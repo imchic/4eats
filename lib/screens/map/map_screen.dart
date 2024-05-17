@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:foreats/utils/logger.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -97,8 +98,59 @@ class MapScreen extends GetView<MapController> {
             target: controller.currentLocation.value,
             zoom: 15,
           ),
-          markers: controller.markers.toSet(),
-          // widgetMarkers: controller.markers,
+          //widgetMarkers: controller.widgetMarkers.isNotEmpty ? controller.widgetMarkers : [],
+          widgetMarkers: [
+            for (var store in controller.storeList)
+              WidgetMarker(
+                markerId: store.name ?? '0',
+                position: LatLng(
+                  double.parse(store.y ?? '0.0'),
+                  double.parse(store.x ?? '0.0'),
+                ),
+                onTap: () {
+                  controller.onMarkerTapped(store);
+                },
+                widget: Container(
+                  width: 120.w,
+                  height: Get.height * 0.05,
+                  alignment: Alignment.center,
+                  padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
+                  decoration: BoxDecoration(
+                    //color: Theme.of(context).colorScheme.primary.withOpacity(0.75),
+                    color: CupertinoColors.activeBlue.withOpacity(0.75),
+                    borderRadius: BorderRadius.circular(10.r),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.25),
+                        spreadRadius: 1,
+                        blurRadius: 7.r,
+                        offset: Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      SvgPicture.asset(
+                        'assets/images/ic_coins.svg',
+                        // width: 15.w,
+                        // height: 15.h,
+                        color: Colors.white,
+                      ),
+                      SizedBox(width: 5.w),
+                      Text(store.totalPoint ?? '0포인트',
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.bold),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1),
+                    ],
+                  ),
+                ),
+              ),
+          ],
           onCameraMove: controller.onCameraMove,
           onCameraMoveStarted: controller.onCameraMoveStarted,
           onCameraIdle: controller.onCameraIdle,

@@ -349,6 +349,7 @@ class UploadController extends GetxController {
         'storeMenuInfo': MapController.to.storeMenuInfo.value,
         'storeContext': MapController.to.storeContext.value,
         'storeLontlat': '${MapController.to.currentLocation.value.latitude}, ${MapController.to.currentLocation.value.longitude}',
+        'storePoint': 0,
         'videoUrls': videoUrls,
         'videoPaths': videoPath,
         'thumbnailUrls': thumbnailDownloadUrls,

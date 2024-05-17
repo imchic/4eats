@@ -10,6 +10,7 @@ class MapModel {
   final String? y;
   final String? thumbnail;
   final String? distance;
+  final String? totalPoint;
   final List<String>? menuInfo;
   final List<String>? contextInfo;
   bool? isItemSelect = false;
@@ -26,6 +27,7 @@ class MapModel {
     this.y,
     this.thumbnail,
     this.distance,
+    this.totalPoint,
     this.menuInfo,
     this.contextInfo,
     this.isItemSelect = false,
@@ -44,6 +46,7 @@ class MapModel {
       y: json['y'],
       thumbnail: json['thumbnail'],
       distance: json['distance'],
+      totalPoint: json['totalPoint'],
       menuInfo: json['menuInfo'],
       contextInfo: json['context'],
       isItemSelect: false,
@@ -63,6 +66,7 @@ class MapModel {
       'y': y,
       'thumbnail': thumbnail,
       'distance': distance,
+      'totalPoint': totalPoint,
       'menuInfo': menuInfo,
       'contextInfo': contextInfo,
       'isItemSelect': isItemSelect,

@@ -1,16 +1,17 @@
 import 'dart:async';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:custom_info_window/custom_info_window.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:foreats/utils/logger.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:dio/dio.dart' as dio;
+import 'package:widget_marker_google_map/widget_marker_google_map.dart';
 
 import '../../model/map_marker.dart';
 import '../../model/map_model.dart';
+import '../../utils/logger.dart';
 import 'location_service.dart';
 
 import 'package:image/image.dart' as IMG;
@@ -23,6 +24,10 @@ class MapController extends GetxController {
 
   final RxList<MapModel> storeList = <MapModel>[].obs;
   final RxList<Marker> markers = <Marker>[].obs;
+
+  // widgetMarker
+  final List<WidgetMarker> tempMarkers = [];
+  final RxList<WidgetMarker> widgetMarkers = <WidgetMarker>[].obs;
 
   final List<MapMarker> googleMarkers = [];
   //late final List<MapMarker> googleMarkers = [];
@@ -70,6 +75,10 @@ class MapController extends GetxController {
     searchController.dispose();
     storeList.clear();
     markers.clear();
+    widgetMarkers.clear();
+    googleMarkers.clear();
+    customInfoWindowControllerList.clear();
+    mapController.dispose();
   }
 
   /// 스크롤 위치로 이동
@@ -142,47 +151,47 @@ class MapController extends GetxController {
   /// latLng: 위경도
   /// model: 맛집 정보
   Future<void> addMarker(LatLng latLng, MapModel? model) async {
-
-    ByteData data = await rootBundle.load('assets/images/ic_marker.png');
-    ByteData containStore = await rootBundle.load('assets/images/ic_contains_marker.png');
-
-    Uint8List markerIcon = data.buffer.asUint8List();
-    Uint8List containStoreIcon = containStore.buffer.asUint8List();
-
-    markerIcon = resizeImage(markerIcon, 100, 110)!;
-    containStoreIcon = resizeImage(containStoreIcon, 100, 110)!;
-
-    Marker marker = Marker(
-      markerId: MarkerId(model?.name ?? ''),
+    WidgetMarker widgetMarker = WidgetMarker(
+      markerId: model == null ? 'currentLocation' : model.name!,
       position: latLng,
-      zIndex: 1,
-      icon: BitmapDescriptor.fromBytes(markerIcon),
-      infoWindow: InfoWindow(
-        title: model?.name,
-        snippet: model?.address,
-        onTap: () {
-          onMarkerTapped(model!);
-        },
+      widget: SizedBox(
+        height: 100.h,
+        child: Center(
+          child: Column(
+            children: [
+              Container(
+                padding: EdgeInsets.all(4.r),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      spreadRadius: 1,
+                      blurRadius: 2,
+                      offset: const Offset(0, 1),
+                    ),
+                  ],
+                ),
+                child: Text(
+                  model?.name ?? '',
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              Image.asset(
+                'assets/images/ic_marker.png',
+              ),
+            ],
+          ),
+        ),
       ),
       onTap: () {
-        // customInfoWindowController.addInfoWindow!(
-        //   Container(
-        //     margin: EdgeInsets.only(bottom: 20.h),
-        //     padding: EdgeInsets.all(10),
-        //     color: Colors.white,
-        //     child: Column(
-        //       children: [
-        //         Text(model?.name ?? ''),
-        //         Text(model?.address ?? ''),
-        //       ],
-        //     ),
-        //   ),
-        //   latLng,
-        // );
+        onMarkerTapped(model!);
       },
     );
-    markers.add(marker);
-
+    widgetMarkers.add(widgetMarker);
   }
 
   /// 주소 변환 (위경도 -> 주소)
@@ -340,44 +349,33 @@ class MapController extends GetxController {
         return;
       }
 
-      await FirebaseFirestore.instance.collection('stores').get().then((value) {
-        containStoreList.clear();
-        for (var element in value.docs) {
-          var name = element.data()['storeName'];
-          containStoreList.add(MapModel(name: name));
-        }
-      });
-
       storeList.removeWhere((element) => foodCategory.contains(element.category));
-
-      for (var element in storeList) {
-        for (var containElement in containStoreList) {
-          if(element.name == containElement.name) {
-            element.isContain = true;
-          }
-        }
-      }
 
       // sort by distance
       storeList.sort((a, b) => double.parse(a.distance ?? '0.0').compareTo(double.parse(b.distance ?? '0.0')));
 
-      // 마커 초기화
-      markers.clear();
-
-      for (var i = 0; i < storeList.length; i++) {
-       addMarker(LatLng(double.parse(storeList[i].y!), double.parse(storeList[i].x!)), storeList[i]);
-      }
-
       isSearchLoading.value = false;
+
+      // Future.delayed(Duration(milliseconds: 500), () {
+      //   setMarkers();
+      // });
 
     } catch (e) {
       AppLog.to.e('fetchSearchPlace error: $e');
-      //GlobalToastController.to.showToast('검색 결과가 없습니다');
+      //GlobalToastto.showToast('검색 결과가 없습니다');
     }
 
   }
 
-  /// 커스텀 인포윈도우
+  /// 마커 세팅
+  Future<void> setMarkers() async {
+    markers.clear();
+    widgetMarkers.clear();
+
+    for (var i = 0; i < storeList.length; i++) {
+      await addMarker(LatLng(double.parse(storeList[i].y!), double.parse(storeList[i].x!)), storeList[i]);
+    }
+  }
 
 
   /// 미터를 킬로미터로 변환
@@ -400,13 +398,13 @@ class MapController extends GetxController {
     selectIndex.value = storeList.indexWhere((element) => element.name == store.name);
     AppLog.to.d('selectIndex: $selectIndex');
 
-    //scrollToIndex(selectIndex.value);
+    scrollToIndex(selectIndex.value);
 
-    // scrollController.animateTo(
-    //   Get.width * 0.75 * selectIndex.value,
-    //   duration: Duration(milliseconds: 500),
-    //   curve: Curves.easeInOut,
-    // );
+    scrollController.animateTo(
+      Get.width * 0.75 * selectIndex.value,
+      duration: Duration(milliseconds: 500),
+      curve: Curves.easeInOut,
+    );
 
     await mapController.animateCamera(
       CameraUpdate.newCameraPosition(
