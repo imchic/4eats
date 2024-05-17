@@ -1,11 +1,14 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:custom_info_window/custom_info_window.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:foreats/utils/logger.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:logger/logger.dart';
+import 'package:widget_marker_google_map/widget_marker_google_map.dart';
 
 import '../../utils/colors.dart';
 import '../../widget/animatet_search_bar.dart';
@@ -20,6 +23,7 @@ class MapScreen extends GetView<MapController> {
 
   @override
   Widget build(BuildContext context) {
+    Get.put(AppLog());
     // get arguments
     final args = Get.arguments;
     if (args != null) {
@@ -70,9 +74,14 @@ class MapScreen extends GetView<MapController> {
         Column(
           children: [
             _buildMap(context),
-            //_buildSubmitButton(context),
           ],
         ),
+        // CustomInfoWindow(
+        //   controller: controller.customInfoWindowController,
+        //   width: 150.w,
+        //   height: 40.h,
+        //   offset: 10.w,
+        // ),
         _searchBar(context),
         _storeList(context),
       ],
@@ -82,13 +91,14 @@ class MapScreen extends GetView<MapController> {
   Widget _buildMap(BuildContext context) {
     return Expanded(
       child: Obx(
-        () => GoogleMap(
+        () => WidgetMarkerGoogleMap(
           onMapCreated: controller.onMapCreated,
           initialCameraPosition: CameraPosition(
             target: controller.currentLocation.value,
             zoom: 15,
           ),
-          markers: Set<Marker>.of(controller.markers),
+          markers: controller.markers.toSet(),
+          // widgetMarkers: controller.markers,
           onCameraMove: controller.onCameraMove,
           onCameraMoveStarted: controller.onCameraMoveStarted,
           onCameraIdle: controller.onCameraIdle,
@@ -96,6 +106,7 @@ class MapScreen extends GetView<MapController> {
           myLocationButtonEnabled: true,
           buildingsEnabled: true,
           mapToolbarEnabled: false,
+          tiltGesturesEnabled: false,
         ),
       ),
     );
@@ -468,7 +479,7 @@ class MapScreen extends GetView<MapController> {
                                     ),
                                   ),
                                 );
-                              }).toList() ?? [],
+                              })?.toList() ?? [],
                             ),
                           ),
                         ),

@@ -35,12 +35,12 @@ class _DescriptionTextState extends State<DescriptionText> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.only(top: 10.h),
+      margin: EdgeInsets.only(top: 10.h, left: 4.w),
       child: secondHalf.isEmpty
           ? Text(
               firstHalf,
               style: TextStyle(
-                fontSize: 11.sp,
+                fontSize: 12.sp,
                 color: Colors.white,
               ),
             )

@@ -23,9 +23,9 @@ Future<void> main() async {
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
   // firebase store
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  FirebaseMessaging.onBackgroundMessage(onBackgroundHandler);
-  await FirebaseMessageApi().initNotifications();
+  await Firebase.initializeApp(name: '4eats', options: DefaultFirebaseOptions.currentPlatform);
+
+  FirebaseMessageApi().initNotifications();
 
   // 가로모드 대응
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);

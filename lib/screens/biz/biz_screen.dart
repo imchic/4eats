@@ -4,7 +4,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
-import 'package:lottie/lottie.dart';
 
 import '../../model/biz_model.dart';
 import '../../utils/app_routes.dart';
@@ -14,6 +13,7 @@ import '../login/user_store.dart';
 import 'biz_controller.dart';
 
 class BizScreen extends GetView<BizController> {
+
   BizScreen({super.key});
 
   final _logger = Logger();
@@ -32,7 +32,7 @@ class BizScreen extends GetView<BizController> {
               Obx(
                 () => UserStore.to.id.value.isEmpty
                     ? Center(
-                        child: Text(
+                      child: Text(
                           '로그인이 필요한 서비스입니다',
                           style: TextStyle(
                             fontSize: 14.sp,
@@ -40,7 +40,7 @@ class BizScreen extends GetView<BizController> {
                             fontWeight: FontWeight.w700,
                           ),
                         ),
-                      )
+                    )
                     : Container(
                         width: 1.sw,
                         padding: EdgeInsets.symmetric(
@@ -55,7 +55,7 @@ class BizScreen extends GetView<BizController> {
                             ),
                             children: [
                               TextSpan(
-                                text: UserStore.to.userProfile.id ?? '',
+                                text: UserStore.to.userProfile.nickname ?? '',
                                 style: TextStyle(
                                   fontSize: 14.sp,
                                   color: Theme.of(context).colorScheme.primary,
@@ -73,7 +73,7 @@ class BizScreen extends GetView<BizController> {
                             ],
                           ),
                         ),
-                      ),
+                ),
               ),
               SizedBox(height: 10.h),
               // card
@@ -117,8 +117,7 @@ class BizScreen extends GetView<BizController> {
                             SizedBox(width: 5.w),
                             Text('누적포인트',
                                 style: TextStyle(
-                                    color:
-                                        Theme.of(context).colorScheme.onPrimary,
+                                    color: Theme.of(context).colorScheme.onPrimary,
                                     fontWeight: FontWeight.w800)),
                           ],
                         ),
@@ -143,8 +142,7 @@ class BizScreen extends GetView<BizController> {
                             },
                             child: Text('적립 / 사용내역',
                                 style: TextStyle(
-                                    color:
-                                        Theme.of(context).colorScheme.onPrimary,
+                                    color: Theme.of(context).colorScheme.onPrimary,
                                     fontSize: 10.sp,
                                     // underscore
                                     decoration: TextDecoration.underline,
@@ -161,16 +159,17 @@ class BizScreen extends GetView<BizController> {
                     ),
                   ],
                 ),
+
               ),
               SizedBox(height: 10.h),
               Obx(
                 () => controller.bizList.isEmpty &&
                         controller.brandNameList.isNotEmpty
                     ? Center(
-                        child: CircularProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation<Color>(gray300),
-                        ),
-                      )
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(gray300),
+                      ),
+                    )
                     : _buildBizListCategoryList(context),
               ),
               SizedBox(height: 10.h),
@@ -178,10 +177,10 @@ class BizScreen extends GetView<BizController> {
                 () => controller.bizList.isEmpty &&
                         controller.brandNameList.isNotEmpty
                     ? Center(
-                        child: CircularProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation<Color>(gray300),
-                        ),
-                      )
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(gray300),
+                      ),
+                    )
                     : _buildBizListApiList(context),
               ),
             ],
@@ -271,31 +270,31 @@ class BizScreen extends GetView<BizController> {
               await controller.fetchGoodsTypeSelectList(
                   controller.goodTypeList[index], index);
             },
-            child: Obx(
-              () => Container(
-                alignment: Alignment.center,
-                margin: EdgeInsets.only(right: 5.w),
-                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.background,
-                  borderRadius: BorderRadius.circular(20.r),
-                  shape: BoxShape.rectangle,
-                  border: Border.all(
-                    color: controller.isGoodTypeSelectIndex.value == index
-                        ? Theme.of(context).colorScheme.primary
-                        : gray300,
-                    width: 1.w,
+            child: Obx(() =>
+                Container(
+                  alignment: Alignment.center,
+                  margin: EdgeInsets.only(right: 5.w),
+                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.background,
+                    borderRadius: BorderRadius.circular(20.r),
+                    shape: BoxShape.rectangle,
+                    border: Border.all(
+                      color: controller.isGoodTypeSelectIndex.value == index
+                          ? Theme.of(context).colorScheme.primary
+                          : gray300,
+                      width: 1.w,
+                    ),
+                  ),
+                  child: Text(
+                    controller.goodTypeList[index],
+                    style: TextStyle(
+                      fontSize: 11.sp,
+                      fontWeight: FontWeight.w500,
+                      color: Theme.of(context).colorScheme.onBackground,
+                    ),
                   ),
                 ),
-                child: Text(
-                  controller.goodTypeList[index],
-                  style: TextStyle(
-                    fontSize: 11.sp,
-                    fontWeight: FontWeight.w500,
-                    color: Theme.of(context).colorScheme.onBackground,
-                  ),
-                ),
-              ),
             ),
           );
         },
@@ -318,8 +317,7 @@ class BizScreen extends GetView<BizController> {
           itemBuilder: (context, index) {
             return controller.isAll.value
                 ? _buildBizListApiItem(context, controller.bizList[index])
-                : _buildBizListApiItem(
-                    context, controller.bizSelectList[index]);
+                : _buildBizListApiItem(context, controller.bizSelectList[index]);
           },
         ),
       ),
@@ -390,9 +388,7 @@ class BizScreen extends GetView<BizController> {
           ),
         ),
         SizedBox(height: 5.h),
-        Text(bizModel.brandName ?? '',
-            style: TextStyle(
-                fontSize: 10.sp, fontWeight: FontWeight.w500, color: gray600)),
+        Text(bizModel.brandName ?? '', style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w500, color: gray600)),
         SizedBox(height: 2.5.h),
         Container(
           alignment: Alignment.center,
@@ -431,7 +427,7 @@ class BizScreen extends GetView<BizController> {
     );
   }
 
-/*_pageNumber(BuildContext context) {
+  /*_pageNumber(BuildContext context) {
     return Obx(
       () => Container(
         // width: 200.w,

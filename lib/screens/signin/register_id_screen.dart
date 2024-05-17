@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+
 import 'package:get/get.dart';
 import 'package:get/get_rx/get_rx.dart';
 import 'package:logger/logger.dart';
@@ -231,12 +232,18 @@ class _RegisterIdScreen extends State<RegisterIdScreen> {
   }
 
   _validator(String value) {
-   // 영문 숫자 조합만
-    if (RegExp(r'^[a-zA-Z0-9]*$').hasMatch(value)) {
+
+
+    // 영문 숫자 조합 및 인스타그램 정규식
+    RegExp regExp = RegExp(r'^[a-zA-Z0-9_]*$');
+    if (regExp.hasMatch(value)) {
       _isIdDuplicated.value = true;
     } else {
       _isIdDuplicated.value = false;
+      _logger.t('아이디 정규식 불일치: $value');
     }
+
+
   }
 
 }

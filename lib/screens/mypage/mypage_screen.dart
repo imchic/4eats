@@ -36,9 +36,14 @@ class MyPageScreen extends GetView<MyPageController> {
             }
           }),
           Expanded(
-            child:
-              _buildMyFeedContainer(context),
-            ),
+            child: Obx(() {
+              if (UserStore.to.isLoggedIn) {
+                return _buildMyFeedContainer(context);
+              } else {
+                return Container();
+              }
+            }),
+          ),
         ],
       ),
     );
@@ -59,55 +64,74 @@ class MyPageScreen extends GetView<MyPageController> {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              CachedNetworkImage(
-                imageUrl: UserStore.to.userProfile.photoUrl ?? '',
-                imageBuilder: (context, imageProvider) => Container(
-                  width: 40.w,
-                  height: 40.h,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    image: DecorationImage(
-                      image: imageProvider,
+              Obx(() {
+                if (UserStore.to.userProfile.photoUrl != null) {
+                  return ClipRRect(
+                    borderRadius: BorderRadius.circular(50.r),
+                    child: CachedNetworkImage(
+                      imageUrl: UserStore.to.userProfile.photoUrl!,
+                      width: 50.w,
+                      height: 50.h,
                       fit: BoxFit.cover,
+                      placeholder: (context, url) => Container(
+                        color: gray200,
+                      ),
+                      errorWidget: (context, url, error) => Container(
+                        color: gray200,
+                        child: Icon(
+                          Icons.error,
+                          color: Colors.red,
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-                placeholder: (context, url) => Container(
-                  width: 40.w,
-                  height: 40.h,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.grey[200],
-                  ),
-                ),
-                errorWidget: (context, url, error) => Container(
-                  width: 44.w,
-                  height: 44.h,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.grey[200],
-                  ),
-                  child: Icon(
-                    Icons.error,
-                    color: Colors.red,
-                  ),
-                ),
-              ),
-              SizedBox(width: 8.w),
+                  );
+                } else {
+                  return ClipRRect(
+                    borderRadius: BorderRadius.circular(50.r),
+                    child: Icon(
+                      Icons.account_circle,
+                      size: 50.r,
+                      color: gray200,
+                    ),
+                  );
+                }
+              }),
+              SizedBox(width: 10.w),
               Expanded(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      UserStore.to.userProfile.id ?? '',
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.onBackground,
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w700,
-                        height: 0,
-                      ),
+                    Column(
+                      children: [
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              UserStore.to.userProfile.nickname ?? '',
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.onBackground,
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w700,
+                                height: 0,
+                              ),
+                            ),
+                            SizedBox(height: 2.h),
+                            Text(
+                              '@${UserStore.to.userProfile.id ?? ''}',
+                              style: TextStyle(
+                                color: gray500,
+                                fontSize: 12.sp,
+                                fontWeight: FontWeight.w400,
+                                height: 0,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -260,9 +284,19 @@ class MyPageScreen extends GetView<MyPageController> {
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(6.r),
-                child: Image.file(
-                  File(FeedController.to.thumbnailList[index]),
+                child: CachedNetworkImage(
+                  imageUrl: FeedController.to.thumbnailList[index],
                   fit: BoxFit.cover,
+                  placeholder: (context, url) => Container(
+                    color: gray200,
+                  ),
+                  errorWidget: (context, url, error) => Container(
+                    color: gray200,
+                    child: Icon(
+                      Icons.error,
+                      color: Colors.red,
+                    ),
+                  ),
                 ),
               ),
             ),

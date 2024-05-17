@@ -68,6 +68,9 @@ dependencies:
   geolocator: ^11.0.0
   google_maps_flutter: ^2.2.8
   native_exif: ^0.5.0
+  custom_info_window: ^1.0.1
+  fluster: ^1.2.0
+  widget_marker_google_map: ^0.0.2
 
   # firebase & google
   google_sign_in: ^5.0.1

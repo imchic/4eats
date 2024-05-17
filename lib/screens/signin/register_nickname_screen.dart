@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
 import '../../utils/app_routes.dart';
@@ -18,6 +19,8 @@ class RegisterNicknameScreen extends StatefulWidget {
 class _RegisterNicknameScreen extends State<RegisterNicknameScreen> {
 
   late final TextEditingController _nickNameController = TextEditingController();
+  final _nickName = ''.obs;
+
   final _logger = Logger(
     printer: PrettyPrinter(
         methodCount: 2, // Number of method calls to be displayed
@@ -115,9 +118,7 @@ class _RegisterNicknameScreen extends State<RegisterNicknameScreen> {
                             child: TextField(
                               controller: _nickNameController,
                               onChanged: (value) {
-                                setState(() {
-                                  _nickNameController.text = value;
-                                });
+                                _nickName.value = _nickNameController.text;
                               },
                               decoration: InputDecoration(
                                 hintText: '닉네임 입력',

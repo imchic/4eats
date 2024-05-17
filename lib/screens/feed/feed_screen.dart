@@ -310,13 +310,31 @@ class FeedScreen extends GetView<FeedController> {
                       ),
                     ),
                     SizedBox(width: 10.w),
-                    Text(
-                      controller.feedList[index].user ?? '',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.w500,
-                      ),
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Text(
+                          UserStore.to.userProfile.nickname ?? '',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w700,
+                            height: 0,
+                          ),
+                        ),
+                        SizedBox(height: 2.h),
+                        Text(
+                          '@${UserStore.to.userProfile.id ?? ''}',
+                          style: TextStyle(
+                            color: gray500,
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.w400,
+                            height: 0,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -539,7 +557,7 @@ class FeedScreen extends GetView<FeedController> {
                 controller.feedList[index].hashTags?[idx] ?? '',
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 10.sp,
+                  fontSize: 11.sp,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -575,7 +593,9 @@ class FeedScreen extends GetView<FeedController> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(
-                  '댓글 ${controller.commentArrayList[index].length}개',
+                  controller.commentArrayList.isEmpty
+                      ? '댓글 0개'
+                      : '댓글 ${controller.commentArrayList[index].length}개',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 10.sp,

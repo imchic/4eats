@@ -1,12 +1,15 @@
 import 'dart:async';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:custom_info_window/custom_info_window.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:foreats/utils/logger.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:logger/logger.dart';
 import 'package:dio/dio.dart' as dio;
 
+import '../../model/map_marker.dart';
 import '../../model/map_model.dart';
 import 'location_service.dart';
 
@@ -18,26 +21,11 @@ class MapController extends GetxController {
   late GoogleMapController mapController;
   late TextEditingController searchController;
 
-  final Logger _logger = Logger(
-    filter: null, // Use the default LogFilter (-> only log in debug mode)
-    printer: PrettyPrinter(
-      methodCount: 2,
-      // number of method calls to be displayed
-      errorMethodCount: 8,
-      // number of method calls if stacktrace is provided
-      lineLength: 120,
-      // width of the output
-      colors: true,
-      // Colorful log messages
-      printEmojis: true,
-      // Print an emoji for each log message
-      printTime: false, // Should each log print contain a timestamp
-    ),
-    output: null, // Use the default LogOutput (-> send everything to console)
-  );
-
   final RxList<MapModel> storeList = <MapModel>[].obs;
   final RxList<Marker> markers = <Marker>[].obs;
+
+  final List<MapMarker> googleMarkers = [];
+  //late final List<MapMarker> googleMarkers = [];
 
   final RxInt page = 1.obs;
   final RxString searchPlace = ''.obs;
@@ -61,6 +49,12 @@ class MapController extends GetxController {
 
   final ScrollController scrollController = ScrollController();
 
+  final CustomInfoWindowController customInfoWindowController = CustomInfoWindowController();
+  final List<CustomInfoWindowController> customInfoWindowControllerList = [];
+
+  final containStoreList = <MapModel>[].obs;
+
+
   @override
   Future<void> onInit() async {
     super.onInit();
@@ -68,28 +62,6 @@ class MapController extends GetxController {
     await getCurrentLocation(
       Get.arguments['lonlat']
     );
-    scrollController.addListener(() async {
-
-      // 스크롤 처음
-      // if (scrollController.position.pixels == 0) {
-      //   _logger.d('스크롤 처음');
-      //   if(page.value > 1) {
-      //     page.value--;
-      //     await fetchSearchPlace(searchPlace.value, page: page.value);
-      //   } else {
-      //     _logger.d('첫 페이지입니다.');
-      //   }
-      // }
-
-      // 스크롤 끝
-      // if (scrollController.position.pixels ==
-      //     scrollController.position.maxScrollExtent) {
-      //   _logger.d('스크롤 끝');
-      //   page.value++;
-      //   await fetchSearchPlace(searchPlace.value, page: page.value);
-      // }
-
-    });
   }
 
   @override
@@ -100,16 +72,21 @@ class MapController extends GetxController {
     markers.clear();
   }
 
+  /// 스크롤 위치로 이동
   void scrollToIndex(int index) {
     scrollController.jumpTo(index * 150.0);
   }
 
+  /// 지도 생성
   Future<void> onMapCreated(GoogleMapController controller) async {
+    AppLog.to.d('onMapCreated');
     mapController = controller;
+    customInfoWindowController.googleMapController = controller;
     isMapLoading = false;
-    Future.delayed(Duration(milliseconds: 500), () {
-      mapController.showMarkerInfoWindow(MarkerId('currentLocation'));
-    });
+
+    await fetchSearchPlace('맛집', page: 1);
+    await convertLatLngToAddress(currentLocation.value);
+
   }
 
   Future<void> onCameraMove(CameraPosition position) async {
@@ -117,7 +94,6 @@ class MapController extends GetxController {
   }
 
   Future<void> onCameraIdle() async {
-    // _logger.d('onCameraIdle: ${currentLocation.value}');
     await convertLatLngToAddress(currentLocation.value);
   }
 
@@ -128,11 +104,11 @@ class MapController extends GetxController {
     storeCategory.value = '';
     storeMenuInfo.value = '';
     storeContext.value = '';
-    _logger.d('onCameraMoveStarted');
+    AppLog.to.d('onCameraMoveStarted');
   }
 
   Future<void> onSearchPlace() async {
-    _logger.d('onSearchPlace: ${searchController.text}');
+    AppLog.to.d('onSearchPlace: ${searchController.text}');
     searchPlace.value = searchController.text;
     page.value = 1;
     await fetchSearchPlace(searchPlace.value, page: page.value);
@@ -144,10 +120,10 @@ class MapController extends GetxController {
     await LocationService.to.getLocation();
     currentLocation.value = LatLng(argument[0], argument[1]);
 
-    addMarker(currentLocation.value, null);
+    await addMarker(currentLocation.value, null);
+    await convertLatLngToAddress(currentLocation.value);
 
     isMapLoading = false;
-    await convertLatLngToAddress(currentLocation.value);
   }
 
   /// 현재 위치로 이동
@@ -163,28 +139,49 @@ class MapController extends GetxController {
   }
 
   /// 마커 추가
+  /// latLng: 위경도
+  /// model: 맛집 정보
   Future<void> addMarker(LatLng latLng, MapModel? model) async {
-    _logger.d('addMarker: $latLng');
 
-    final Uint8List? markerIcon = await getBytesFromAsset('assets/images/ic_food.png', 130);
+    ByteData data = await rootBundle.load('assets/images/ic_marker.png');
+    ByteData containStore = await rootBundle.load('assets/images/ic_contains_marker.png');
 
-    markers.add(
-      Marker(
-        markerId: MarkerId('currentLocation'),
-        position: latLng,
-        icon: BitmapDescriptor.fromBytes(markerIcon!),
-        infoWindow: InfoWindow(
-          title: model == null ? '현재 위치' : model.name,
-          //snippet: model == null ? '가게주소' : model.address,
-          onTap: () {
-            _logger.d('current location marker infoWindow tapped');
-          }
-        ),
+    Uint8List markerIcon = data.buffer.asUint8List();
+    Uint8List containStoreIcon = containStore.buffer.asUint8List();
+
+    markerIcon = resizeImage(markerIcon, 100, 110)!;
+    containStoreIcon = resizeImage(containStoreIcon, 100, 110)!;
+
+    Marker marker = Marker(
+      markerId: MarkerId(model?.name ?? ''),
+      position: latLng,
+      zIndex: 1,
+      icon: BitmapDescriptor.fromBytes(markerIcon),
+      infoWindow: InfoWindow(
+        title: model?.name,
+        snippet: model?.address,
         onTap: () {
-          _logger.d('current location marker tapped');
+          onMarkerTapped(model!);
         },
       ),
+      onTap: () {
+        // customInfoWindowController.addInfoWindow!(
+        //   Container(
+        //     margin: EdgeInsets.only(bottom: 20.h),
+        //     padding: EdgeInsets.all(10),
+        //     color: Colors.white,
+        //     child: Column(
+        //       children: [
+        //         Text(model?.name ?? ''),
+        //         Text(model?.address ?? ''),
+        //       ],
+        //     ),
+        //   ),
+        //   latLng,
+        // );
+      },
     );
+    markers.add(marker);
 
   }
 
@@ -214,7 +211,7 @@ class MapController extends GetxController {
     );
 
     if(response.data['results'].isEmpty) {
-      _logger.d('주소가 없습니다.');
+      AppLog.to.d('주소가 없습니다.');
       return;
     }
 
@@ -236,7 +233,7 @@ class MapController extends GetxController {
     try {
 
       if(value.isEmpty) {
-        _logger.d('검색어가 없습니다.');
+        AppLog.to.d('검색어가 없습니다.');
         return;
       }
 
@@ -248,21 +245,21 @@ class MapController extends GetxController {
       LatLng latLng = currentLocation.value;
 
       var searchPlaceUrl =
-              'https://map.naver.com/p/api/search/allSearch?query=${searchPlace.value}&type=food&searchCoord=${latLng.longitude};${latLng.latitude}&page=$page&displayCount=50&isPlaceRecommendationReplace=true&lang=ko';
+              'https://map.naver.com/p/api/search/allSearch?query=${value}&type=food&searchCoord=${latLng.longitude};${latLng.latitude}&page=$page&displayCount=50&isPlaceRecommendationReplace=true&lang=ko';
 
-      _logger.d('네이버 플레이스 검색: $searchPlaceUrl');
+      AppLog.to.d('네이버 플레이스 검색: $searchPlaceUrl');
 
       dio.Response response = await dio.Dio().get(searchPlaceUrl).timeout(
             const Duration(seconds: 5),
             onTimeout: () {
-              _logger.d('timeout');
+              AppLog.to.d('timeout');
               isSearchLoading.value = false;
               return dio.Response(requestOptions: dio.RequestOptions(path: ''));
             },
           );
 
       var searchResultItem = response.data['result']['place']['list'];
-      _logger.d('네이버 플레이스 검색결과: $searchResultItem');
+      AppLog.to.d('네이버 플레이스 검색결과: $searchResultItem');
 
       var foodCategory = [
             '한식',
@@ -311,7 +308,6 @@ class MapController extends GetxController {
           contextList.add(element);
         });
 
-        // _logger.d('contextList: $contextList');
 
         var store = MapModel(
           name: element['name'],
@@ -326,11 +322,12 @@ class MapController extends GetxController {
           distance: double.parse(element['distance']).toString(),
           menuInfo: menuInfoList,
           contextInfo: contextList,
+          isContain: false,
         );
 
         if (!foodCategory.contains(store.category?.split(', ').first) ||
             store.category == null) {
-          _logger.w('추가되지 않아야하는 카테고리: ${store.category}');
+          AppLog.to.w('추가되지 않아야하는 카테고리: ${store.category}');
         } else {
           //_logger.d('추가되어야하는 카테고리: ${store.category}');
           storeList.add(store);
@@ -338,48 +335,50 @@ class MapController extends GetxController {
       }
 
       if(storeList.isEmpty) {
-        _logger.d('검색 결과가 없습니다.');
+        AppLog.to.d('검색 결과가 없습니다.');
         isSearchLoading.value = false;
         return;
       }
 
+      await FirebaseFirestore.instance.collection('stores').get().then((value) {
+        containStoreList.clear();
+        for (var element in value.docs) {
+          var name = element.data()['storeName'];
+          containStoreList.add(MapModel(name: name));
+        }
+      });
+
       storeList.removeWhere((element) => foodCategory.contains(element.category));
+
+      for (var element in storeList) {
+        for (var containElement in containStoreList) {
+          if(element.name == containElement.name) {
+            element.isContain = true;
+          }
+        }
+      }
 
       // sort by distance
       storeList.sort((a, b) => double.parse(a.distance ?? '0.0').compareTo(double.parse(b.distance ?? '0.0')));
 
-      final Uint8List? markerIcon = await getBytesFromAsset('assets/images/ic_food.png', 130);
-
+      // 마커 초기화
       markers.clear();
 
-      // 마커 추가
       for (var i = 0; i < storeList.length; i++) {
-        Marker marker = Marker(
-          markerId: MarkerId(storeList[i].name!),
-          position: LatLng(double.parse(storeList[i].y!), double.parse(storeList[i].x!)),
-          icon: BitmapDescriptor.fromBytes(markerIcon!),
-          infoWindow: InfoWindow(
-            title: storeList[i].name!,
-            snippet: storeList[i].address!,
-            onTap: () {
-              onMarkerTapped(storeList[i]);
-            },
-          ),
-          onTap: () {
-            onMarkerTapped(storeList[i]);
-          },
-        );
-        markers.add(marker);
+       addMarker(LatLng(double.parse(storeList[i].y!), double.parse(storeList[i].x!)), storeList[i]);
       }
 
       isSearchLoading.value = false;
 
     } catch (e) {
-      _logger.e('fetchSearchPlace error: $e');
+      AppLog.to.e('fetchSearchPlace error: $e');
       //GlobalToastController.to.showToast('검색 결과가 없습니다');
     }
 
   }
+
+  /// 커스텀 인포윈도우
+
 
   /// 미터를 킬로미터로 변환
   String convertKmToMeter(double meters) {
@@ -395,19 +394,19 @@ class MapController extends GetxController {
 
   /// 마커 클릭시 이벤트
   Future<void> onMarkerTapped(MapModel store) async {
-    _logger.d('onMarkerTapped: ${store.name}');
+    AppLog.to.d('onMarkerTapped: ${store.name}');
 
     // get index
     selectIndex.value = storeList.indexWhere((element) => element.name == store.name);
-    _logger.d('selectIndex: $selectIndex');
+    AppLog.to.d('selectIndex: $selectIndex');
 
     //scrollToIndex(selectIndex.value);
 
-    scrollController.animateTo(
-      Get.width * 0.75 * selectIndex.value,
-      duration: Duration(milliseconds: 500),
-      curve: Curves.easeInOut,
-    );
+    // scrollController.animateTo(
+    //   Get.width * 0.75 * selectIndex.value,
+    //   duration: Duration(milliseconds: 500),
+    //   curve: Curves.easeInOut,
+    // );
 
     await mapController.animateCamera(
       CameraUpdate.newCameraPosition(
@@ -428,14 +427,16 @@ class MapController extends GetxController {
     return resizedData;
   }
 
+  /// 이미지 리사이즈
   Future<Uint8List?> getBytesFromAsset(String path, int width) async {
     ByteData data = await rootBundle.load(path);
     Uint8List? bytes = data.buffer.asUint8List();
     return resizeImage(bytes, width, width);
   }
 
+  /// 마커 정보창 보이기
   void showInfoWindow(String? x, String? y, String? name, String? address) {
-    mapController.showMarkerInfoWindow(MarkerId(name!));
+    mapController.showMarkerInfoWindow(MarkerId('$name'));
   }
 
 }

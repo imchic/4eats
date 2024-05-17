@@ -13,6 +13,7 @@ class MapModel {
   final List<String>? menuInfo;
   final List<String>? contextInfo;
   bool? isItemSelect = false;
+  bool? isContain = false;
 
   MapModel({
     this.name,
@@ -28,6 +29,7 @@ class MapModel {
     this.menuInfo,
     this.contextInfo,
     this.isItemSelect = false,
+    this.isContain = false,
   });
 
   factory MapModel.fromJson(Map<String, dynamic> json) {
@@ -45,6 +47,7 @@ class MapModel {
       menuInfo: json['menuInfo'],
       contextInfo: json['context'],
       isItemSelect: false,
+      isContain: false,
     );
   }
 
@@ -63,6 +66,7 @@ class MapModel {
       'menuInfo': menuInfo,
       'contextInfo': contextInfo,
       'isItemSelect': isItemSelect,
+      'isContain': isContain,
     };
   }
 

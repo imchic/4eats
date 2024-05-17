@@ -380,7 +380,7 @@ class UploadRegisterScreen extends GetView<UploadController> {
                   target: MapController.to.currentLocation.value,
                   zoom: 15,
                 ),
-                markers: Set<Marker>.of(MapController.to.markers),
+                markers: MapController.to.markers.toSet(),
                 onCameraMove: MapController.to.onCameraMove,
                 myLocationEnabled: true,
                 zoomControlsEnabled: false,

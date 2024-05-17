@@ -1,11 +1,13 @@
 import 'dart:typed_data';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:foreats/screens/upload/upload_controller.dart';
 import 'package:get/get.dart';
 import 'package:photo_manager/photo_manager.dart';
 
+import '../../utils/colors.dart';
 import '../../widget/base_appbar.dart';
 import '../../widget/custom_gallery.dart';
 import '../feed/feed_controller.dart';

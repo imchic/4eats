@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
-import 'package:video_thumbnail/video_thumbnail.dart';
 
 import '../../model/feed_model.dart';
 import '../../model/user_model.dart';

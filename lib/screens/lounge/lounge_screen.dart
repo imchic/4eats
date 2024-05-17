@@ -25,7 +25,8 @@ class LoungeScreen extends GetView<LoungeController> {
       appBar: BaseAppBar(
         title: '라운지',
       ),
-      body: Column(
+      body:
+      Column(
         children: [
           Expanded(
             child: _buildLoungeBody(context),
@@ -191,7 +192,7 @@ class LoungeScreen extends GetView<LoungeController> {
                     scrollDirection: Axis.horizontal,
                     itemCount: controller.users.length,
                     itemBuilder: (context, index) {
-                      return _circleAvatarItem(controller.users[index].photoUrl, controller.users[index].id ?? '');
+                      return _circleAvatarItem(controller.users[index].photoUrl, controller.users[index].nickname ?? '');
                     },
                     separatorBuilder: (BuildContext context, int index) {
                       // 간격 겹치기
@@ -268,9 +269,13 @@ class LoungeScreen extends GetView<LoungeController> {
                     children: [
                       ClipRRect(
                         borderRadius: BorderRadius.circular(6.r),
-                        child: Image.file(
-                          File(FeedController.to.thumbnailList[index]),
+                        child: CachedNetworkImage(
+                          imageUrl: FeedController.to.thumbnailList[index],
                           fit: BoxFit.cover,
+                          placeholder: (context, url) => const Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                          errorWidget: (context, url, error) => const Icon(Icons.error),
                         ),
                       ),
                     ],

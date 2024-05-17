@@ -1,3 +1,5 @@
+
+
 import 'comment_model.dart';
 
 class FeedModel {
@@ -11,10 +13,12 @@ class FeedModel {
   String? storeLontlat;
   List<String>? videoUrls;
   List<String>? videoPaths;
+  List<String>? thumbnailUrls;
   String? createdAt;
   String? updatedAt;
   String? uid;
-  String? user;
+  String? userid;
+  String? usernickname;
   String? profilePhoto;
   int? likeCount;
   int? bookmarkCount;
@@ -35,10 +39,12 @@ class FeedModel {
     this.storeLontlat,
     this.videoUrls,
     this.videoPaths,
+    this.thumbnailUrls,
     this.createdAt,
     this.updatedAt,
     this.uid,
-    this.user,
+    this.userid,
+    this.usernickname,
     this.profilePhoto,
     this.likeCount = 0,
     this.bookmarkCount = 0,
@@ -60,10 +66,12 @@ class FeedModel {
         storeLontlat: json["storeLontlat"],
         videoUrls: List<String>.from(json["videoUrls"].map((x) => x)),
         videoPaths: List<String>.from(json["videoPaths"].map((x) => x)),
+        thumbnailUrls: List<String>.from(json["thumbnailUrls"].map((x) => x)),
         createdAt: json["createdAt"],
         updatedAt: json["updatedAt"],
         uid: json["uid"],
-        user: json["user"],
+        userid: json["userid"],
+        usernickname: json["usernickname"],
         profilePhoto: json["profilePhoto"],
         likeCount: json["likeCount"],
         bookmarkCount: json["bookmarkCount"],
@@ -84,10 +92,12 @@ class FeedModel {
         "storeLontlat": storeLontlat,
         "videoUrls": List<dynamic>.from(videoUrls!.map((x) => x)),
         "videoPaths": List<dynamic>.from(videoPaths!.map((x) => x)),
+        "thumbnailUrls": List<dynamic>.from(thumbnailUrls!.map((x) => x)),
         "createdAt": createdAt,
         "updatedAt": updatedAt,
         "uid": uid,
-        "user": user,
+        "userid": userid,
+        "usernickname": usernickname,
         "profilePhoto": profilePhoto,
         "likeCount": likeCount,
         "bookmarkCount": bookmarkCount,

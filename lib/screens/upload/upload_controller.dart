@@ -48,6 +48,7 @@ class UploadController extends GetxController {
   Rx<File> uploadFile = File('').obs;
   RxList<File> uploadFiles = <File>[].obs;
   RxInt selected = 0.obs;
+  RxBool isUploadLoading = false.obs;
 
   // list selected
   RxList<int> selectedList = <int>[].obs;
@@ -195,19 +196,33 @@ class UploadController extends GetxController {
   }
 
   /// 동영상 썸네일 생성
-  Future<Uint8List> getThumbnail() async {
+  // Future<Uint8List> getThumbnail(String downloadUrl) async {
+  //   try {
+  //     final Uint8List? thumbnail = await VideoThumbnail.thumbnailData(
+  //       video: uploadFile.value.path,
+  //       imageFormat: ImageFormat.WEBP,
+  //       maxWidth: 128,
+  //       quality: 75,
+  //     );
+  //     //print('thumbnail: $thumbnail');
+  //     return thumbnail!;
+  //   } catch (e) {
+  //     _logger.e('getThumbnail error: $e');
+  //     return Uint8List(0);
+  //   }
+  // }
+
+  thumbnailDownload(String videoUrl) async {
     try {
-      final Uint8List? thumbnail = await VideoThumbnail.thumbnailData(
-        video: uploadFile.value.path,
+      final thumbnail = await VideoThumbnail.thumbnailFile(
+        video: videoUrl,
         imageFormat: ImageFormat.WEBP,
         maxWidth: 128,
-        quality: 75,
+        quality: 25,
       );
-      //print('thumbnail: $thumbnail');
-      return thumbnail!;
+      return thumbnail;
     } catch (e) {
-      _logger.e('getThumbnail error: $e');
-      return Uint8List(0);
+      _logger.e('thumbnailDownload error: $e');
     }
   }
 
@@ -265,6 +280,7 @@ class UploadController extends GetxController {
 
       var videoUrls = <String>[];
       var videoPath = <String>[];
+      var thumbnailDownloadUrls = <String>[];
 
       UserStore.to.getUserProfile();
 
@@ -272,7 +288,7 @@ class UploadController extends GetxController {
         final MediaInfo? compressVideoFile = await compressVideo(uploadFiles[i]);
         _logger.i('uploadVideo > compressVideoFile: ${compressVideoFile?.filesize}');
 
-        // 파일 업로드
+        // 동영상 업로드
         final String fileName = uploadFiles[i].path.split('/').last;
         _logger.i('uploadVideo > fileName: $fileName');
 
@@ -281,14 +297,24 @@ class UploadController extends GetxController {
         final TaskSnapshot taskSnapshot = await uploadTask.whenComplete(() => _logger.i('uploadVideo > complete'));
         final String downloadUrl = await taskSnapshot.ref.getDownloadURL();
 
+        // 썸네일 업로드
+        final String thumbnail = await thumbnailDownload(downloadUrl);
+        final String thumbnailFileName = '${fileName.split('.').first}.webp';
+        final Reference thumbnailRef = FirebaseStorage.instance.ref().child('thumbnails/$thumbnailFileName');
+        final UploadTask thumbnailUploadTask = thumbnailRef.putFile(File(thumbnail));
+
         _logger.i('uploadVideo > downloadUrl: $downloadUrl');
+        final String thumbnailDownloadUrl = await thumbnailUploadTask.whenComplete(() => _logger.i('uploadVideo > thumbnail complete')).then((value) => value.ref.getDownloadURL());
+
+        _logger.i('uploadVideo > thumbnailDownloadUrl: $thumbnailDownloadUrl');
 
         videoUrls.add(downloadUrl);
         videoPath.add(compressVideoFile.file!.path);
+        thumbnailDownloadUrls.add(thumbnailDownloadUrl);
       }
 
       var doc = FirebaseFirestore.instance.collection('feeds').doc();
-      _logger.i('uploadVideo > storeName: ${MapController.to.storeContext}');
+      // _logger.i('uploadVideo > storeName: ${MapController.to.storeContext}');
 
       var model = FeedModel(
         seq: doc.id,
@@ -300,10 +326,12 @@ class UploadController extends GetxController {
         storeLontlat: '${MapController.to.currentLocation.value.latitude}, ${MapController.to.currentLocation.value.longitude}',
         videoUrls: videoUrls,
         videoPaths: videoPath,
+        thumbnailUrls: thumbnailDownloadUrls,
         description: storeDescription,
         hashTags: selectedHashtagStringList,
         profilePhoto: UserStore.to.userProfile.photoUrl,
-        user: UserStore.to.userProfile.id,
+        userid: UserStore.to.userProfile.id,
+        usernickname: UserStore.to.userProfile.nickname,
         uid: UserStore.to.userProfile.uid,
         createdAt: DateTime.now().toString(),
         likeCount: 0,
@@ -314,7 +342,7 @@ class UploadController extends GetxController {
       await FirebaseFirestore.instance.collection('feeds').add(model.toJson());
 
       // 가게 정보 등록
-      await FirebaseFirestore.instance.collection('stores').doc(MapController.to.searchAddress.value).set({
+      await FirebaseFirestore.instance.collection('stores').doc(storeNameController.text).set({
         'storeName': storeNameController.text,
         'storeAddress': MapController.to.searchAddress.value,
         'storeType': MapController.to.storeCategory.value,
@@ -323,6 +351,7 @@ class UploadController extends GetxController {
         'storeLontlat': '${MapController.to.currentLocation.value.latitude}, ${MapController.to.currentLocation.value.longitude}',
         'videoUrls': videoUrls,
         'videoPaths': videoPath,
+        'thumbnailUrls': thumbnailDownloadUrls,
         'description': storeDescription,
         'hashTags': selectedHashtagStringList,
         'profilePhoto': UserStore.to.userProfile.photoUrl,
@@ -334,10 +363,12 @@ class UploadController extends GetxController {
         'point': 0,
       });
 
+      isUploadLoading.value = false;
       Get.offAllNamed(AppRoutes.uploadDone);
 
     } catch (e) {
       _logger.e('uploadVideo error: $e');
+      isUploadLoading.value = false;
     }
   }
 

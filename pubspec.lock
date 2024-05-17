@@ -185,6 +185,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.8"
+  custom_info_window:
+    dependency: "direct main"
+    description:
+      name: custom_info_window
+      sha256: b7fce9017cb4b8a4319fa7f8080e4fdabfc65996df61c65cd2079dbaf93f56f5
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.1"
   dbus:
     dependency: transitive
     description:
@@ -425,6 +433,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.0"
+  fluster:
+    dependency: "direct main"
+    description:
+      name: fluster
+      sha256: "3807f5d088b7798f0416b8578498046338af98bb4fb922a70e2810b8293963f6"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.2.0"
   flutter:
     dependency: "direct main"
     description: flutter
@@ -1437,6 +1453,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.13.0"
+  widget_marker_google_map:
+    dependency: "direct main"
+    description:
+      name: widget_marker_google_map
+      sha256: "2dd542dcced52b982312cb30303ee33fa8138158058c96c61fa1dbe089a2ce60"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.2"
   win32:
     dependency: transitive
     description:

@@ -1,3 +1,4 @@
+import 'package:foreats/utils/logger.dart';
 import 'package:get/get.dart';
 
 import '../screens/biz/biz_controller.dart';
@@ -17,6 +18,7 @@ import 'home_controller.dart';
 class HomeBinding extends Bindings {
   @override
   void dependencies() {
+    Get.lazyPut<AppLog>(() => AppLog());
     Get.lazyPut<HomeController>(() => HomeController());
     Get.lazyPut<LoginController>(() => LoginController());
     Get.lazyPut<FeedController>(() => FeedController());

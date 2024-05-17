@@ -186,7 +186,7 @@ class _FeedDetailScreenState extends State<FeedDetailScreen> {
                     ),
                     SizedBox(width: 10.w),
                     Text(
-                      feedDetail.user ?? '',
+                      feedDetail.userid ?? '',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 12.sp,
@@ -462,7 +462,7 @@ class _FeedDetailScreenState extends State<FeedDetailScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                feedDetail.user ?? '',
+                                feedDetail.userid ?? '',
                                 style: TextStyle(
                                   color: Colors.black,
                                   fontSize: 12.sp,

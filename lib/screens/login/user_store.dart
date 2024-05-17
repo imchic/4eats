@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 import 'package:get/get_rx/get_rx.dart';
+import 'package:get/get_rx/src/rx_types/rx_types.dart';
 import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -32,6 +33,7 @@ class UserStore extends GetxController {
   RxBool isExist = false.obs;
 
   RxString id = ''.obs;
+  RxString nickname = ''.obs;
   RxString loginType = ''.obs;
   RxString photoUrl = ''.obs;
   RxString displayName = ''.obs;
@@ -158,6 +160,7 @@ class UserStore extends GetxController {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
 
       id.value = prefs.getString('id') ?? '';
+      nickname.value = prefs.getString('nickname') ?? '';
       displayName.value = prefs.getString('nickname') ?? '';
       photoUrl.value = prefs.getString('profileImage') ?? '';
       emailAddress.value = prefs.getString('email') ?? '';
@@ -165,6 +168,7 @@ class UserStore extends GetxController {
 
       userProfile = UserModel(
         id: id.value,
+        nickname: nickname.value,
         displayName: displayName.value,
         photoUrl: photoUrl.value,
         email: emailAddress.value,
@@ -201,6 +205,7 @@ class UserStore extends GetxController {
       prefs.remove('accessToken');
       prefs.remove('uid');
       prefs.remove('id');
+      prefs.remove('usernickname');
       prefs.remove('email');
       prefs.remove('nickname');
       prefs.remove('profileImage');
@@ -215,7 +220,7 @@ class UserStore extends GetxController {
       prefs.setString('uid', userModel.uid ?? '');
       prefs.setString('email', userModel.email ?? '');
       prefs.setString('id', userModel.id ?? '');
-      prefs.setString('nickname', userModel.displayName ?? '');
+      prefs.setString('nickname', userModel.nickname ?? '');
       prefs.setString('profileImage', userModel.photoUrl ?? '');
       prefs.setString('loginType', userModel.loginType ?? '');
     });
