@@ -69,15 +69,33 @@ class MyPageScreen extends GetView<MyPageController> {
                   return ClipRRect(
                     borderRadius: BorderRadius.circular(50.r),
                     child: CachedNetworkImage(
-                      imageUrl: UserStore.to.userProfile.photoUrl!,
-                      width: 50.w,
-                      height: 50.h,
-                      fit: BoxFit.cover,
+                      imageUrl: UserStore.to.userProfile.photoUrl ?? '',
+                      imageBuilder: (context, imageProvider) => Container(
+                        width: 50.w,
+                        height: 50.h,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          image: DecorationImage(
+                            image: imageProvider,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
                       placeholder: (context, url) => Container(
-                        color: gray200,
+                        width: 40.w,
+                        height: 40.h,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.grey[200],
+                        ),
                       ),
                       errorWidget: (context, url, error) => Container(
-                        color: gray200,
+                        width: 44.w,
+                        height: 44.h,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.grey[200],
+                        ),
                         child: Icon(
                           Icons.error,
                           color: Colors.red,
@@ -88,10 +106,15 @@ class MyPageScreen extends GetView<MyPageController> {
                 } else {
                   return ClipRRect(
                     borderRadius: BorderRadius.circular(50.r),
-                    child: Icon(
-                      Icons.account_circle,
-                      size: 50.r,
+                    child: Container(
+                      width: 50.w,
+                      height: 50.h,
                       color: gray200,
+                      child: Icon(
+                        Icons.person,
+                        color: gray500,
+                        size: 30.sp,
+                      ),
                     ),
                   );
                 }

@@ -3,9 +3,18 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 class DescriptionText extends StatefulWidget {
-  final String text;
 
-  const DescriptionText({super.key, required this.text});
+  final String text;
+  final Color? color;
+  final double? fontSize;
+  final FontWeight? fontWeight;
+
+  DescriptionText({
+    required this.text,
+    this.color,
+    this.fontSize,
+    this.fontWeight,
+  });
 
   @override
   _DescriptionTextState createState() => _DescriptionTextState();
@@ -40,8 +49,8 @@ class _DescriptionTextState extends State<DescriptionText> {
           ? Text(
               firstHalf,
               style: TextStyle(
-                fontSize: 12.sp,
-                color: Colors.white,
+                fontSize: widget.fontSize ?? 11.sp,
+                color: widget.color ?? Colors.white,
               ),
             )
           : Column(
@@ -58,8 +67,8 @@ class _DescriptionTextState extends State<DescriptionText> {
                         child: Text(
                           flag ? (firstHalf + "...") : (firstHalf + secondHalf),
                           style: TextStyle(
-                            fontSize: 11.sp,
-                            color: Colors.white,
+                            fontSize: widget.fontSize ?? 11.sp,
+                            color: widget.color ?? Colors.white,
                           ),
                         ),
                       ),
@@ -68,8 +77,8 @@ class _DescriptionTextState extends State<DescriptionText> {
                           flag ? "더보기" : "접기",
                           style: TextStyle(
                             color: Theme.of(context).colorScheme.tertiary,
-                            fontSize: 11.sp,
-                            fontWeight: FontWeight.bold,
+                            fontSize: widget.fontSize ?? 11.sp,
+                            fontWeight: widget.fontWeight ?? FontWeight.bold,
                           ),
                         ),
                       ),

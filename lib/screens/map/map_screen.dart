@@ -99,8 +99,8 @@ class MapScreen extends GetView<MapController> {
             zoom: 15,
           ),
           //widgetMarkers: controller.widgetMarkers.isNotEmpty ? controller.widgetMarkers : [],
-          widgetMarkers: [
-            for (var store in controller.storeList)
+          widgetMarkers: controller.storeList.isNotEmpty ? controller.storeList.map((store) {
+            return
               WidgetMarker(
                 markerId: store.name ?? '0',
                 position: LatLng(
@@ -116,8 +116,8 @@ class MapScreen extends GetView<MapController> {
                   alignment: Alignment.center,
                   padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
                   decoration: BoxDecoration(
-                    //color: Theme.of(context).colorScheme.primary.withOpacity(0.75),
-                    color: CupertinoColors.activeBlue.withOpacity(0.75),
+                    color: Theme.of(context).colorScheme.primary.withOpacity(0.75),
+                    // color: CupertinoColors.activeBlue.withOpacity(0.75),
                     borderRadius: BorderRadius.circular(10.r),
                     boxShadow: [
                       BoxShadow(
@@ -134,9 +134,6 @@ class MapScreen extends GetView<MapController> {
                     children: [
                       SvgPicture.asset(
                         'assets/images/ic_coins.svg',
-                        // width: 15.w,
-                        // height: 15.h,
-                        color: Colors.white,
                       ),
                       SizedBox(width: 5.w),
                       Text(store.totalPoint ?? '0포인트',
@@ -149,11 +146,11 @@ class MapScreen extends GetView<MapController> {
                     ],
                   ),
                 ),
-              ),
-          ],
-          onCameraMove: controller.onCameraMove,
-          onCameraMoveStarted: controller.onCameraMoveStarted,
-          onCameraIdle: controller.onCameraIdle,
+              );
+          }).toList() : [],
+          // onCameraMove: controller.onCameraMove,
+          // onCameraMoveStarted: controller.onCameraMoveStarted,
+          // onCameraIdle: controller.onCameraIdle,
           myLocationEnabled: true,
           myLocationButtonEnabled: true,
           buildingsEnabled: true,
@@ -341,16 +338,8 @@ class MapScreen extends GetView<MapController> {
             itemBuilder: (context, index) {
               return InkWell(
                 onTap: () {
-                  controller.onMarkerTapped(controller.storeList[index]);
                   controller.selectIndex.value = index;
-                  _logger.d('selectIndex: ${controller.selectIndex.value}');
-                  // show info window
-                  controller.showInfoWindow(
-                    controller.storeList[index].x,
-                    controller.storeList[index].y,
-                    controller.storeList[index].name,
-                    controller.storeList[index].address,
-                  );
+                  controller.onMarkerTapped(controller.storeList[index]);
                 },
                 child: Obx(() =>
                   Container(

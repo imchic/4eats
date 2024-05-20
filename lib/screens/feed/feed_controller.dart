@@ -14,6 +14,7 @@ import 'package:logger/logger.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 import '../../model/comment_model.dart';
 import '../../model/feed_model.dart';
+import '../../model/user_model.dart';
 import '../../utils/app_routes.dart';
 import '../../utils/global_toast_controller.dart';
 import 'package:dio/dio.dart' as dio;
@@ -40,6 +41,7 @@ class FeedController extends GetxController {
       <List<CachedVideoPlayerPlusController>>[].obs;
   late CachedVideoPlayerPlusController videoController;
   late List<CachedVideoPlayerPlusController> videoControllers;
+  late CachedVideoPlayerPlusController videoDetailController;
   late PageController pageController;
 
   late TextEditingController commentController;
@@ -61,8 +63,10 @@ class FeedController extends GetxController {
   // List<CommentModel> get commentList => _commentList;
 
   final _commentArrayList = <List<CommentModel>>[].obs;
-
   List<List<CommentModel>> get commentArrayList => _commentArrayList;
+
+  final _commentReplyArrayList = <List<CommentModel>>[].obs;
+  List<List<CommentModel>> get commentReplyArrayList => _commentReplyArrayList;
 
   final _thumbnailList = <String>[].obs;
 
@@ -71,6 +75,12 @@ class FeedController extends GetxController {
   final _hashTags = <String>[].obs;
 
   List<String> get hashTags => _hashTags;
+
+  final _mentionUserList = <UserModel>[].obs;
+  List<UserModel> get mentionUserList => _mentionUserList;
+
+  final _allUserList = <UserModel>[].obs;
+  List<UserModel> get allUserList => _allUserList;
 
   final isVideoLoading = true.obs;
   final _isCommentLoading = false.obs;
@@ -105,6 +115,14 @@ class FeedController extends GetxController {
   bool get isFeedLike => _isFeedLike.value;
 
   set isFeedLike(bool value) => _isFeedLike.value = value;
+
+  final _isMentionLoading = false.obs;
+  bool get isMentionLoading => _isMentionLoading.value;
+  set isMentionLoading(bool value) => _isMentionLoading.value = value;
+
+  final _isReply = false.obs;
+  bool get isReply => _isReply.value;
+  set isReply(bool value) => _isReply.value = value;
 
   @override
   Future<void> onInit() async {
@@ -414,59 +432,96 @@ class FeedController extends GetxController {
       // 로딩바 보여주기
       _isCommentLoading.value = true;
 
-      var doc = FirebaseFirestore.instance
+
+      _logger.d('feedId: $feedId');
+      _logger.d('comment: $comment');
+
+      await FirebaseFirestore.instance
           .collection('feeds')
-          .doc(feedId)
-          .collection('comments')
-          .doc();
+          .where('seq', isEqualTo: feedId)
+          .get()
+          .then((value) async {
+        for (var i = 0; i < value.docs.length; i++) {
 
-      var userLoginType = UserStore.to.loginType.value;
+          // commmentId 생성
+          var commentId = value.docs[i].reference.collection('comments').doc().id;
 
-      if (userLoginType == 'kakao') {
-        await FirebaseFirestore.instance
-            .collection('feeds')
-            .doc(feedId)
-            .collection('comments')
-            .add({
-          'comment': comment,
-          'commentId': doc.id,
-          'createdAt': Timestamp.now(),
-          'uid': '',
-          'userName': UserStore.to.displayName.value,
-          'userPhotoUrl': UserStore.to.photoUrl.value,
-          'feedId': feedId,
-          'registerUserId': UserStore.to.id.value,
-          'likeCount': 0,
-          'userId': UserStore.to.id.value,
-          'likeUserIds': [],
-        });
-      } else if (userLoginType == 'google') {
-        await FirebaseFirestore.instance
-            .collection('feeds')
-            .doc(feedId)
-            .collection('comments')
-            .add({
-          'comment': comment,
-          'commentId': doc.id,
-          'createdAt': Timestamp.now(),
-          'uid': FirebaseAuth.instance.currentUser!.uid ?? '',
-          'userName': FirebaseAuth.instance.currentUser!.displayName ?? '',
-          'userPhotoUrl': FirebaseAuth.instance.currentUser!.photoURL,
-          'feedId': feedId,
-          'registerUserId': UserStore.to.id.value,
-          'likeCount': 0,
-          'userId': UserStore.to.id.value,
-          'likeUserIds': [],
-        });
-      }
-
-      // fcm 발송
-      await sendFcm(feedId, comment, '댓글');
+          value.docs[i].reference.collection('comments').add({
+            'comment': comment,
+            'createdAt': Timestamp.now(),
+            'uid': '',
+            'userName': UserStore.to.displayName.value,
+            'userNickname': UserStore.to.nickname.value,
+            'userPhotoUrl': UserStore.to.photoUrl.value,
+            'feedId': feedId,
+            'commentId': commentId,
+            'registerUserId': UserStore.to.id.value,
+            'likeCount': 0,
+            'userId': UserStore.to.id.value,
+            'likeUserIds': [],
+            'isReply': _isReply.value,
+            'replyCommentId': '',
+          });
+        }
+      });
 
       // 새로고침
       await refreshComments(feedId, currentFeedIndex.value);
     } catch (e) {
       _logger.e('addComment error: $e');
+    }
+  }
+
+  /// 대댓글
+  Future<void> addReplyComment(String comment, String feedId) async {
+    try {
+      // 로딩바 보여주기
+      //_isCommentLoading.value = true;
+
+      _logger.d('feedId: $feedId');
+      _logger.d('comment: $comment');
+
+      await FirebaseFirestore.instance
+          .collection('feeds')
+          .where('seq', isEqualTo: feedId)
+          .get()
+          .then((value) async {
+
+        for (var i = 0; i < value.docs.length; i++) {
+          value.docs[i].reference.collection('comments').get().then((event) {
+            for (var i = 0; i < event.docs.length; i++) {
+              _logger.d('commentId: ${event.docs[i].data()['commentId']}');
+
+              var commentId = event.docs[i].data()['commentId'];
+
+              // add reply
+              event.docs[i].reference.collection('reply').add({
+                'comment': comment,
+                'createdAt': Timestamp.now(),
+                'uid': '',
+                'userName': UserStore.to.displayName.value,
+                'userNickname': UserStore.to.nickname.value,
+                'userPhotoUrl': UserStore.to.photoUrl.value,
+                'feedId': feedId,
+                'commentId': commentId,
+                'registerUserId': UserStore.to.id.value,
+                'likeCount': 0,
+                'userId': UserStore.to.id.value,
+                'likeUserIds': [],
+                'isReply': true,
+                'replyCommentId': commentId,
+              });
+
+              // commentId로 댓글 찾기
+
+            }
+          });
+        }
+
+      });
+
+    } catch (e) {
+      _logger.e('addReplyComment error: $e');
     }
   }
 
@@ -481,21 +536,23 @@ class FeedController extends GetxController {
 
       await FirebaseFirestore.instance
           .collection('feeds')
-          .doc(feedId)
-          .collection('comments')
-          .orderBy('createdAt', descending: true)
-          .snapshots()
-          .listen((value) {
-        tempList.clear();
+          .where('seq', isEqualTo: feedId)
+          .get()
+          .then((value) {
         for (var i = 0; i < value.docs.length; i++) {
-          final comment = CommentModel.fromJson(value.docs[i].data());
-          tempList.add(comment);
+          value.docs[i].reference.collection('comments').orderBy('createdAt', descending: true).get().then((event) {
+            tempList.clear();
+
+            for (var i = 0; i < event.docs.length; i++) {
+              final comment = CommentModel.fromJson(event.docs[i].data());
+              tempList.add(comment);
+            }
+
+            _commentArrayList.insert(feedIndex, tempList);
+            _isCommentLoading.value = false;
+          });
         }
 
-        _commentArrayList[feedIndex] = tempList;
-
-        commentController.clear();
-        _isCommentLoading.value = false;
       });
     } catch (e) {
       _logger.e('fetchComments error: $e');
@@ -507,23 +564,46 @@ class FeedController extends GetxController {
     try {
       // 댓글 조회
       var tempList = <CommentModel>[];
+      /// 대댓글 조회
+      var tempReplyList = <CommentModel>[];
 
       FirebaseFirestore.instance
           .collection('feeds')
-          .doc(feedId)
-          .collection('comments')
-          .orderBy('createdAt', descending: true)
-          .snapshots()
-          .listen((event) {
-        tempList.clear();
+          .where('seq', isEqualTo: feedId)
+          .get()
+          .then((value) {
 
-        for (var i = 0; i < event.docs.length; i++) {
-          final comment = CommentModel.fromJson(event.docs[i].data());
-          tempList.add(comment);
+        for (var i = 0; i < value.docs.length; i++) {
+
+          value.docs[i].reference
+              .collection('comments')
+              .orderBy('createdAt', descending: true)
+              .get()
+              .then((event) {
+
+          tempList.clear();
+
+            for (var i = 0; i < event.docs.length; i++) {
+              final comment = CommentModel.fromJson(event.docs[i].data());
+              tempList.add(comment);
+              /// 대댓글 조회
+              event.docs[i].reference.collection('reply').orderBy('createdAt', descending: true).get().then((replyEvent) {
+                tempReplyList.clear();
+                for (var i = 0; i < replyEvent.docs.length; i++) {
+                  final replyComment = CommentModel.fromJson(replyEvent.docs[i].data());
+                  tempReplyList.add(replyComment);
+                }
+                tempList[i].replyList = tempReplyList;
+                _commentReplyArrayList.insert(feedIndex, tempReplyList);
+                _logger.d('tempReplyList: $tempReplyList');
+              });
+            }
+
+            _commentArrayList.insert(feedIndex, tempList);
+            _isCommentLoading.value = false;
+          });
         }
 
-        _commentArrayList.insert(feedIndex, tempList);
-        _isCommentLoading.value = false;
       });
     } catch (e) {
       _logger.e('fetchComments error: $e');
@@ -872,6 +952,7 @@ class FeedController extends GetxController {
     String feedId,
   ) async {
     try {
+
       // var feed = _feedList.firstWhere((element) => element.seq == feedId);
       // var shareText = '포잇에서 공유한 글입니다.\n\n';
       // shareText += '제목: ${feed.storeName}\n';
@@ -880,6 +961,8 @@ class FeedController extends GetxController {
       // // 클립보드 복사
       // await Clipboard.setData(ClipboardData(text: shareText));
       // GlobalToastController.to.showToast('클립보드에 복사되었습니다.');
+
+      // 1. 공유 종류 선택
 
       // 카카오톡 공유
       bool isKakaoTalkSharingAvailable = await ShareClient.instance.isKakaoTalkSharingAvailable();
@@ -1046,4 +1129,49 @@ class FeedController extends GetxController {
       _logger.e('sendPushMessage error: $e');
     }
   }
+
+  /// 멘션 유저 조회
+  Future<void> fetchMentionUser(String keyword) async {
+    try {
+
+      _mentionUserList.clear();
+
+      // 첫글자가 '@'인 경우
+      if (keyword.startsWith('@')) {
+
+        // 멘션 유저 조회
+        await FirebaseFirestore.instance
+            .collection('users')
+            .get()
+            .then((value) {
+
+          _mentionUserList.clear();
+          _allUserList.clear();
+
+          for (var i = 0; i < value.docs.length; i++) {
+            var user = UserModel.fromJson(value.docs[i].data());
+            _allUserList.add(user);
+          }
+
+          if (keyword.length > 1) {
+            for (var i = 0; i < _allUserList.length; i++) {
+              if (_allUserList[i].nickname!.contains(keyword.substring(1))) {
+                _mentionUserList.add(_allUserList[i]);
+              }
+            }
+          }
+
+        });
+
+      } else {
+        // _logger.i('isMenion: false');
+      }
+
+
+    } catch (e) {
+      _logger.e('fetchMentionUser error: $e');
+    }
+  }
+
+
 }

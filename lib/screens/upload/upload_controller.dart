@@ -337,6 +337,7 @@ class UploadController extends GetxController {
         likeCount: 0,
         bookmarkCount: 0,
         point: 0,
+        comments: [],
       );
 
       await FirebaseFirestore.instance.collection('feeds').add(model.toJson());

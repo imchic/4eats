@@ -392,11 +392,11 @@ class MapController extends GetxController {
 
   /// 마커 클릭시 이벤트
   Future<void> onMarkerTapped(MapModel store) async {
-    AppLog.to.d('onMarkerTapped: ${store.name}');
+    //AppLog.to.d('onMarkerTapped: ${store.name}');
 
     // get index
     selectIndex.value = storeList.indexWhere((element) => element.name == store.name);
-    AppLog.to.d('selectIndex: $selectIndex');
+    //AppLog.to.d('selectIndex: $selectIndex');
 
     scrollToIndex(selectIndex.value);
 
@@ -410,7 +410,7 @@ class MapController extends GetxController {
       CameraUpdate.newCameraPosition(
         CameraPosition(
           target: LatLng(double.parse(store.y!), double.parse(store.x!)),
-          zoom: 15,
+          zoom: await mapController.getZoomLevel(),
         ),
       ),
     );

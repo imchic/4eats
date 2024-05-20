@@ -7,8 +7,8 @@ class CommentModel {
   String? commentId;
   String? userId;
   String? userName;
+  String? userNickname;
   String? comment;
-  // date
   DateTime? createdAt;
   DateTime? updatedAt;
   String? feedId;
@@ -16,11 +16,13 @@ class CommentModel {
   String? likeCount;
   String? userPhotoUrl;
   List<String>? likeUserIds;
+  List<CommentModel>? replyList;
 
   CommentModel({
     this.commentId,
     this.userId,
     this.userName,
+    this.userNickname,
     this.comment,
     this.createdAt,
     this.updatedAt,
@@ -29,12 +31,14 @@ class CommentModel {
     this.likeCount,
     this.userPhotoUrl,
     this.likeUserIds,
+    this.replyList,
   });
 
   CommentModel.fromJson(Map<String, dynamic> json) {
     commentId = json['commentId'];
     userId = json['userId'];
     userName = json['userName'];
+    userNickname = json['userNickname'];
     comment = json['comment'];
     createdAt = Timestamp.fromDate(json['createdAt'].toDate()).toDate();
     //updatedAt = Timestamp.fromDate(json['updatedAt'].toDate()).toDate();
@@ -43,6 +47,12 @@ class CommentModel {
     likeCount = json['likeCount'].toString();
     userPhotoUrl = json['userPhotoUrl'];
     likeUserIds = List<String>.from(json['likeUserIds']);
+    if (json['replyList'] != null) {
+      replyList = <CommentModel>[];
+      json['replyList'].forEach((v) {
+        replyList!.add(CommentModel.fromJson(v));
+      });
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -50,6 +60,7 @@ class CommentModel {
     data['commentId'] = commentId;
     data['userId'] = userId;
     data['userName'] = userName;
+    data['userNickname'] = userNickname;
     data['comment'] = comment;
     data['createdAt'] = createdAt;
     //data['updatedAt'] = updatedAt;
@@ -58,6 +69,9 @@ class CommentModel {
     data['likeCount'] = likeCount;
     data['userPhotoUrl'] = userPhotoUrl;
     data['likeUserIds'] = likeUserIds;
+    if (replyList != null) {
+      data['replyList'] = replyList!.map((v) => v.toJson()).toList();
+    }
     return data;
   }
 

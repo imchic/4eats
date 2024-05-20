@@ -79,6 +79,7 @@ class FeedModel {
         hashTags: List<String>.from(json["hashTags"].map((x) => x)),
         isBookmark: json["isBookmark"],
         isLike: json["isLike"],
+        comments: List<List<CommentModel>>.from(json["comments"].map((x) => List<CommentModel>.from(x.map((x) => CommentModel.fromJson(x))))),
       );
 
   Map<String, dynamic> toJson() => {
@@ -105,6 +106,7 @@ class FeedModel {
         "hashTags": List<dynamic>.from(hashTags!.map((x) => x)),
         "isBookmark": isBookmark,
         "isLike": isLike,
+        "comments": List<dynamic>.from(comments!.map((x) => List<dynamic>.from(x.map((x) => x.toJson())))),
       };
 
   // tostring
