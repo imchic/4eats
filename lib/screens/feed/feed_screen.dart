@@ -3,9 +3,10 @@ import 'package:cached_video_player_plus/cached_video_player_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:foreats/utils/global_toast_controller.dart';
+import 'package:foreats/utils/text_style.dart';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
 import 'package:lottie/lottie.dart';
@@ -19,14 +20,12 @@ import '../login/user_store.dart';
 import 'feed_controller.dart';
 
 class FeedScreen extends GetView<FeedController> {
-
   FeedScreen({super.key});
+
   final _logger = Logger();
 
   @override
   Widget build(BuildContext context) {
-
-
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
       statusBarIconBrightness: Brightness.light,
@@ -72,7 +71,8 @@ class FeedScreen extends GetView<FeedController> {
                 controller.currentFeedIndex.value = index;
                 controller.allPause();
                 controller.allMute();
-                controller.initializeVideoPlayer(controller.videoControllerList);
+                controller
+                    .initializeVideoPlayer(controller.videoControllerList);
                 controller.fetchLikes(controller.feedList[index].seq ?? '');
                 controller.fetchBookmarks(controller.feedList[index].seq ?? '');
               },
@@ -80,7 +80,9 @@ class FeedScreen extends GetView<FeedController> {
                 return Obx(
                   () => Stack(
                     children: [
-                      CachedVideoPlayerPlus(controller.videoControllerList[controller.currentFeedIndex.value][controller.currentVideoUrlIndex.value]),
+                      CachedVideoPlayerPlus(controller.videoControllerList[
+                              controller.currentFeedIndex.value]
+                          [controller.currentVideoUrlIndex.value]),
                       _topMenu(context, index),
                       _feedInfo(context, index),
                       _indicator(context),
@@ -136,8 +138,10 @@ class FeedScreen extends GetView<FeedController> {
                         'storeAddress': controller.feedList[index].storeAddress,
                         'storeType': controller.feedList[index].storeType,
                         'lonlat': [
-                          double.parse(controller.feedList[index].storeLontlat!.split(',')[0]),
-                          double.parse(controller.feedList[index].storeLontlat!.split(',')[1])
+                          double.parse(controller.feedList[index].storeLontlat!
+                              .split(',')[0]),
+                          double.parse(controller.feedList[index].storeLontlat!
+                              .split(',')[1])
                         ]
                       });
                     },
@@ -153,7 +157,8 @@ class FeedScreen extends GetView<FeedController> {
                       controller.changeMute(index);
                     },
                     child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 10.w, vertical: 10.h),
                         child: Obx(
                           () => SvgPicture.asset(
                             controller.isMuted
@@ -161,7 +166,8 @@ class FeedScreen extends GetView<FeedController> {
                                 : 'assets/images/ic_volume_up.svg',
                             width: 20.w,
                             height: 20.h,
-                            colorFilter: ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                            colorFilter:
+                                ColorFilter.mode(Colors.white, BlendMode.srcIn),
                           ),
                         )),
                   ),
@@ -237,7 +243,7 @@ class FeedScreen extends GetView<FeedController> {
                     _feedHashtags(context, index),
                     _feedComments(context, index),
                   ],
-              ))
+                ))
           ],
         ),
       ),
@@ -267,7 +273,8 @@ class FeedScreen extends GetView<FeedController> {
                       ),
                       child: Obx(
                         () => CachedNetworkImage(
-                          imageUrl: controller.feedList[index].profilePhoto ?? '',
+                          imageUrl:
+                              controller.feedList[index].profilePhoto ?? '',
                           imageBuilder: (context, imageProvider) => Container(
                             width: 40.w,
                             height: 40.h,
@@ -340,18 +347,23 @@ class FeedScreen extends GetView<FeedController> {
                 onTap: () {
                   // 좋아요
                   controller.isFeedBookmark
-                      ? controller.removeBookmark(FeedController.to.feedList[index].seq ?? '')
-                      : controller.addBookmark(FeedController.to.feedList[index].seq ?? '');
+                      ? controller.removeBookmark(
+                          FeedController.to.feedList[index].seq ?? '')
+                      : controller.addBookmark(
+                          FeedController.to.feedList[index].seq ?? '');
                 },
-                child: Obx(() =>
-                  Container(
+                child: Obx(
+                  () => Container(
                     padding: EdgeInsets.only(top: 4.h),
                     child: Icon(
                       controller.isFeedBookmark
                           ? Icons.bookmark
                           : Icons.bookmark_border,
                       color: controller.isFeedBookmark
-                          ? Theme.of(context).colorScheme.tertiary.withOpacity(0.8)
+                          ? Theme.of(context)
+                              .colorScheme
+                              .tertiary
+                              .withOpacity(0.8)
                           : Colors.white,
                       size: 20.w,
                     ),
@@ -363,8 +375,10 @@ class FeedScreen extends GetView<FeedController> {
                 onTap: () {
                   // 좋아요
                   controller.isFeedLike
-                      ? controller.removeLike(FeedController.to.feedList[index].seq ?? '')
-                      : controller.addLike(FeedController.to.feedList[index].seq ?? '');
+                      ? controller.removeLike(
+                          FeedController.to.feedList[index].seq ?? '')
+                      : controller
+                          .addLike(FeedController.to.feedList[index].seq ?? '');
                 },
                 child: Container(
                   padding: EdgeInsets.only(top: 4.h),
@@ -372,9 +386,7 @@ class FeedScreen extends GetView<FeedController> {
                     controller.isFeedLike
                         ? Icons.favorite
                         : Icons.favorite_border,
-                    color: controller.isFeedLike
-                        ? Colors.red
-                        : Colors.white,
+                    color: controller.isFeedLike ? Colors.red : Colors.white,
                     size: 20.w,
                   ),
                 ),
@@ -383,7 +395,8 @@ class FeedScreen extends GetView<FeedController> {
               InkWell(
                 onTap: () {
                   // 공유
-                  controller.shareFeed(FeedController.to.feedList[index].seq ?? '');
+                  controller
+                      .shareFeed(FeedController.to.feedList[index].seq ?? '');
                 },
                 child: Container(
                   padding: EdgeInsets.only(top: 4.h),
@@ -459,9 +472,9 @@ class FeedScreen extends GetView<FeedController> {
               ),
               controller.isFeedMore
                   ? Container(
-                    width: 0.8.sw,
-                    margin: EdgeInsets.only(top: 10.h),
-                    child: Column(
+                      width: 0.8.sw,
+                      margin: EdgeInsets.only(top: 10.h),
+                      child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
@@ -474,14 +487,17 @@ class FeedScreen extends GetView<FeedController> {
                           ),
                           SizedBox(height: 5.h),
                           Container(
-                            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 10.w, vertical: 5.h),
                             decoration: BoxDecoration(
                               color: Colors.white.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(4.r),
                             ),
                             child: SingleChildScrollView(
                               child: Text(
-                                controller.convertMenuList(controller.feedList[index].storeMenuInfo ?? ''),
+                                controller.convertMenuList(
+                                    controller.feedList[index].storeMenuInfo ??
+                                        ''),
                                 style: TextStyle(
                                   fontSize: 11.sp,
                                   color: Colors.white,
@@ -491,35 +507,41 @@ class FeedScreen extends GetView<FeedController> {
                             ),
                           ),
                           SizedBox(height: 10.h),
-                          controller.convertNaverPlaceContext(controller.feedList[index].storeContext ?? '') != ''
+                          controller.convertNaverPlaceContext(
+                                      controller.feedList[index].storeContext ??
+                                          '') !=
+                                  ''
                               ? Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    '가게 소개',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 12.sp,
-                                      fontWeight: FontWeight.w600,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      '가게 소개',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 12.sp,
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                     ),
-                                  ),
-                                  SizedBox(height: 5.h),
-                                  Text(
-                                    // controller.feedList[index].storeContext ?? '',
-                                    // 스트링을 리스트로
-                                    controller.convertNaverPlaceContext(controller.feedList[index].storeContext ?? ''),
-                                    style: TextStyle(
-                                      color: CupertinoColors.activeGreen,
-                                      fontSize: 11.sp,
-                                      fontWeight: FontWeight.w600,
+                                    SizedBox(height: 5.h),
+                                    Text(
+                                      // controller.feedList[index].storeContext ?? '',
+                                      // 스트링을 리스트로
+                                      controller.convertNaverPlaceContext(
+                                          controller.feedList[index]
+                                                  .storeContext ??
+                                              ''),
+                                      style: TextStyle(
+                                        color: CupertinoColors.activeGreen,
+                                        fontSize: 11.sp,
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                     ),
-                                  ),
-                                ],
-                              )
+                                  ],
+                                )
                               : Container(),
                         ],
                       ),
-                  )
+                    )
                   : Container(),
             ],
           ),
@@ -564,8 +586,8 @@ class FeedScreen extends GetView<FeedController> {
 
   /// 댓글
   _feedComments(BuildContext context, int index) {
-    return Obx(() =>
-      Container(
+    return Obx(
+      () => Container(
         width: 1.sw,
         margin: EdgeInsets.only(top: 10.h, left: 4.w),
         child: InkWell(
@@ -588,7 +610,7 @@ class FeedScreen extends GetView<FeedController> {
                 Text(
                   controller.commentArrayList.isEmpty
                       ? '댓글 0개'
-                      : '댓글 ${controller.commentArrayList[index].length}개',
+                      : '댓글 ${controller.commentArrayList[index].length + controller.commentArrayList[index].fold(0, (previousValue, element) => previousValue + element.replyCommentList!.length)}개',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 10.sp,
@@ -605,7 +627,8 @@ class FeedScreen extends GetView<FeedController> {
 
   // 댓글 시트
   _commentSheet(BuildContext context, int feedIndex) {
-    return Obx(() => controller.isCommentLoading
+    return Obx(
+      () => controller.isCommentLoading
           ? Container(
               width: Get.width,
               height: 0.25.sh,
@@ -618,23 +641,26 @@ class FeedScreen extends GetView<FeedController> {
             )
           :
           // 댓글 리스트 및 작성 창
-          Obx(() => SingleChildScrollView(
-            child: Container(
-                width: Get.width,
-                padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(20.r),
-                    topRight: Radius.circular(20.r),
+          Obx(
+              () => SingleChildScrollView(
+                child: Container(
+                  width: Get.width,
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(20.r),
+                      topRight: Radius.circular(20.r),
+                    ),
                   ),
-                ),
-                child: Column(
+                  child: Column(
                     mainAxisSize: MainAxisSize.min,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       // 댓글 리스트
-                      controller.commentArrayList[feedIndex].isEmpty ? SizedBox(
+                      controller.commentArrayList.isEmpty
+                          ? SizedBox(
                               width: Get.width,
                               height: 0.25.sh,
                               child: Center(
@@ -649,303 +675,34 @@ class FeedScreen extends GetView<FeedController> {
                               ),
                             )
 
-                      // 댓글 리스트
-                      : Column(
-                        mainAxisSize: MainAxisSize.min,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          SizedBox(
-                            width: Get.width,
-                            height: controller.commentArrayList[feedIndex].length < 10
-                                ? 0.25.sh
-                                : 0.8.sh,
-                            child: Obx(() => RefreshIndicator(
-                              onRefresh: () async {
-                                // await controller.fetchComments(
-                                //     controller.feedList[feedIndex].feedId ?? '',
-                                //     feedIndex);
-                              },
-                              child: ListView.builder(
-                                shrinkWrap: true,
-                                itemCount: controller.commentArrayList[feedIndex].length,
-                                itemBuilder: (context, commentIndex) {
-                                  return SizedBox(
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        // 댓글 작성자 정보
-                                        Row(
-                                          children: [
-                                            // 댓글 작성자 프로필
-                                            CachedNetworkImage(
-                                              imageUrl: controller.commentArrayList[feedIndex].isEmpty
-                                                  ? ''
-                                                  : controller.commentArrayList[feedIndex][commentIndex].userPhotoUrl ?? '',
-                                              imageBuilder:
-                                                  (context, imageProvider) =>
-                                                  Container(
-                                                    width: 30.w,
-                                                    height: 30.h,
-                                                    decoration: BoxDecoration(
-                                                      shape: BoxShape.circle,
-                                                      image: DecorationImage(
-                                                        image: imageProvider,
-                                                        fit: BoxFit.cover,
-                                                      ),
-                                                    ),
-                                                  ),
-                                              placeholder: (context, url) => Center(
-                                                child: CircularProgressIndicator(
-                                                  color: Colors.grey[100],
-                                                ),
-                                              ),
-                                              errorWidget: (context, url, error) =>
-                                                  Container(
-                                                    width: 30.w,
-                                                    height: 30.h,
-                                                    decoration: BoxDecoration(
-                                                      shape: BoxShape.circle,
-                                                      color: Colors.grey[200],
-                                                    ),
-                                                    child: Icon(
-                                                      Icons.error,
-                                                      color: Colors.red,
-                                                    ),
-                                                  ),
-                                            ),
-                                            SizedBox(width: 10.w),
-                                            // 댓글 작성자 정보
-                                            Column(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              children: [
-                                                SizedBox(height: 4.h),
-                                                Text(
-                                                  controller.commentArrayList[feedIndex].isEmpty
-                                                      ? ''
-                                                      : controller.commentArrayList[feedIndex][commentIndex].userNickname ?? '',
-                                                  style: TextStyle(
-                                                    color: Colors.black,
-                                                    fontSize: 12.sp,
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                ),
-                                                SizedBox(height: 4.h),
-                                                Text(
-                                                  controller.commentArrayList[feedIndex].isEmpty
-                                                      ? ''
-                                                      : HomeController.to.timeAgo(
-                                                    // string을 date로 변환
-                                                      DateTime.parse(
-                                                        controller.commentArrayList[feedIndex][commentIndex]
-                                                            .createdAt
-                                                            .toString(),
-                                                      )),
-                                                  style: TextStyle(
-                                                    color: gray600,
-                                                    fontSize: 12.sp,
-                                                    fontWeight: FontWeight.w400,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ],
-                                        ),
-                                        SizedBox(height: 4.h),
-                                        // 댓글 내용
-                                        Container(
-                                          margin: EdgeInsets.only(left: 40.w),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                            crossAxisAlignment: CrossAxisAlignment.center,
-                                            children: [
-                                              // 댓글 내용
-                                              Container(
-                                                width: 0.65.sw,
-                                                child: RichText(
-                                                  text: controller.commentArrayList[feedIndex].isEmpty
-                                                      ? TextSpan()
-                                                      : TextSpan(
-                                                      children: [
-                                                        TextSpan(
-                                                          text: controller.commentArrayList[feedIndex][commentIndex].comment!.startsWith('@')
-                                                              ? '${controller.commentArrayList[feedIndex][commentIndex].comment!.split(' ')[0]} '
-                                                              : '',
-                                                          style: TextStyle(
-                                                            color: Theme.of(context).colorScheme.secondary,
-                                                            fontSize: 11.sp,
-                                                            fontWeight: FontWeight.w700,
-                                                          ),
-                                                        ),
-                                                        TextSpan(
-                                                          text: // 골뱅이 제외 다 보여줌
-                                                          controller.commentArrayList[feedIndex][commentIndex].comment!.startsWith('@')
-                                                              ? controller.commentArrayList[feedIndex][commentIndex].comment!.split(' ').sublist(1).join(' ')
-                                                              : controller.commentArrayList[feedIndex][commentIndex].comment!,
-                                                          style: TextStyle(
-                                                            color: gray800,
-                                                            fontSize: 11.sp,
-                                                            fontWeight: FontWeight.w500,
-                                                          ),
-                                                        ),
-                                                      ]
-                                                  ),
-                                                ),
-                                              ),
-                                              // 좋아요, 좋아요 카운트, 더보기 버튼
-                                              Container(
-                                                width: 40.w,
-                                                child: Icon(
-                                                  Icons.more_vert_outlined,
-                                                  color: gray500,
-                                                  size: 14.w,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        SizedBox(height: 4.h),
-                                        // 대댓글 내용
-                                        Column(
-                                          children: [
-                                            controller.commentReplyArrayList[feedIndex].isEmpty
-                                                ? Container()
-                                                : ListView.builder(
-                                              shrinkWrap: true,
-                                              itemCount: controller.commentReplyArrayList[feedIndex].length,
-                                              itemBuilder: (context, replyIndex) {
-                                                return Container(
-                                                  padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-                                                  child: Column(
-                                                    children: [
-                                                      Row(
-                                                        children: [
-                                                          CachedNetworkImage(imageUrl: controller.commentReplyArrayList[feedIndex].isEmpty
-                                                              ? ''
-                                                              : controller.commentReplyArrayList[feedIndex][replyIndex].userPhotoUrl ?? '',
-                                                            imageBuilder: (context, imageProvider) => Container(
-                                                              width: 30.w,
-                                                              height: 30.h,
-                                                              decoration: BoxDecoration(
-                                                                shape: BoxShape.circle,
-                                                                image: DecorationImage(
-                                                                  image: imageProvider,
-                                                                  fit: BoxFit.cover,
-                                                                ),
-                                                              ),
-                                                            ),
-                                                            placeholder: (context, url) => Center(
-                                                              child: CircularProgressIndicator(
-                                                                color: Colors.grey[100],
-                                                              ),
-                                                            ),
-                                                            errorWidget: (context, url, error) => Container(
-                                                              width: 30.w,
-                                                              height: 30.h,
-                                                              decoration: BoxDecoration(
-                                                                shape: BoxShape.circle,
-                                                                color: Colors.grey[200],
-                                                              ),
-                                                              child: Icon(
-                                                                Icons.error,
-                                                                color: Colors.red,
-                                                              ),
-                                                            ),
-                                                          ),
-                                                          SizedBox(width: 10.w),
-                                                          Column(
-                                                            mainAxisAlignment: MainAxisAlignment.start,
-                                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                                            children: [
-                                                              Text(
-                                                                controller.commentReplyArrayList[feedIndex].isEmpty
-                                                                    ? ''
-                                                                    : controller.commentReplyArrayList[feedIndex][replyIndex].userNickname ?? '',
-                                                                style: TextStyle(
-                                                                  color: Colors.black,
-                                                                  fontSize: 12.sp,
-                                                                  fontWeight: FontWeight.w700,
-                                                                  height: 0,
-                                                                ),
-                                                              ),
-                                                              SizedBox(height: 4.h),
-                                                              Text(
-                                                                controller.commentReplyArrayList[feedIndex].isEmpty
-                                                                    ? ''
-                                                                    : HomeController.to.timeAgo(
-                                                                  // string을 date로 변환
-                                                                    DateTime.parse(
-                                                                      controller.commentReplyArrayList[feedIndex][replyIndex]
-                                                                          .createdAt
-                                                                          .toString(),
-                                                                    )),
-                                                                style: TextStyle(
-                                                                  color: gray600,
-                                                                  fontSize: 12.sp,
-                                                                  fontWeight: FontWeight.w400,
-                                                                ),
-                                                              ),
-                                                            ],
-                                                          ),
-                                                        ],
-                                                      ),
-                                                      SizedBox(height: 4.h),
-                                                      Container(
-                                                        margin: EdgeInsets.only(left: 20.w),
-                                                        child: RichText(
-                                                          text: controller.commentReplyArrayList[feedIndex].isEmpty
-                                                              ? TextSpan()
-                                                              : TextSpan(
-                                                              children: [
-                                                                TextSpan(
-                                                                  text: controller.commentReplyArrayList[feedIndex][commentIndex].comment!.startsWith('@')
-                                                                      ? '${controller.commentReplyArrayList[feedIndex][commentIndex].comment!.split(' ')[0]} '
-                                                                      : '',
-                                                                  style: TextStyle(
-                                                                    color: Theme.of(context).colorScheme.secondary,
-                                                                    fontSize: 11.sp,
-                                                                    fontWeight: FontWeight.w700,
-                                                                  ),
-                                                                ),
-                                                                TextSpan(
-                                                                  text: // 골뱅이 제외 다 보여줌
-                                                                  controller.commentReplyArrayList[feedIndex][commentIndex].comment!.startsWith('@')
-                                                                      ? controller.commentReplyArrayList[feedIndex][commentIndex].comment!.split(' ').sublist(1).join(' ')
-                                                                      : controller.commentReplyArrayList[feedIndex][commentIndex].comment!,
-                                                                  style: TextStyle(
-                                                                    color: gray800,
-                                                                    fontSize: 11.sp,
-                                                                    fontWeight: FontWeight.w500,
-                                                                  ),
-                                                                ),
-                                                              ]
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                );
-                                              },
-                                            ),
-                                          ],
-                                        ),
-                                      ],
+                          // 댓글 리스트
+                          : Column(
+                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                SizedBox(
+                                  width: Get.width,
+                                  // height: controller.commentArrayList[feedIndex].length < 10
+                                  //     ? 0.4.sh
+                                  //     : 0.8.sh,
+                                  child: Obx(
+                                    () => RefreshIndicator(
+                                      onRefresh: () async {
+                                        // await controller.fetchComments(
+                                        //     controller.feedList[feedIndex].feedId ?? '',
+                                        //     feedIndex);
+                                      },
+                                      child: buildComment(feedIndex),
                                     ),
-                                  );
-                                },
-                              ),
+                                  ),
+                                ),
+                              ],
                             ),
-                            ),
-                          ),
-                        ],
-                      ),
 
                       // 댓글 작성 창
                       Container(
                         width: 1.sw,
-                        height: 40.h,
                         padding: EdgeInsets.symmetric(horizontal: 10.w),
                         decoration: BoxDecoration(
                           color: Colors.grey[100],
@@ -957,30 +714,30 @@ class FeedScreen extends GetView<FeedController> {
                               child: TextField(
                                 controller: controller.commentController,
                                 onTap: () {
-                                  UserStore.to.isLoggedIn
-                                      ? controller.commentController.text = ''
-                                      : Get.bottomSheet(
-                                          const LoginBottomSheet(),
-                                        );
-                                },
-                                onChanged: (value) {
-                                  if(UserStore.to.isLoggedIn) {
+                                  _logger.d('onTap');
 
-                                    if(controller.commentController.text.isEmpty){
-                                      controller.mentionUserList.clear();
-                                      controller.isMentionLoading = false;
-                                    }
-
-                                    if(controller.commentController.text.contains('@')) {
+                                  if (UserStore.to.isLoggedIn) {
+                                    if (controller.commentController.text.contains('@')) {
                                       controller.isMentionLoading = true;
-                                      controller.comment = controller.commentController.text;
                                       controller.fetchMentionUser(controller.commentController.text);
                                     } else {
                                       controller.isMentionLoading = false;
                                     }
-
                                   } else {
-                                    controller.commentController.text = '';
+                                    Get.bottomSheet(const LoginBottomSheet());
+                                  }
+
+                                },
+                                onChanged: (value) {
+                                  if (UserStore.to.isLoggedIn) {
+                                    if (controller.commentController.text.contains('@')) {
+                                      controller.isMentionLoading = true;
+                                      controller.fetchMentionUser(controller.commentController.text);
+                                    } else {
+                                      controller.isMentionLoading = false;
+                                    }
+                                  } else {
+                                    Get.bottomSheet(const LoginBottomSheet());
                                   }
                                 },
                                 decoration: InputDecoration(
@@ -996,40 +753,54 @@ class FeedScreen extends GetView<FeedController> {
                             ),
                             InkWell(
                               onTap: () {
-                                if(UserStore.to.isLoggedIn) {
+                                if (UserStore.to.isLoggedIn) {
 
-                                  if(controller.commentController.text.isEmpty) {
-                                    return;
-                                  }
+                                  FeedController.to.comment = FeedController.to.commentController.text;
 
-                                  if(controller.isReply){
-                                    controller.addReplyComment(
-                                      controller.commentController.text,
-                                      controller.feedList[feedIndex].seq ?? ''
-                                    );
-
-                                  } else {
-                                    controller.addComment(
-                                      controller.feedList[feedIndex].seq ?? '',
-                                      controller.commentController.text
-                                    );
+                                  // 멘션 기능 추가
+                                  if (FeedController.to.commentController.text.contains('@')) {
+                                    // 사용자 검색
+                                    FeedController.to.fetchMentionUser(FeedController.to.commentController.text);
                                   }
 
                                 } else {
-                                  Get.bottomSheet(
-                                    const LoginBottomSheet(),
-                                  );
-
+                                  Get.bottomSheet(const LoginBottomSheet());
                                 }
                               },
-                              child: Container(
-                                padding: EdgeInsets.all(10.w),
-                                child: SvgPicture.asset(
-                                  'assets/images/ic_send.svg',
-                                  colorFilter:
-                                  ColorFilter.mode(gray400, BlendMode.srcIn),
-                                  width: 20.w,
-                                  height: 20.h,
+                              child: InkWell(
+                                onTap: () async {
+                                  if (UserStore.to.isLoggedIn) {
+                                    if (controller.commentController.text.isNotEmpty) {
+                                      if (controller.isReply) {
+                                        await FeedController.to.addReplyComment(
+                                          feedIndex,
+                                          FeedController.to.commentController.text,
+                                          FeedController.to.feedList[feedIndex].seq ?? '',
+                                        );
+                                      } else {
+                                        await FeedController.to.addComment(
+                                          FeedController.to.feedList[feedIndex].seq ?? '',
+                                          FeedController.to.commentController.text,
+                                        );
+                                      }
+                                    } else {
+                                      GlobalToastController.to.showToast(
+                                        '댓글을 입력해주세요',
+                                      );
+                                    }
+                                  } else {
+                                    Get.bottomSheet(const LoginBottomSheet());
+                                  }
+                                },
+                                child: Container(
+                                  padding: EdgeInsets.all(10.w),
+                                  child: SvgPicture.asset(
+                                    'assets/images/ic_send.svg',
+                                    colorFilter: ColorFilter.mode(
+                                        gray400, BlendMode.srcIn),
+                                    width: 20.w,
+                                    height: 20.h,
+                                  ),
                                 ),
                               ),
                             ),
@@ -1037,44 +808,350 @@ class FeedScreen extends GetView<FeedController> {
                         ),
                       ),
 
-                      // 멘션 유저 horizontal list
-                      SizedBox(
-                        width: 1.sw,
-                        height: 40.h,
-                        child: ListView.builder(
-                          shrinkWrap: true,
-                          scrollDirection: Axis.horizontal,
-                          itemCount: controller.mentionUserList.length,
-                          itemBuilder: (context, idx) {
-                            return InkWell(
-                              onTap: () {
-                                controller.commentController.text = controller.commentController.text.replaceAll('@${controller.mentionUserList[idx].nickname}', '');
-                                controller.commentController.text = '@${controller.mentionUserList[idx].nickname} ';
-                                controller.mentionUserList.clear();
-                                controller.isMentionLoading = false;
-                              },
-                              child: Container(
-                                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
-                                child:
-                                Text('@${controller.mentionUserList[idx].nickname}',
-                                  style: TextStyle(
-                                    color: Theme.of(context).colorScheme.secondary,
-                                    fontSize: 11.sp,
-                                    fontWeight: FontWeight.w600,
+                      controller.mentionUserList.isEmpty
+                          ? Container()
+                          : feedCommentMentionList(),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+    );
+  }
+
+  /// 댓글 리스트
+  ListView buildComment(int feedIndex) {
+    return ListView.separated(
+      shrinkWrap: true,
+      itemCount: controller.commentArrayList[feedIndex].length,
+      itemBuilder: (context, commentIndex) {
+        return SizedBox(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 댓글 작성자 정보
+              Row(
+                children: [
+                  // 댓글 작성자 프로필
+                  CachedNetworkImage(
+                    imageUrl: controller.commentArrayList[feedIndex].isEmpty
+                        ? ''
+                        : controller.commentArrayList[feedIndex][commentIndex].userPhotoUrl ?? '',
+                    imageBuilder: (context, imageProvider) => Container(
+                      width: 30.w,
+                      height: 30.h,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        image: DecorationImage(
+                          image: imageProvider,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                    placeholder: (context, url) => Center(
+                      child: CircularProgressIndicator(
+                        color: Colors.grey[100],
+                      ),
+                    ),
+                    errorWidget: (context, url, error) => Container(
+                      width: 30.w,
+                      height: 30.h,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.grey[200],
+                      ),
+                      child: Icon(
+                        Icons.error,
+                        color: Colors.red,
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 10.w),
+                  // 댓글 작성자 정보
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(height: 4.h),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(
+                            controller.commentArrayList[feedIndex].isEmpty
+                                ? ''
+                                : controller.commentArrayList[feedIndex][commentIndex].userNickname ?? '',
+                            style: TextStyleUtils().commentTitleTextStyle(),
+                          ),
+                          SizedBox(width: 4.w),
+                          // 작성자 표시
+                          // Container(
+                          //   padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
+                          //   decoration: BoxDecoration(
+                          //     color: Theme.of(context).colorScheme.secondary.withOpacity(0.2),
+                          //     borderRadius: BorderRadius.circular(4.r),
+                          //   ),
+                          //   child: Text(
+                          //     controller.commentArrayList[feedIndex][commentIndex].userNickname.toString() == UserStore.to.nickname.toString()
+                          //         ? '작성자'
+                          //         : '',
+                          //     style: TextStyleUtils().commentContentTextStyle(),
+                          //   ),
+                          // ),
+                        ],
+                      ),
+                      SizedBox(height: 4.h),
+                      Text(
+                        controller.commentArrayList[feedIndex].isEmpty
+                            ? ''
+                            : HomeController.to.timeAgo(/* string을 date로 변환 */
+                                DateTime.parse(
+                                controller
+                                    .commentArrayList[feedIndex][commentIndex]
+                                    .createdAt
+                                    .toString(),
+                              )),
+                        style: TextStyleUtils().commentContentTextStyle(),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              SizedBox(height: 4.h),
+              // 댓글 내용
+              feedCommentsItem(feedIndex, commentIndex),
+            ],
+          ),
+        );
+      },
+      separatorBuilder: (context, index) {
+        return SizedBox(height: 14.h);
+      },
+    );
+  }
+
+  /// 댓글 내용
+  Widget feedCommentsItem(int feedIndex, int commentIndex) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          margin: EdgeInsets.only(left: 40.w, top: 4.h,),
+          child: Row(
+            children: [
+              // 댓글 내용
+              Text(
+                controller.commentArrayList[feedIndex].isEmpty
+                    ? ''
+                    : controller.commentArrayList[feedIndex][commentIndex].comment ?? '',
+                style: TextStyleUtils().commentContentTextStyle(),
+              ),
+              SizedBox(width: 10.w),
+              // 답글 버튼
+              InkWell(
+                onTap: () {
+                  controller.isReply = true;
+                  controller.commentController.text =
+                      '@${controller.commentArrayList[feedIndex][commentIndex].userNickname} ';
+                },
+                child: Text(
+                  '답글',
+                  style: TextStyle(
+                    color: Colors.grey[400],
+                    fontSize: 10.sp,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              SizedBox(width: 10.w),
+              // 삭제 버튼
+              InkWell(
+                onTap: () async {
+                  await FeedController.to.deleteComment(
+                    FeedController.to.commentArrayList[feedIndex][commentIndex].feedId ?? '',
+                    FeedController.to.commentArrayList[feedIndex][commentIndex].commentId ?? '',
+                    feedIndex,
+                  );
+                },
+                child: Text(
+                  '삭제',
+                  style: TextStyle(
+                    color: Colors.grey[400],
+                    fontSize: 10.sp,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        // 대댓글
+        controller.commentArrayList[feedIndex][commentIndex].replyCommentList?.isEmpty == true
+            ? Container()
+            : buildReplies(feedIndex, commentIndex),
+      ],
+    );
+  }
+
+  /// 대댓글 내용
+  Widget buildReplies(int feedIndex, int commentIndex) {
+    return ListView.builder(
+      shrinkWrap: true,
+      itemCount: controller.commentArrayList[feedIndex][commentIndex].replyCommentList?.length,
+      itemBuilder: (context, replyIndex) {
+        return Container(
+          margin: EdgeInsets.only(left: 30.w, top: 4.h,),
+          child: Container(
+            margin: EdgeInsets.only(top: 4.h, left: 4.w),
+            child: Column(
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    SizedBox(width: 10.w),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            CachedNetworkImage(
+                              imageUrl: controller.commentArrayList[feedIndex][commentIndex]
+                                  .replyCommentList![0].userPhotoUrl ??
+                                  '',
+                              imageBuilder: (context, imageProvider) => Container(
+                                width: 20.w,
+                                height: 20.h,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  image: DecorationImage(
+                                    image: imageProvider,
+                                    fit: BoxFit.cover,
                                   ),
                                 ),
                               ),
-                            );
-                          },
+                              placeholder: (context, url) => Center(
+                                child: CircularProgressIndicator(
+                                  color: Colors.grey[100],
+                                ),
+                              ),
+                              errorWidget: (context, url, error) => Container(
+                                width: 20.w,
+                                height: 20.h,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.grey[200],
+                                ),
+                                child: Icon(
+                                  Icons.error,
+                                  color: Colors.red,
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: 10.w),
+                            Text(
+                              controller.commentArrayList[feedIndex][commentIndex].replyCommentList![replyIndex].userNickname!,
+                              style: TextStyleUtils().commentTitleTextStyle(),
+                            ),
+                          ],
                         ),
-                      ),
-
-                    ],
-                  ),
-
+                        SizedBox(height: 4.h),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Text(
+                              // timeago
+                              HomeController.to.timeAgo(
+                                DateTime.parse(
+                                  controller.commentArrayList[feedIndex][commentIndex]
+                                      .replyCommentList![replyIndex].createdAt
+                                      .toString(),
+                                ),
+                              ),
+                              style: TextStyleUtils().commentContentTextStyle(),
+                            ),
+                            SizedBox(height: 4.h),
+                            RichText(
+                              text: controller.commentArrayList[feedIndex][commentIndex].replyCommentList?.isEmpty == true
+                                  ? TextSpan()
+                                  : TextSpan(children: [
+                                      TextSpan(
+                                        text: controller
+                                                .commentArrayList[feedIndex][commentIndex]
+                                                .replyCommentList![replyIndex]
+                                                .comment!
+                                                .startsWith('@')
+                                            ? '${controller.commentArrayList[feedIndex][commentIndex].replyCommentList![replyIndex].comment!.split(' ')[0]} '
+                                            : '',
+                                        style: TextStyleUtils().commentContentSetColorTextStyle(Theme.of(Get.context!).colorScheme.secondary),
+                                      ),
+                                      TextSpan(
+                                        text: // 골뱅이 제외 다 보여줌
+                                            controller.commentArrayList[feedIndex][commentIndex]
+                                                    .replyCommentList![replyIndex]
+                                                    .comment!
+                                                    .startsWith('@')
+                                                ? controller
+                                                    .commentArrayList[feedIndex][commentIndex]
+                                                    .replyCommentList![replyIndex]
+                                                    .comment!
+                                                    .split(' ')
+                                                    .sublist(1)
+                                                    .join(' ')
+                                                : controller
+                                                    .commentArrayList[feedIndex][commentIndex]
+                                                    .replyCommentList![replyIndex]
+                                                    .comment!,
+                                        style: TextStyleUtils().commentContentTextStyle(),
+                                      ),
+                                    ]),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
+              ],
+            ),
           ),
-          ),
+        );
+      },
     );
   }
+
+  /// 멘션 유저 리스트
+  Widget feedCommentMentionList() {
+    return SizedBox(
+      width: 1.sw,
+      height: 40.h,
+      child: ListView.builder(
+        shrinkWrap: true,
+        scrollDirection: Axis.horizontal,
+        itemCount: controller.mentionUserList.length,
+        itemBuilder: (context, idx) {
+          return InkWell(
+            onTap: () {
+              controller.commentController.text = controller.commentController.text.replaceAll('@${controller.mentionUserList[idx].nickname}', '');
+              controller.commentController.text = '@${controller.mentionUserList[idx].nickname} ';
+              controller.mentionUserList.clear();
+              controller.isMentionLoading = false;
+            },
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
+              child: Text(
+                '@${controller.mentionUserList[idx].nickname}',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.secondary,
+                  fontSize: 11.sp,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
 }

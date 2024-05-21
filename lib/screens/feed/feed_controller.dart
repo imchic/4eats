@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:cached_video_player_plus/cached_video_player_plus.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dio/dio.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -35,10 +34,11 @@ class FeedController extends GetxController {
     ),
   );
 
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
   final dio.Dio _dio = dio.Dio();
 
-  List<List<CachedVideoPlayerPlusController>> videoControllerList =
-      <List<CachedVideoPlayerPlusController>>[].obs;
+  List<List<CachedVideoPlayerPlusController>> videoControllerList = <List<CachedVideoPlayerPlusController>>[].obs;
   late CachedVideoPlayerPlusController videoController;
   late List<CachedVideoPlayerPlusController> videoControllers;
   late CachedVideoPlayerPlusController videoDetailController;
@@ -56,24 +56,18 @@ class FeedController extends GetxController {
   List<RxInt> durationList = <RxInt>[].obs;
 
   final _feedList = <FeedModel>[].obs;
-
   List<FeedModel> get feedList => _feedList;
-
-  // final _commentList = <CommentModel>[].obs;
-  // List<CommentModel> get commentList => _commentList;
 
   final _commentArrayList = <List<CommentModel>>[].obs;
   List<List<CommentModel>> get commentArrayList => _commentArrayList;
 
-  final _commentReplyArrayList = <List<CommentModel>>[].obs;
+  final _commentReplyArrayList =<List<CommentModel>>[].obs;
   List<List<CommentModel>> get commentReplyArrayList => _commentReplyArrayList;
 
   final _thumbnailList = <String>[].obs;
-
   List<String> get thumbnailList => _thumbnailList;
 
   final _hashTags = <String>[].obs;
-
   List<String> get hashTags => _hashTags;
 
   final _mentionUserList = <UserModel>[].obs;
@@ -87,33 +81,24 @@ class FeedController extends GetxController {
   final _isMuted = false.obs;
 
   bool get isLoading => isVideoLoading.value;
-
   set isLoading(bool value) => isVideoLoading.value = value;
 
   bool get isCommentLoading => _isCommentLoading.value;
-
   set isCommentLoading(bool value) => _isCommentLoading.value = value;
 
   bool get isMuted => _isMuted.value;
-
   set isMuted(bool value) => _isMuted.value = value;
 
   final _isFeedMore = false.obs;
-
   bool get isFeedMore => _isFeedMore.value;
-
   set isFeedMore(bool value) => _isFeedMore.value = value;
 
   final _isFeedBookmark = false.obs;
-
   bool get isFeedBookmark => _isFeedBookmark.value;
-
   set isFeedBookmark(bool value) => _isFeedBookmark.value = value;
 
   final _isFeedLike = false.obs;
-
   bool get isFeedLike => _isFeedLike.value;
-
   set isFeedLike(bool value) => _isFeedLike.value = value;
 
   final _isMentionLoading = false.obs;
@@ -123,6 +108,8 @@ class FeedController extends GetxController {
   final _isReply = false.obs;
   bool get isReply => _isReply.value;
   set isReply(bool value) => _isReply.value = value;
+
+  Timer? _debounce;
 
   @override
   Future<void> onInit() async {
@@ -145,6 +132,7 @@ class FeedController extends GetxController {
 
   /// 피드 목록 가져오기
   Future<void> fetchFeeds() async {
+
     try {
       _feedList.clear();
       isVideoLoading.value = true;
@@ -165,8 +153,7 @@ class FeedController extends GetxController {
 
         // 썸네일
         for (var i = 0; i < _feedList.length; i++) {
-          _thumbnailList.add(_feedList[i].thumbnailUrls![0] ??
-              '');
+          _thumbnailList.add(_feedList[i].thumbnailUrls![0]);
           await fetchComments(feedList[i].seq ?? '', i);
         }
 
@@ -180,7 +167,9 @@ class FeedController extends GetxController {
       }
     } catch (e) {
       _logger.e('fetchFeeds error: $e');
+      isVideoLoading.value = false;
     }
+
   }
 
   /// 메뉴 리스트 스트링으로 변환
@@ -188,12 +177,6 @@ class FeedController extends GetxController {
   /// return: 메뉴 리스트 스트링
   String convertMenuList(String menuInfo) {
     try {
-      // var menuList = '';
-      // menuInfo.trim().replaceAll('[', '').replaceAll(']', '').split(' , ').forEach((element) {
-      //   menuList += '${element.trim()}\n';
-      //   // 마지막 개행 제거
-      // });
-      // menuList = menuList.substring(0, menuList.length - 1);
 
       var menuList = '';
       menuInfo
@@ -201,7 +184,7 @@ class FeedController extends GetxController {
           .replaceAll(']', '')
           .split(', ')
           .forEach((element) {
-        menuList += '${element}\n';
+        menuList += '$element\n';
         // 마지막 개행 제거
       });
       menuList = menuList.substring(0, menuList.length - 1);
@@ -216,6 +199,7 @@ class FeedController extends GetxController {
   /// 네이버 플레이스 컨텍스트 해시태그로 변환
   String convertNaverPlaceContext(String naverPlaceContext) {
     try {
+
       var hashTag = '';
       // 콤마를 # 으로 변환
       naverPlaceContext
@@ -272,27 +256,16 @@ class FeedController extends GetxController {
   }
 
   /// 비디오 플레이어 초기화
-  Future<void> initializeVideoPlayer(
-      List<List<CachedVideoPlayerPlusController>> videoControllerList) async {
+  Future<void> initializeVideoPlayer(List<List<CachedVideoPlayerPlusController>> videoControllerList) async {
     try {
-      videoControllerList[currentFeedIndex.value][currentVideoUrlIndex.value]
-          .initialize()
-          .then((_) {
+      videoControllerList[currentFeedIndex.value][currentVideoUrlIndex.value].initialize().then((_) {
         initializeVideoPlayerFuture =
-            videoControllerList[currentFeedIndex.value]
-                    [currentVideoUrlIndex.value]
-                .play();
-        videoControllerList[currentFeedIndex.value][currentVideoUrlIndex.value]
-            .play();
+            videoControllerList[currentFeedIndex.value][currentVideoUrlIndex.value].play();
         // mute
         if (videoControllerList[currentFeedIndex.value].length == 1) {
-          //videoControllerList[currentFeedIndex.value][currentVideoUrlIndex.value].setVolume(0);
-          videoControllerList[currentFeedIndex.value]
-                  [currentVideoUrlIndex.value]
-              .setLooping(true);
+          videoControllerList[currentFeedIndex.value][currentVideoUrlIndex.value].setLooping(true);
         }
-        videoControllerList[currentFeedIndex.value][currentVideoUrlIndex.value]
-            .addListener(_onVideoPlayerStateChanged);
+        videoControllerList[currentFeedIndex.value][currentVideoUrlIndex.value].addListener(_onVideoPlayerStateChanged);
       });
     } catch (e) {
       _logger.e('_initializeVideoPlayer error: $e');
@@ -302,14 +275,10 @@ class FeedController extends GetxController {
   /// 비디오 플레이어 상태 변경
   _onVideoPlayerStateChanged() {
     try {
-      if (videoControllerList[currentFeedIndex.value]
-              [currentVideoUrlIndex.value]
-          .value
-          .isCompleted) {
+      if (videoControllerList[currentFeedIndex.value][currentVideoUrlIndex.value].value.isCompleted) {
         _logger.e('isCompleted');
 
-        if (currentVideoUrlIndex.value <
-            videoControllerList[currentFeedIndex.value].length - 1) {
+        if (currentVideoUrlIndex.value < videoControllerList[currentFeedIndex.value].length - 1) {
           currentVideoUrlIndex.value++;
           initializeVideoPlayer(videoControllerList);
         } else {
@@ -341,12 +310,6 @@ class FeedController extends GetxController {
   /// 음소거 상태 변경
   Future<void> changeMute(int index) async {
     try {
-      // for (var videoController in videoControllerList) {
-      //   for (var element in videoController) {
-      //     element.setVolume(isMuted ? 0 : 1);
-      //   }
-      // }
-      //
       isMuted = !isMuted;
       videoControllerList[currentFeedIndex.value][currentVideoUrlIndex.value]
           .setVolume(isMuted ? 0 : 1);
@@ -428,15 +391,13 @@ class FeedController extends GetxController {
   /// feedId: 피드 ID
   /// commentId: 댓글 내용
   Future<void> addComment(String feedId, String comment) async {
+
     try {
+
       // 로딩바 보여주기
       _isCommentLoading.value = true;
 
-
-      _logger.d('feedId: $feedId');
-      _logger.d('comment: $comment');
-
-      await FirebaseFirestore.instance
+      await _firestore
           .collection('feeds')
           .where('seq', isEqualTo: feedId)
           .get()
@@ -461,64 +422,63 @@ class FeedController extends GetxController {
             'likeUserIds': [],
             'isReply': _isReply.value,
             'replyCommentId': '',
+            'replyCommentList': [],
           });
         }
       });
 
       // 새로고침
       await refreshComments(feedId, currentFeedIndex.value);
+
     } catch (e) {
       _logger.e('addComment error: $e');
     }
   }
 
   /// 대댓글
-  Future<void> addReplyComment(String comment, String feedId) async {
+  Future<void> addReplyComment(int index, String comment, String feedId) async {
+
     try {
-      // 로딩바 보여주기
-      //_isCommentLoading.value = true;
 
-      _logger.d('feedId: $feedId');
-      _logger.d('comment: $comment');
+      var commentId = _commentArrayList[currentFeedIndex.value][index].commentId;
+      _logger.d('commentId: $commentId');
 
-      await FirebaseFirestore.instance
+      QuerySnapshot<Map<String, dynamic>> feedSnapshot = await _firestore
           .collection('feeds')
           .where('seq', isEqualTo: feedId)
-          .get()
-          .then((value) async {
+          .get();
 
-        for (var i = 0; i < value.docs.length; i++) {
-          value.docs[i].reference.collection('comments').get().then((event) {
-            for (var i = 0; i < event.docs.length; i++) {
-              _logger.d('commentId: ${event.docs[i].data()['commentId']}');
+      for (var i = 0; i < feedSnapshot.docs.length; i++) {
+        feedSnapshot.docs[i].reference.collection('comments').where('commentId', isEqualTo: commentId).get().then((value) {
 
-              var commentId = event.docs[i].data()['commentId'];
-
-              // add reply
-              event.docs[i].reference.collection('reply').add({
-                'comment': comment,
-                'createdAt': Timestamp.now(),
-                'uid': '',
-                'userName': UserStore.to.displayName.value,
-                'userNickname': UserStore.to.nickname.value,
-                'userPhotoUrl': UserStore.to.photoUrl.value,
-                'feedId': feedId,
-                'commentId': commentId,
-                'registerUserId': UserStore.to.id.value,
-                'likeCount': 0,
-                'userId': UserStore.to.id.value,
-                'likeUserIds': [],
-                'isReply': true,
-                'replyCommentId': commentId,
-              });
-
-              // commentId로 댓글 찾기
-
-            }
+          // isReply가 true업데이트
+          value.docs[i].reference.update({
+            'isReply': true,
           });
-        }
 
-      });
+          for (var j = 0; j < value.docs.length; j++) {
+            value.docs[j].reference.collection('reply').add({
+              'comment': comment,
+              'createdAt': Timestamp.now(),
+              'uid': '',
+              'userName': UserStore.to.displayName.value,
+              'userNickname': UserStore.to.nickname.value,
+              'userPhotoUrl': UserStore.to.photoUrl.value,
+              'feedId': feedId,
+              'commentId': commentId,
+              'registerUserId': UserStore.to.id.value,
+              'likeCount': 0,
+              'userId': UserStore.to.id.value,
+              'likeUserIds': [],
+              'isReply': true,
+              'replyCommentId': commentId,
+              'replyCommentList': [],
+            });
+          }
+        });
+      }
+
+      await refreshComments(feedId, currentFeedIndex.value);
 
     } catch (e) {
       _logger.e('addReplyComment error: $e');
@@ -527,84 +487,59 @@ class FeedController extends GetxController {
 
   /// 댓글 새로고침
   Future<void> refreshComments(String feedId, int feedIndex) async {
+
     try {
-      //_commentArrayList[feedIndex].clear();
       _isCommentLoading.value = true;
 
-      // 댓글 조회
-      var tempList = <CommentModel>[];
+      _commentArrayList.clear();
+      _commentReplyArrayList.clear();
 
-      await FirebaseFirestore.instance
-          .collection('feeds')
-          .where('seq', isEqualTo: feedId)
-          .get()
-          .then((value) {
-        for (var i = 0; i < value.docs.length; i++) {
-          value.docs[i].reference.collection('comments').orderBy('createdAt', descending: true).get().then((event) {
-            tempList.clear();
+      await fetchComments(feedId, feedIndex);
 
-            for (var i = 0; i < event.docs.length; i++) {
-              final comment = CommentModel.fromJson(event.docs[i].data());
-              tempList.add(comment);
-            }
+      _isCommentLoading.value = false;
+      commentController.clear();
 
-            _commentArrayList.insert(feedIndex, tempList);
-            _isCommentLoading.value = false;
-          });
-        }
-
-      });
     } catch (e) {
       _logger.e('fetchComments error: $e');
     }
+
   }
 
   /// [FirebaseFirestore] Feed 댓글 조회
   Future<void> fetchComments(String feedId, int feedIndex) async {
     try {
-      // 댓글 조회
-      var tempList = <CommentModel>[];
-      /// 대댓글 조회
-      var tempReplyList = <CommentModel>[];
 
-      FirebaseFirestore.instance
+      QuerySnapshot feedSnapshot = await _firestore
           .collection('feeds')
           .where('seq', isEqualTo: feedId)
-          .get()
-          .then((value) {
+          .get();
 
-        for (var i = 0; i < value.docs.length; i++) {
+      List<CommentModel> comments = [];
 
-          value.docs[i].reference
-              .collection('comments')
-              .orderBy('createdAt', descending: true)
-              .get()
-              .then((event) {
+      for (var i = 0; i < feedSnapshot.docs.length; i++) {
 
-          tempList.clear();
+        QuerySnapshot<Map<String, dynamic>> commentSnapshot = await feedSnapshot.docs[i].reference.collection('comments').orderBy('createdAt', descending: true).get();
 
-            for (var i = 0; i < event.docs.length; i++) {
-              final comment = CommentModel.fromJson(event.docs[i].data());
-              tempList.add(comment);
-              /// 대댓글 조회
-              event.docs[i].reference.collection('reply').orderBy('createdAt', descending: true).get().then((replyEvent) {
-                tempReplyList.clear();
-                for (var i = 0; i < replyEvent.docs.length; i++) {
-                  final replyComment = CommentModel.fromJson(replyEvent.docs[i].data());
-                  tempReplyList.add(replyComment);
-                }
-                tempList[i].replyList = tempReplyList;
-                _commentReplyArrayList.insert(feedIndex, tempReplyList);
-                _logger.d('tempReplyList: $tempReplyList');
-              });
+        for (var j = 0; j < commentSnapshot.docs.length; j++) {
+          comments.add(CommentModel.fromMap(commentSnapshot.docs[j].data()));
+          comments[j].replyCommentList = [];
+
+          if(commentSnapshot.docs[j].data()['isReply'] == true) {
+            QuerySnapshot<Map<String, dynamic>> replySnapshot = await commentSnapshot.docs[j].reference.collection('reply').orderBy('createdAt', descending: true).get();
+            for (var k = 0; k < replySnapshot.docs.length; k++) {
+              comments[j].replyCommentList!.add(CommentModel.fromMap(replySnapshot.docs[k].data()));
             }
+          } else {
+            comments[j].replyCommentList = [];
+          }
 
-            _commentArrayList.insert(feedIndex, tempList);
-            _isCommentLoading.value = false;
-          });
+          //_logger.d('_commentArrayList: ${comments[j].toString()}');
+          _commentArrayList.add(comments);
+
         }
+      }
 
-      });
+
     } catch (e) {
       _logger.e('fetchComments error: $e');
     }
@@ -614,19 +549,30 @@ class FeedController extends GetxController {
   Future<void> deleteComment(
       String feedId, String commentId, int feedIndex) async {
     try {
-      await FirebaseFirestore.instance
+
+      _logger.d('feedId: $feedId');
+      _logger.d('commentId: $commentId');
+      _logger.d('feedIndex: $feedIndex');
+
+      QuerySnapshot<Map<String, dynamic>> feedSnapshot = await _firestore
           .collection('feeds')
-          .doc(feedId)
-          .collection('comments')
-          .where('commentId', isEqualTo: commentId)
-          .snapshots()
-          .listen((value) async {
-        for (var i = 0; i < value.docs.length; i++) {
-          value.docs[i].reference.delete();
-        }
-        await refreshComments(feedId, feedIndex);
-        Get.back();
-      });
+          .where('seq', isEqualTo: feedId)
+          .get();
+
+      _logger.d('feedSnapshot.docs.length: ${feedSnapshot.docs.length}');
+
+      for (var i = 0; i < feedSnapshot.docs.length; i++) {
+        feedSnapshot.docs[i].reference.collection('comments').where('commentId', isEqualTo: commentId).get().then((value) {
+          for (var j = 0; j < value.docs.length; j++) {
+            // _logger.d('value.docs[j].data(): ${value.docs[j].data()}');
+            value.docs[j].reference.delete();
+          }
+        });
+      }
+
+      await refreshComments(feedId, feedIndex);
+      //Get.back();
+
     } catch (e) {
       _logger.e('deleteComment error: $e');
     }
@@ -639,8 +585,7 @@ class FeedController extends GetxController {
       // 자신이 올린 게시물 제외
       if (UserStore.to.id.value ==
           _commentArrayList[feedIndex]
-              .firstWhere((element) => element.commentId == commentId)
-              .userId) {
+              .firstWhere((element) => element.commentId == commentId).userId) {
         GlobalToastController.to.showToast('자신이 작성한 댓글은 좋아요를 누를 수 없습니다.');
         return;
       }
@@ -654,7 +599,7 @@ class FeedController extends GetxController {
         return;
       }
 
-      await FirebaseFirestore.instance
+      await _firestore
           .collection('feeds')
           .doc(feedId)
           .collection('comments')
@@ -681,7 +626,7 @@ class FeedController extends GetxController {
   Future<void> cancelCommentLike(
       String feedId, String commentId, int feedIndex) async {
     try {
-      await FirebaseFirestore.instance
+      await _firestore
           .collection('feeds')
           .doc(feedId)
           .collection('comments')
@@ -705,7 +650,7 @@ class FeedController extends GetxController {
   Future<void> updateComment(
       String feedId, String commentId, String comment, int feedIndex) async {
     try {
-      await FirebaseFirestore.instance
+      await _firestore
           .collection('feeds')
           .doc(feedId)
           .collection('comments')
@@ -730,7 +675,7 @@ class FeedController extends GetxController {
   /// 북마크 여부를 확인하여 북마크 여부를 반환
   Future<void> fetchBookmarks(String feedId) async {
     try {
-      await FirebaseFirestore.instance
+      await _firestore
           .collection('users')
           .doc(UserStore.to.id.value)
           .collection('bookmarks')
@@ -759,7 +704,7 @@ class FeedController extends GetxController {
       var target = _feedList.indexWhere((element) => element.seq == feedId);
 
       // 유저 북마크 추가
-      await FirebaseFirestore.instance
+      await _firestore
           .collection('users')
           .doc(UserStore.to.id.value)
           .collection('bookmarks')
@@ -775,7 +720,8 @@ class FeedController extends GetxController {
         return;
       }
 
-      await FirebaseFirestore.instance.collection('feeds').get().then((value) {
+      await _firestore
+          .collection('feeds').get().then((value) {
         for (var i = 0; i < value.docs.length; i++) {
           if (feed.seq == value.docs[i].data()['seq']) {
             value.docs[i].reference.update({
@@ -801,7 +747,7 @@ class FeedController extends GetxController {
   /// 피드 북마크 삭제
   Future<void> removeBookmark(String feedId) async {
     try {
-      await FirebaseFirestore.instance
+      await _firestore
           .collection('users')
           .doc(UserStore.to.id.value)
           .collection('bookmarks')
@@ -816,7 +762,7 @@ class FeedController extends GetxController {
       var feed = _feedList.firstWhere((element) => element.seq == feedId);
       var target = _feedList.indexWhere((element) => element.seq == feedId);
 
-      await FirebaseFirestore.instance.collection('feeds').get().then((value) {
+      await _firestore.collection('feeds').get().then((value) {
         for (var i = 0; i < value.docs.length; i++) {
           if (feed.seq == value.docs[i].data()['seq']) {
             value.docs[i].reference.update({
@@ -843,7 +789,7 @@ class FeedController extends GetxController {
   /// 좋아요 여부를 확인하여 좋아요 여부를 반환
   Future<void> fetchLikes(String feedId) async {
     try {
-      await FirebaseFirestore.instance
+      await _firestore
           .collection('users')
           .doc(UserStore.to.id.value)
           .collection('likes')
@@ -867,7 +813,7 @@ class FeedController extends GetxController {
   /// 피드 좋아요 추가
   Future<void> addLike(String feedId) async {
     try {
-      await FirebaseFirestore.instance
+      await _firestore
           .collection('users')
           .doc(UserStore.to.id.value)
           .collection('likes')
@@ -887,7 +833,7 @@ class FeedController extends GetxController {
       }
 
       // 피드 좋아요 수 추가
-      await FirebaseFirestore.instance.collection('feeds').get().then((value) {
+      await _firestore.collection('feeds').get().then((value) {
         for (var i = 0; i < value.docs.length; i++) {
           if (feed.seq == value.docs[i].data()['seq']) {
             value.docs[i].reference.update({
@@ -912,7 +858,7 @@ class FeedController extends GetxController {
   /// 피드 좋아요 삭제
   Future<void> removeLike(String feedId) async {
     try {
-      await FirebaseFirestore.instance
+      await _firestore
           .collection('users')
           .doc(UserStore.to.id.value)
           .collection('likes')
@@ -928,7 +874,7 @@ class FeedController extends GetxController {
       var target = _feedList.indexWhere((element) => element.seq == feedId);
 
       // 피드 좋아요 수 추가
-      await FirebaseFirestore.instance.collection('feeds').get().then((value) {
+      await _firestore.collection('feeds').get().then((value) {
         for (var i = 0; i < value.docs.length; i++) {
           if (feed.seq == value.docs[i].data()['seq']) {
             value.docs[i].reference.update({
@@ -1027,7 +973,7 @@ class FeedController extends GetxController {
       _logger.i('userLoginType: $userLoginType');
 
       if (userLoginType == 'kakao') {
-        await FirebaseFirestore.instance
+        await _firestore
             .collection('users')
             .where('id', isEqualTo: feed.userid)
             .get()
@@ -1037,7 +983,7 @@ class FeedController extends GetxController {
           // fcm 발송
         });
       } else if (userLoginType == 'google') {
-        await FirebaseFirestore.instance
+        await _firestore
             .collection('users')
             .where('id', isEqualTo: feed.userid)
             .get()
@@ -1051,7 +997,7 @@ class FeedController extends GetxController {
           // fcm 발송
 
           // add notification
-          await FirebaseFirestore.instance.collection('notifications').add({
+          await _firestore.collection('notifications').add({
             'createdAt': Timestamp.now(),
             'fcmToken': fcmToken,
             'title': type,
@@ -1134,13 +1080,12 @@ class FeedController extends GetxController {
   Future<void> fetchMentionUser(String keyword) async {
     try {
 
-      _mentionUserList.clear();
-
-      // 첫글자가 '@'인 경우
-      if (keyword.startsWith('@')) {
+      if(_debounce?.isActive ?? false) _debounce?.cancel();
+      _debounce = Timer(const Duration(milliseconds: 300), () async {
+        _isMentionLoading.value = true;
 
         // 멘션 유저 조회
-        await FirebaseFirestore.instance
+        await _firestore
             .collection('users')
             .get()
             .then((value) {
@@ -1150,23 +1095,22 @@ class FeedController extends GetxController {
 
           for (var i = 0; i < value.docs.length; i++) {
             var user = UserModel.fromJson(value.docs[i].data());
+            _logger.d('nickname: ${user.nickname}');
             _allUserList.add(user);
           }
 
           if (keyword.length > 1) {
             for (var i = 0; i < _allUserList.length; i++) {
               if (_allUserList[i].nickname!.contains(keyword.substring(1))) {
+                _logger.d('nickname: ${_allUserList[i].nickname}');
                 _mentionUserList.add(_allUserList[i]);
               }
+              _isMentionLoading.value = false;
             }
           }
 
         });
-
-      } else {
-        // _logger.i('isMenion: false');
-      }
-
+      });
 
     } catch (e) {
       _logger.e('fetchMentionUser error: $e');

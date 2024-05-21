@@ -1,66 +1,45 @@
 import 'dart:ui';
 
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+
+import 'colors.dart';
+
 class TextStyleUtils {
-  static TextStyle textStyle({
-    required double fontSize,
-    required Color color,
-    FontWeight? fontWeight,
-  }) {
-    return TextStyle(
-      fontSize: fontSize,
-      color: color,
-      fontWeight: fontWeight,
+
+  /// 댓글 작성자
+  TextStyle commentTitleTextStyle() {
+    return  TextStyle(
+      color: Colors.black,
+      fontSize: 12.sp,
+      fontWeight: FontWeight.bold,
     );
   }
 
-  static TextStyle textStyleWithDecoration({
-    required double fontSize,
-    required Color color,
-    FontWeight? fontWeight,
-    TextDecoration? decoration,
-  }) {
+  /// 댓글 멘션
+  TextStyle commentMentionTextStyle(Color secondary) {
     return TextStyle(
-      fontSize: fontSize,
-      color: color,
-      fontWeight: fontWeight,
-      decoration: decoration,
+      color: secondary,
+      fontSize: 12.sp,
+      fontWeight: FontWeight.bold,
     );
   }
 
-  static TextStyle textStyleWithDecorationAndHeight({
-    required double fontSize,
-    required Color color,
-    FontWeight? fontWeight,
-    TextDecoration? decoration,
-    double? height,
-  }) {
+  // 댓글 내용
+  TextStyle? commentContentTextStyle() {
     return TextStyle(
-      fontSize: fontSize,
-      color: color,
-      fontWeight: fontWeight,
-      decoration: decoration,
-      height: height,
+      color: gray600,
+      fontSize: 11.sp,
+      fontWeight: FontWeight.w400,
     );
   }
 
-  static TextStyle textStyleWithDecorationAndHeightAndLetterSpacing({
-    required double fontSize,
-    required Color color,
-    FontWeight? fontWeight,
-    TextDecoration? decoration,
-    double? height,
-    double? letterSpacing,
-  }) {
+  TextStyle? commentContentSetColorTextStyle(Color color) {
     return TextStyle(
-      fontSize: fontSize,
       color: color,
-      fontWeight: fontWeight,
-      decoration: decoration,
-      height: height,
-      letterSpacing: letterSpacing,
+      fontSize: 12.sp,
+      fontWeight: FontWeight.bold,
     );
   }
-
-
 
 }

@@ -112,9 +112,14 @@ class LoungeController extends GetxController {
   Future<void> getUserProfile() async {
 
     try {
-      final QuerySnapshot<Map<String, dynamic>> result = await FirebaseFirestore.instance.collection('users').get();
-      final List<UserModel> users = result.docs.map((e) => UserModel.fromJson(e.data())).toList();
-      this.users.value = users;
+
+      final QuerySnapshot<Map<String, dynamic>> querySnapshot = await FirebaseFirestore.instance.collection('users').get();
+      final List<UserModel> users = querySnapshot.docs.map((doc) => UserModel.fromJson(doc.data())).toList();
+
+      users.forEach((user) {
+        _logger.i('user: ${user.toJson()}');
+      });
+
     } catch (e) {
       _logger.e('getUserProfile error: $e');
     }

@@ -16,7 +16,8 @@ class CommentModel {
   String? likeCount;
   String? userPhotoUrl;
   List<String>? likeUserIds;
-  List<CommentModel>? replyList;
+  List<CommentModel>? replyCommentList;
+  bool isReply = false;
 
   CommentModel({
     this.commentId,
@@ -31,7 +32,8 @@ class CommentModel {
     this.likeCount,
     this.userPhotoUrl,
     this.likeUserIds,
-    this.replyList,
+    this.replyCommentList,
+    this.isReply = false,
   });
 
   CommentModel.fromJson(Map<String, dynamic> json) {
@@ -47,12 +49,36 @@ class CommentModel {
     likeCount = json['likeCount'].toString();
     userPhotoUrl = json['userPhotoUrl'];
     likeUserIds = List<String>.from(json['likeUserIds']);
-    if (json['replyList'] != null) {
-      replyList = <CommentModel>[];
-      json['replyList'].forEach((v) {
-        replyList!.add(CommentModel.fromJson(v));
+    if (json['replyCommentList'] != null) {
+      replyCommentList = <CommentModel>[];
+      json['replyCommentList'].forEach((v) {
+        replyCommentList!.add(CommentModel.fromJson(v));
       });
     }
+    isReply = json['isReply'];
+  }
+
+  // from map
+  CommentModel.fromMap(Map<Object, dynamic> map) {
+    commentId = map['commentId'];
+    userId = map['userId'];
+    userName = map['userName'];
+    userNickname = map['userNickname'];
+    comment = map['comment'];
+    createdAt = map['createdAt'].toDate();
+    //updatedAt = map['updatedAt'].toDate();
+    feedId = map['feedId'];
+    replyCount = map['replyCount'].toString();
+    likeCount = map['likeCount'].toString();
+    userPhotoUrl = map['userPhotoUrl'];
+    likeUserIds = List<String>.from(map['likeUserIds']);
+    if (map['replyCommentList'] != null) {
+      replyCommentList = <CommentModel>[];
+      map['replyCommentList'].forEach((v) {
+        replyCommentList!.add(CommentModel.fromMap(v));
+      });
+    }
+    isReply = map['isReply'];
   }
 
   Map<String, dynamic> toJson() {
@@ -69,15 +95,16 @@ class CommentModel {
     data['likeCount'] = likeCount;
     data['userPhotoUrl'] = userPhotoUrl;
     data['likeUserIds'] = likeUserIds;
-    if (replyList != null) {
-      data['replyList'] = replyList!.map((v) => v.toJson()).toList();
+    if (replyCommentList != null) {
+      data['replyCommentList'] = replyCommentList!.map((v) => v.toJson()).toList();
     }
+    data['isReply'] = isReply;
     return data;
   }
 
   @override
   String toString() {
-    return 'CommentModel{commentId: $commentId, userId: $userId, userName: $userName, comment: $comment, createdAt: $createdAt, updatedAt: $updatedAt, feedId: $feedId, replyCount: $replyCount, likeCount: $likeCount, userPhotoUrl: $userPhotoUrl}';
+    return toJson().toString().replaceAll(",", ",\n");
   }
 
 }
