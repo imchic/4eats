@@ -5,14 +5,14 @@ class AppLog extends GetxController {
   static AppLog get to => Get.find();
 
   final logger = Logger(
-    printer: PrettyPrinter(
-      methodCount: 0,
-      errorMethodCount: 8,
-      lineLength: 120,
-      colors: true,
-      printEmojis: true,
-      printTime: false,
-    )
+    // printer: PrettyPrinter(
+    //   methodCount: 0,
+    //   errorMethodCount: 8,
+    //   lineLength: 120,
+    //   colors: true,
+    //   printEmojis: true,
+    //   printTime: false,
+    // )
   );
 
   void i(String message) {

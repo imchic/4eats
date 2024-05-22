@@ -768,9 +768,9 @@ class _FeedDetailScreenState extends State<FeedDetailScreen> {
                                         );
                                       },
                                       child: Container(
-                                        padding: EdgeInsets.symmetric(
-                                            horizontal: 10.w, vertical: 10.h),
-                                        child: Row(
+                                        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
+                                        child:
+                                        Row(
                                           crossAxisAlignment: CrossAxisAlignment.center,
                                           children: [
                                             InkWell(

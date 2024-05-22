@@ -1,9 +1,11 @@
 import 'dart:async';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:custom_info_window/custom_info_window.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:foreats/model/store_model.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:dio/dio.dart' as dio;
@@ -18,6 +20,8 @@ import 'package:image/image.dart' as IMG;
 
 class MapController extends GetxController {
   static MapController get to => Get.find();
+
+  final _fireStore = FirebaseFirestore.instance;
 
   late GoogleMapController mapController;
   late TextEditingController searchController;
@@ -151,6 +155,7 @@ class MapController extends GetxController {
   /// latLng: 위경도
   /// model: 맛집 정보
   Future<void> addMarker(LatLng latLng, MapModel? model) async {
+
     WidgetMarker widgetMarker = WidgetMarker(
       markerId: model == null ? 'currentLocation' : model.name!,
       position: latLng,
@@ -239,6 +244,10 @@ class MapController extends GetxController {
   /// page: 페이지
   Future<void> fetchSearchPlace(String value, {required page}) async {
 
+    storeList.clear();
+    containStoreList.clear();
+    markers.clear();
+
     try {
 
       if(value.isEmpty) {
@@ -247,10 +256,6 @@ class MapController extends GetxController {
       }
 
       isSearchLoading.value = true;
-
-      markers.clear();
-      storeList.clear();
-
       LatLng latLng = currentLocation.value;
 
       var searchPlaceUrl =
@@ -334,6 +339,11 @@ class MapController extends GetxController {
           isContain: false,
         );
 
+        if(store.x == null || store.y == null) {
+          AppLog.to.d('x, y 값이 없습니다.');
+          continue;
+        }
+
         if (!foodCategory.contains(store.category?.split(', ').first) ||
             store.category == null) {
           AppLog.to.w('추가되지 않아야하는 카테고리: ${store.category}');
@@ -349,6 +359,8 @@ class MapController extends GetxController {
         return;
       }
 
+      await checkContainsStore();
+
       storeList.removeWhere((element) => foodCategory.contains(element.category));
 
       // sort by distance
@@ -356,14 +368,46 @@ class MapController extends GetxController {
 
       isSearchLoading.value = false;
 
-      // Future.delayed(Duration(milliseconds: 500), () {
-      //   setMarkers();
-      // });
 
     } catch (e) {
       AppLog.to.e('fetchSearchPlace error: $e');
       //GlobalToastto.showToast('검색 결과가 없습니다');
     }
+
+  }
+
+  /// 지도 내 네이버 플레이스 검색해서 마커 표출
+  Future<void> checkContainsStore() async {
+    containStoreList.clear();
+    QuerySnapshot<Map<String, dynamic>> querySnapshot = await _fireStore.collection('stores').get();
+    querySnapshot.docs.forEach((element) {
+      var x = element.data()['x'];
+      var y = element.data()['y'];
+      var totalPoint = element.data()['storePoint'];
+      AppLog.to.d('x: $x, y: $y >> total point >> $totalPoint');
+      containStoreList.add(MapModel(
+        name: element.data()['storeName'],
+        x: double.parse(x.toString()).toString(),
+        y: double.parse(y.toString()).toString(),
+        totalPoint: int.parse(totalPoint.toString()).toString(),
+        isContain: true,
+      ));
+    });
+
+    for (var i = 0; i < storeList.length; i++) {
+      for (var j = 0; j < containStoreList.length; j++) {
+        if(storeList[i].name == containStoreList[j].name) {
+          AppLog.to.d('storeList[i].name: ${storeList[i].name}, containStoreList[j].name: ${containStoreList[j].name}');
+          storeList[i].isContain = true;
+          storeList[i].totalPoint = containStoreList[j].totalPoint;
+        } else {
+          storeList[i].isContain = false;
+          storeList[i].totalPoint = '0';
+        }
+      }
+    }
+
+    await setMarkers();
 
   }
 
@@ -375,6 +419,7 @@ class MapController extends GetxController {
     for (var i = 0; i < storeList.length; i++) {
       await addMarker(LatLng(double.parse(storeList[i].y!), double.parse(storeList[i].x!)), storeList[i]);
     }
+
   }
 
 

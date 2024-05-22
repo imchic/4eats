@@ -261,7 +261,7 @@ class LoungeScreen extends GetView<LoungeController> {
               width: 100.w,
               height: 150.h,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(6),
+                borderRadius: BorderRadius.circular(6.r),
               ),
               child: Stack(
                 children: [
@@ -383,18 +383,6 @@ class LoungeScreen extends GetView<LoungeController> {
   randomColor() {
     // get pastel color
     final random = Random();
-
-    // Color(0xffFFC0CB),
-    // Color(0xffFFB6C1),
-    // Color(0xffFF69B4),
-    // Color(0xffFF1493),
-    // Color(0xffDB7093),
-    // Color(0xffC71585),
-    // Color(0xffFFA07A),
-    // Color(0xffFA8072),
-    // Color(0xffE9967A),
-    // Color(0xffF08080),
-    // Color(0xffCD5C5C),
 
     final pastelColors = [
       Color(0xffFFC0CB),

@@ -116,8 +116,7 @@ class MapScreen extends GetView<MapController> {
                   alignment: Alignment.center,
                   padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary.withOpacity(0.75),
-                    // color: CupertinoColors.activeBlue.withOpacity(0.75),
+                    color: store.isContain == true ? Colors.pink.withOpacity(0.75) : Theme.of(context).colorScheme.secondary.withOpacity(0.75),
                     borderRadius: BorderRadius.circular(10.r),
                     boxShadow: [
                       BoxShadow(
@@ -136,7 +135,7 @@ class MapScreen extends GetView<MapController> {
                         'assets/images/ic_coins.svg',
                       ),
                       SizedBox(width: 5.w),
-                      Text(store.totalPoint ?? '0포인트',
+                      Text('${store.totalPoint} 포인트' ?? '0 포인트',
                           style: TextStyle(
                               color: Colors.white,
                               fontSize: 14.sp,

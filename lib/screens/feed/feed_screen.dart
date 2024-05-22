@@ -14,6 +14,7 @@ import 'package:lottie/lottie.dart';
 import '../../home/home_controller.dart';
 import '../../utils/app_routes.dart';
 import '../../utils/colors.dart';
+import '../../utils/logger.dart';
 import '../../widget/description_text.dart';
 import '../../widget/login_bottom_sheet.dart';
 import '../login/user_store.dart';
@@ -26,6 +27,9 @@ class FeedScreen extends GetView<FeedController> {
 
   @override
   Widget build(BuildContext context) {
+
+    Get.put(AppLog());
+
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
       statusBarIconBrightness: Brightness.light,
@@ -882,10 +886,7 @@ class FeedScreen extends GetView<FeedController> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      SizedBox(height: 4.h),
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Text(
                             controller.commentArrayList[feedIndex].isEmpty
@@ -927,7 +928,6 @@ class FeedScreen extends GetView<FeedController> {
                   ),
                 ],
               ),
-              SizedBox(height: 4.h),
               // 댓글 내용
               feedCommentsItem(feedIndex, commentIndex),
             ],
@@ -946,49 +946,176 @@ class FeedScreen extends GetView<FeedController> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          margin: EdgeInsets.only(left: 40.w, top: 4.h,),
+          margin: EdgeInsets.only(left: 40.w),
           child: Row(
             children: [
-              // 댓글 내용
-              Text(
-                controller.commentArrayList[feedIndex].isEmpty
-                    ? ''
-                    : controller.commentArrayList[feedIndex][commentIndex].comment ?? '',
-                style: TextStyleUtils().commentContentTextStyle(),
+              Row(
+                children: [
+                  // 댓글 내용
+                  Text(
+                    controller.commentArrayList[feedIndex].isEmpty
+                        ? ''
+                        : controller.commentArrayList[feedIndex][commentIndex].comment ?? '',
+                    style: TextStyleUtils().commentContentTextStyle(),
+                  ),
+                  SizedBox(width: 10.w),
+                  // 답글 버튼
+                  InkWell(
+                    onTap: () {
+                      controller.isReply = true;
+                      controller.commentController.text =
+                          '@${controller.commentArrayList[feedIndex][commentIndex].userNickname} ';
+                    },
+                    child: Text(
+                      '답글',
+                      style: TextStyle(
+                        color: Colors.grey[400],
+                        fontSize: 10.sp,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  //SizedBox(width: 10.w),
+                  // 삭제 버튼
+                  /*InkWell(
+                    onTap: () async {
+                      await FeedController.to.deleteComment(
+                        FeedController.to.commentArrayList[feedIndex][commentIndex].feedId ?? '',
+                        FeedController.to.commentArrayList[feedIndex][commentIndex].commentId ?? '',
+                        feedIndex,
+                      );
+                    },
+                    child: Text(
+                      '삭제',
+                      style: TextStyle(
+                        color: Colors.grey[400],
+                        fontSize: 10.sp,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),*/
+                ],
               ),
-              SizedBox(width: 10.w),
-              // 답글 버튼
+              Spacer(),
               InkWell(
                 onTap: () {
-                  controller.isReply = true;
-                  controller.commentController.text =
-                      '@${controller.commentArrayList[feedIndex][commentIndex].userNickname} ';
-                },
-                child: Text(
-                  '답글',
-                  style: TextStyle(
-                    color: Colors.grey[400],
-                    fontSize: 10.sp,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-              SizedBox(width: 10.w),
-              // 삭제 버튼
-              InkWell(
-                onTap: () async {
-                  await FeedController.to.deleteComment(
-                    FeedController.to.commentArrayList[feedIndex][commentIndex].feedId ?? '',
-                    FeedController.to.commentArrayList[feedIndex][commentIndex].commentId ?? '',
-                    feedIndex,
+                  Get.bottomSheet(
+                    Container(
+                      width: 1.sw,
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 10.w),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(20.r),
+                          topRight: Radius.circular(20.r),
+                        ),
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          ListTile(
+                            onTap: () async {
+                              // 댓글 삭제
+                              //_logger.d('feedIndex: $feedIndex');
+                              await FeedController.to.deleteComment(
+                                FeedController.to.commentArrayList[feedIndex][commentIndex].feedId ?? '',
+                                FeedController.to.commentArrayList[feedIndex][commentIndex].commentId ?? '',
+                                feedIndex,
+                              );
+                            },
+                            title: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  '삭제',
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 12.sp,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                SvgPicture.asset(
+                                  'assets/images/ic_delete.svg',
+                                  color: gray500,
+                                  width: 16.w,
+                                  height: 16.h,
+                                ),
+                              ],
+                            ),
+                          ),
+                          ListTile(
+                            onTap: () {
+                              Get.back();
+                            },
+                            title: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  '신고하기',
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 12.sp,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                Icon(
+                                  Icons.report_gmailerrorred_outlined,
+                                  color: Colors.red,
+                                  size: 16.w,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    backgroundColor: Colors.transparent,
+                    isScrollControlled: true,
                   );
                 },
-                child: Text(
-                  '삭제',
-                  style: TextStyle(
-                    color: Colors.grey[400],
-                    fontSize: 10.sp,
-                    fontWeight: FontWeight.w600,
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
+                  child:
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      InkWell(
+                        onTap: () {
+                          //_logger.d('feedIndex: $feedIndex');
+                          // 댓글 좋아요
+                          FeedController.to.addCommentLike(
+                              FeedController.to.commentArrayList[feedIndex][commentIndex].feedId ?? '',
+                              FeedController.to.commentArrayList[feedIndex][commentIndex].commentId ?? '',
+                              feedIndex);
+                        },
+                        child: Icon(
+                          Icons.thumb_up_alt_outlined,
+                          color: Theme.of(Get.context!).colorScheme.secondary,
+                          size: 14.w,
+                        ),
+                      ),
+                      SizedBox(width: 2.w),
+                      Text(
+                        FeedController.to.commentArrayList[feedIndex].isEmpty
+                            ? ''
+                            : FeedController.to.commentArrayList[feedIndex][commentIndex].likeCount.toString() ?? '',
+                        style: TextStyle(
+                          color: gray500,
+                          fontSize: 10.sp,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      SizedBox(width: 5.w),
+                      Icon(
+                        Icons.more_vert_outlined,
+                        color: gray500,
+                        size: 14.w,
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -1010,115 +1137,111 @@ class FeedScreen extends GetView<FeedController> {
       itemCount: controller.commentArrayList[feedIndex][commentIndex].replyCommentList?.length,
       itemBuilder: (context, replyIndex) {
         return Container(
-          margin: EdgeInsets.only(left: 30.w, top: 4.h,),
+          margin: EdgeInsets.only(left: 20.w, top: 4.h,),
           child: Container(
             margin: EdgeInsets.only(top: 4.h, left: 4.w),
             child: Column(
               children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SizedBox(width: 10.w),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    Row(
                       children: [
-                        Row(
-                          children: [
-                            CachedNetworkImage(
-                              imageUrl: controller.commentArrayList[feedIndex][commentIndex]
-                                  .replyCommentList![0].userPhotoUrl ??
-                                  '',
-                              imageBuilder: (context, imageProvider) => Container(
-                                width: 20.w,
-                                height: 20.h,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  image: DecorationImage(
-                                    image: imageProvider,
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                              ),
-                              placeholder: (context, url) => Center(
-                                child: CircularProgressIndicator(
-                                  color: Colors.grey[100],
-                                ),
-                              ),
-                              errorWidget: (context, url, error) => Container(
-                                width: 20.w,
-                                height: 20.h,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: Colors.grey[200],
-                                ),
-                                child: Icon(
-                                  Icons.error,
-                                  color: Colors.red,
-                                ),
+                        CachedNetworkImage(
+                          imageUrl: controller.commentArrayList[feedIndex][commentIndex]
+                              .replyCommentList![0].userPhotoUrl ??
+                              '',
+                          imageBuilder: (context, imageProvider) => Container(
+                            width: 20.w,
+                            height: 20.h,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              image: DecorationImage(
+                                image: imageProvider,
+                                fit: BoxFit.cover,
                               ),
                             ),
-                            SizedBox(width: 10.w),
-                            Text(
-                              controller.commentArrayList[feedIndex][commentIndex].replyCommentList![replyIndex].userNickname!,
-                              style: TextStyleUtils().commentTitleTextStyle(),
+                          ),
+                          placeholder: (context, url) => Center(
+                            child: CircularProgressIndicator(
+                              color: Colors.grey[100],
                             ),
-                          ],
+                          ),
+                          errorWidget: (context, url, error) => Container(
+                            width: 20.w,
+                            height: 20.h,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.grey[200],
+                            ),
+                            child: Icon(
+                              Icons.error,
+                              color: Colors.red,
+                            ),
+                          ),
                         ),
-                        SizedBox(height: 4.h),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            Text(
-                              // timeago
-                              HomeController.to.timeAgo(
-                                DateTime.parse(
-                                  controller.commentArrayList[feedIndex][commentIndex]
-                                      .replyCommentList![replyIndex].createdAt
-                                      .toString(),
-                                ),
-                              ),
-                              style: TextStyleUtils().commentContentTextStyle(),
-                            ),
-                            SizedBox(height: 4.h),
-                            RichText(
-                              text: controller.commentArrayList[feedIndex][commentIndex].replyCommentList?.isEmpty == true
-                                  ? TextSpan()
-                                  : TextSpan(children: [
-                                      TextSpan(
-                                        text: controller
-                                                .commentArrayList[feedIndex][commentIndex]
-                                                .replyCommentList![replyIndex]
-                                                .comment!
-                                                .startsWith('@')
-                                            ? '${controller.commentArrayList[feedIndex][commentIndex].replyCommentList![replyIndex].comment!.split(' ')[0]} '
-                                            : '',
-                                        style: TextStyleUtils().commentContentSetColorTextStyle(Theme.of(Get.context!).colorScheme.secondary),
-                                      ),
-                                      TextSpan(
-                                        text: // 골뱅이 제외 다 보여줌
-                                            controller.commentArrayList[feedIndex][commentIndex]
-                                                    .replyCommentList![replyIndex]
-                                                    .comment!
-                                                    .startsWith('@')
-                                                ? controller
-                                                    .commentArrayList[feedIndex][commentIndex]
-                                                    .replyCommentList![replyIndex]
-                                                    .comment!
-                                                    .split(' ')
-                                                    .sublist(1)
-                                                    .join(' ')
-                                                : controller
-                                                    .commentArrayList[feedIndex][commentIndex]
-                                                    .replyCommentList![replyIndex]
-                                                    .comment!,
-                                        style: TextStyleUtils().commentContentTextStyle(),
-                                      ),
-                                    ]),
-                            ),
-                          ],
+                        SizedBox(width: 10.w),
+                        Text(
+                          controller.commentArrayList[feedIndex][commentIndex].replyCommentList![replyIndex].userNickname!,
+                          style: TextStyleUtils().commentTitleTextStyle(),
                         ),
                       ],
+                    ),
+                    Container(
+                      margin: EdgeInsets.only(left: 30.w),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Text(
+                            // timeago
+                            HomeController.to.timeAgo(
+                              DateTime.parse(
+                                controller.commentArrayList[feedIndex][commentIndex]
+                                    .replyCommentList![replyIndex].createdAt
+                                    .toString(),
+                              ),
+                            ),
+                            style: TextStyleUtils().commentContentTextStyle(),
+                          ),
+                          SizedBox(height: 10.h),
+                          RichText(
+                            text: controller.commentArrayList[feedIndex][commentIndex].replyCommentList?.isEmpty == true
+                                ? TextSpan()
+                                : TextSpan(children: [
+                                    TextSpan(
+                                      text: controller
+                                              .commentArrayList[feedIndex][commentIndex]
+                                              .replyCommentList![replyIndex]
+                                              .comment!
+                                              .startsWith('@')
+                                          ? '${controller.commentArrayList[feedIndex][commentIndex].replyCommentList![replyIndex].comment!.split(' ')[0]} '
+                                          : '',
+                                      style: TextStyleUtils().commentContentSetColorTextStyle(Theme.of(Get.context!).colorScheme.secondary),
+                                    ),
+                                    TextSpan(
+                                      text: // 골뱅이 제외 다 보여줌
+                                          controller.commentArrayList[feedIndex][commentIndex]
+                                                  .replyCommentList![replyIndex]
+                                                  .comment!
+                                                  .startsWith('@')
+                                              ? controller
+                                                  .commentArrayList[feedIndex][commentIndex]
+                                                  .replyCommentList![replyIndex]
+                                                  .comment!
+                                                  .split(' ')
+                                                  .sublist(1)
+                                                  .join(' ')
+                                              : controller
+                                                  .commentArrayList[feedIndex][commentIndex]
+                                                  .replyCommentList![replyIndex]
+                                                  .comment!,
+                                      style: TextStyleUtils().commentContentTextStyle(),
+                                    ),
+                                  ]),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),

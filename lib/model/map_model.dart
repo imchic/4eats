@@ -1,18 +1,18 @@
 
 class MapModel {
-  final String? name;
-  final String? tel;
-  final String? status;
-  final String? category;
-  final String? address;
-  final String? roadAddress;
-  final String? x;
-  final String? y;
-  final String? thumbnail;
-  final String? distance;
-  final String? totalPoint;
-  final List<String>? menuInfo;
-  final List<String>? contextInfo;
+  String? name;
+  String? tel;
+  String? status;
+  String? category;
+  String? address;
+  String? roadAddress;
+  String? x;
+  String? y;
+  String? thumbnail;
+  String? distance;
+  String? totalPoint;
+  List<String>? menuInfo;
+  List<String>? contextInfo;
   bool? isItemSelect = false;
   bool? isContain = false;
 
