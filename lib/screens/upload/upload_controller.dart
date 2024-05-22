@@ -24,6 +24,7 @@ class UploadController extends GetxController {
   static UploadController get to => Get.find();
 
   final _logger = Logger();
+  final _firestore = FirebaseFirestore.instance;
 
   late googlemap.GoogleMapController mapController;
   late CachedVideoPlayerPlusController videoController;
@@ -195,23 +196,7 @@ class UploadController extends GetxController {
     }
   }
 
-  /// 동영상 썸네일 생성
-  // Future<Uint8List> getThumbnail(String downloadUrl) async {
-  //   try {
-  //     final Uint8List? thumbnail = await VideoThumbnail.thumbnailData(
-  //       video: uploadFile.value.path,
-  //       imageFormat: ImageFormat.WEBP,
-  //       maxWidth: 128,
-  //       quality: 75,
-  //     );
-  //     //print('thumbnail: $thumbnail');
-  //     return thumbnail!;
-  //   } catch (e) {
-  //     _logger.e('getThumbnail error: $e');
-  //     return Uint8List(0);
-  //   }
-  // }
-
+  /// 동영상 썸네일 다운로드
   thumbnailDownload(String videoUrl) async {
     try {
       final thumbnail = await VideoThumbnail.thumbnailFile(
@@ -313,7 +298,7 @@ class UploadController extends GetxController {
         thumbnailDownloadUrls.add(thumbnailDownloadUrl);
       }
 
-      var doc = FirebaseFirestore.instance.collection('feeds').doc();
+      var doc = _firestore.collection('feeds').doc();
       // _logger.i('uploadVideo > storeName: ${MapController.to.storeContext}');
 
       var model = FeedModel(
@@ -323,7 +308,7 @@ class UploadController extends GetxController {
         storeType: MapController.to.storeCategory.value,
         storeMenuInfo: MapController.to.storeMenuInfo.value,
         storeContext: MapController.to.storeContext.value,
-        storeLontlat: '${MapController.to.currentLocation.value.latitude}, ${MapController.to.currentLocation.value.longitude}',
+        storeLonlat: '${MapController.to.currentLocation.value.latitude}, ${MapController.to.currentLocation.value.longitude}',
         videoUrls: videoUrls,
         videoPaths: videoPath,
         thumbnailUrls: thumbnailDownloadUrls,
@@ -340,30 +325,73 @@ class UploadController extends GetxController {
         comments: [],
       );
 
-      await FirebaseFirestore.instance.collection('feeds').add(model.toJson());
+      await _firestore.collection('feeds').add(model.toJson());
 
       // 가게 정보 등록
-      await FirebaseFirestore.instance.collection('stores').doc(storeNameController.text).set({
-        'storeName': storeNameController.text,
-        'storeAddress': MapController.to.searchAddress.value,
-        'storeType': MapController.to.storeCategory.value,
-        'storeMenuInfo': MapController.to.storeMenuInfo.value,
-        'storeContext': MapController.to.storeContext.value,
-        'storeLontlat': '${MapController.to.currentLocation.value.latitude}, ${MapController.to.currentLocation.value.longitude}',
-        'storePoint': 0,
-        'videoUrls': videoUrls,
-        'videoPaths': videoPath,
-        'thumbnailUrls': thumbnailDownloadUrls,
-        'description': storeDescription,
-        'hashTags': selectedHashtagStringList,
-        'profilePhoto': UserStore.to.userProfile.photoUrl,
-        'user': UserStore.to.userProfile.id,
-        'uid': UserStore.to.userProfile.uid,
-        'createdAt': DateTime.now().toString(),
-        'likeCount': 0,
-        'bookmarkCount': 0,
-        'point': 0,
-      });
+      // 중복된 가게가 있을 경우
+
+      QuerySnapshot<Map<String, dynamic>> querySnapshot = await _firestore.collection('stores').where('storeName', isEqualTo: storeNameController.text).get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        _logger.i('storeName: ${querySnapshot.docs[0]['storeName']}');
+
+        var originVideoUrls = querySnapshot.docs[0]['videoUrls'];
+        var originVideoPaths = querySnapshot.docs[0]['videoPaths'];
+        var originThumbnailUrls = querySnapshot.docs[0]['thumbnailUrls'];
+
+        // 기존 데이터 새로운 영상 추가
+        originVideoUrls.addAll(videoUrls);
+        originVideoPaths.addAll(videoPath);
+        originThumbnailUrls.addAll(thumbnailDownloadUrls);
+
+        _logger.i('기존가게: ${storeNameController.text}');
+
+        await _firestore.collection('stores').doc(storeNameController.text).update({
+          'storeName': storeNameController.text,
+          'storeAddress': MapController.to.searchAddress.value,
+          'storeType': MapController.to.storeCategory.value,
+          'storeMenuInfo': MapController.to.storeMenuInfo.value,
+          'storeContext': MapController.to.storeContext.value,
+          'storeLonlat': '${MapController.to.currentLocation.value.latitude}, ${MapController.to.currentLocation.value.longitude}',
+          'storePoint': 0,
+          'videoUrls': originVideoUrls,
+          'videoPaths': originVideoPaths,
+          'thumbnailUrls': originThumbnailUrls,
+          'description': storeDescription,
+          'hashTags': selectedHashtagStringList,
+          'profilePhoto': UserStore.to.userProfile.photoUrl,
+          'user': UserStore.to.userProfile.id,
+          'uid': UserStore.to.userProfile.uid,
+          'createdAt': DateTime.now().toString(),
+          'likeCount': 0,
+          'bookmarkCount': 0,
+          'point': 0,
+        });
+      } else {
+        _logger.i('신규가게: ${storeNameController.text}');
+        await _firestore.collection('stores').doc(storeNameController.text).set({
+          'storeName': storeNameController.text,
+          'storeAddress': MapController.to.searchAddress.value,
+          'storeType': MapController.to.storeCategory.value,
+          'storeMenuInfo': MapController.to.storeMenuInfo.value,
+          'storeContext': MapController.to.storeContext.value,
+          'storeLonlat': '${MapController.to.currentLocation.value.latitude}, ${MapController.to.currentLocation.value.longitude}',
+          'storePoint': 0,
+          'videoUrls': videoUrls,
+          'videoPaths': videoPath,
+          'thumbnailUrls': thumbnailDownloadUrls,
+          'description': storeDescription,
+          'hashTags': selectedHashtagStringList,
+          'profilePhoto': UserStore.to.userProfile.photoUrl,
+          'user': UserStore.to.userProfile.id,
+          'uid': UserStore.to.userProfile.uid,
+          'createdAt': DateTime.now().toString(),
+          'likeCount': 0,
+          'bookmarkCount': 0,
+          'point': 0,
+        });
+
+      }
 
       isUploadLoading.value = false;
       Get.offAllNamed(AppRoutes.uploadDone);

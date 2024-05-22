@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:foreats/screens/upload/upload_controller.dart';
+import 'package:foreats/utils/logger.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:logger/logger.dart';
@@ -23,6 +24,7 @@ class UploadRegisterScreen extends GetView<UploadController> {
     Get.put(GlobalToastController());
     Get.put(UploadController());
     Get.put(MapController());
+    Get.put(AppLog());
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.background,

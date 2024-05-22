@@ -9,7 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart';
 import 'package:kakao_flutter_sdk/kakao_flutter_sdk_share.dart';
-import 'package:logger/logger.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 import '../../model/comment_model.dart';
 import '../../model/feed_model.dart';
@@ -18,21 +17,14 @@ import '../../utils/app_routes.dart';
 import '../../utils/global_toast_controller.dart';
 import 'package:dio/dio.dart' as dio;
 
+import '../../utils/logger.dart';
 import '../login/user_store.dart';
 import '../lounge/lounge_controller.dart';
 import 'feed_service.dart';
 
 class FeedController extends GetxController {
   static FeedController get to => Get.find();
-  final Logger _logger = Logger(
-    filter: null, // Use the default LogFilter (-> only log in debug mode)
-    printer: PrettyPrinter(
-      lineLength: 120,
-      colors: true,
-      printEmojis: true,
-      printTime: false, // Should each log print contain a timestamp
-    ),
-  );
+  
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
@@ -166,7 +158,7 @@ class FeedController extends GetxController {
         isVideoLoading.value = false;
       }
     } catch (e) {
-      _logger.e('fetchFeeds error: $e');
+      AppLog.to.e('fetchFeeds error: $e');
       isVideoLoading.value = false;
     }
 
@@ -191,7 +183,7 @@ class FeedController extends GetxController {
 
       return menuList;
     } catch (e) {
-      _logger.e('convertMenuList error: $e');
+      AppLog.to.e('convertMenuList error: $e');
       return '';
     }
   }
@@ -217,7 +209,7 @@ class FeedController extends GetxController {
 
       return hashTag;
     } catch (e) {
-      _logger.e('convertNaverPlaceContext error: $e');
+      AppLog.to.e('convertNaverPlaceContext error: $e');
       return '';
     }
   }
@@ -238,7 +230,7 @@ class FeedController extends GetxController {
 
       await initializeVideoPlayer(videoControllerList);
     } catch (e) {
-      _logger.e('getFeedVideoList error: $e');
+      AppLog.to.e('getFeedVideoList error: $e');
     }
   }
 
@@ -251,7 +243,7 @@ class FeedController extends GetxController {
         }
       }
     } catch (e) {
-      _logger.e('disposeVideoPlayer error: $e');
+      AppLog.to.e('disposeVideoPlayer error: $e');
     }
   }
 
@@ -268,7 +260,7 @@ class FeedController extends GetxController {
         videoControllerList[currentFeedIndex.value][currentVideoUrlIndex.value].addListener(_onVideoPlayerStateChanged);
       });
     } catch (e) {
-      _logger.e('_initializeVideoPlayer error: $e');
+      AppLog.to.e('_initializeVideoPlayer error: $e');
     }
   }
 
@@ -276,7 +268,7 @@ class FeedController extends GetxController {
   _onVideoPlayerStateChanged() {
     try {
       if (videoControllerList[currentFeedIndex.value][currentVideoUrlIndex.value].value.isCompleted) {
-        _logger.e('isCompleted');
+        AppLog.to.e('isCompleted');
 
         if (currentVideoUrlIndex.value < videoControllerList[currentFeedIndex.value].length - 1) {
           currentVideoUrlIndex.value++;
@@ -285,10 +277,10 @@ class FeedController extends GetxController {
           currentVideoUrlIndex.value = 0;
           initializeVideoPlayer(videoControllerList);
         }
-        _logger.d('currentVideoUrlIndex: ${currentVideoUrlIndex.value}');
+        AppLog.to.d('currentVideoUrlIndex: ${currentVideoUrlIndex.value}');
       }
     } catch (e) {
-      _logger.e('_onVideoPlayerStateChanged error: $e');
+      AppLog.to.e('_onVideoPlayerStateChanged error: $e');
     }
   }
 
@@ -303,7 +295,7 @@ class FeedController extends GetxController {
       );
       return thumbnail;
     } catch (e) {
-      _logger.e('thumbnailDownload error: $e');
+      AppLog.to.e('thumbnailDownload error: $e');
     }
   }
 
@@ -314,7 +306,7 @@ class FeedController extends GetxController {
       videoControllerList[currentFeedIndex.value][currentVideoUrlIndex.value]
           .setVolume(isMuted ? 0 : 1);
     } catch (e) {
-      _logger.e('changeMute error: $e');
+      AppLog.to.e('changeMute error: $e');
     }
   }
 
@@ -324,7 +316,7 @@ class FeedController extends GetxController {
       videoControllerList[currentFeedIndex.value][currentVideoUrlIndex.value]
           .play();
     } catch (e) {
-      _logger.e('recentPlay error: $e');
+      AppLog.to.e('recentPlay error: $e');
     }
   }
 
@@ -348,7 +340,7 @@ class FeedController extends GetxController {
         videoControllerList[feedIndex][videoIndex].pause();
       }
     } catch (e) {
-      _logger.e('currentPause error: $e');
+      AppLog.to.e('currentPause error: $e');
     }
   }
 
@@ -361,7 +353,7 @@ class FeedController extends GetxController {
         }
       }
     } catch (e) {
-      _logger.e('allPause error: $e');
+      AppLog.to.e('allPause error: $e');
     }
   }
 
@@ -375,7 +367,7 @@ class FeedController extends GetxController {
       }
       isMuted = !isMuted;
     } catch (e) {
-      _logger.e('allMute error: $e');
+      AppLog.to.e('allMute error: $e');
     }
   }
 
@@ -431,7 +423,7 @@ class FeedController extends GetxController {
       await refreshComments(feedId, currentFeedIndex.value);
 
     } catch (e) {
-      _logger.e('addComment error: $e');
+      AppLog.to.e('addComment error: $e');
     }
   }
 
@@ -441,7 +433,7 @@ class FeedController extends GetxController {
     try {
 
       var commentId = _commentArrayList[currentFeedIndex.value][index].commentId;
-      _logger.d('commentId: $commentId');
+      AppLog.to.d('commentId: $commentId');
 
       QuerySnapshot<Map<String, dynamic>> feedSnapshot = await _firestore
           .collection('feeds')
@@ -481,7 +473,7 @@ class FeedController extends GetxController {
       await refreshComments(feedId, currentFeedIndex.value);
 
     } catch (e) {
-      _logger.e('addReplyComment error: $e');
+      AppLog.to.e('addReplyComment error: $e');
     }
   }
 
@@ -500,7 +492,7 @@ class FeedController extends GetxController {
       commentController.clear();
 
     } catch (e) {
-      _logger.e('fetchComments error: $e');
+      AppLog.to.e('fetchComments error: $e');
     }
 
   }
@@ -533,7 +525,7 @@ class FeedController extends GetxController {
             comments[j].replyCommentList = [];
           }
 
-          //_logger.d('_commentArrayList: ${comments[j].toString()}');
+          //AppLog.to.d('_commentArrayList: ${comments[j].toString()}');
           _commentArrayList.add(comments);
 
         }
@@ -541,7 +533,7 @@ class FeedController extends GetxController {
 
 
     } catch (e) {
-      _logger.e('fetchComments error: $e');
+      AppLog.to.e('fetchComments error: $e');
     }
   }
 
@@ -550,21 +542,21 @@ class FeedController extends GetxController {
       String feedId, String commentId, int feedIndex) async {
     try {
 
-      _logger.d('feedId: $feedId');
-      _logger.d('commentId: $commentId');
-      _logger.d('feedIndex: $feedIndex');
+      AppLog.to.d('feedId: $feedId');
+      AppLog.to.d('commentId: $commentId');
+      AppLog.to.d('feedIndex: $feedIndex');
 
       QuerySnapshot<Map<String, dynamic>> feedSnapshot = await _firestore
           .collection('feeds')
           .where('seq', isEqualTo: feedId)
           .get();
 
-      _logger.d('feedSnapshot.docs.length: ${feedSnapshot.docs.length}');
+      AppLog.to.d('feedSnapshot.docs.length: ${feedSnapshot.docs.length}');
 
       for (var i = 0; i < feedSnapshot.docs.length; i++) {
         feedSnapshot.docs[i].reference.collection('comments').where('commentId', isEqualTo: commentId).get().then((value) {
           for (var j = 0; j < value.docs.length; j++) {
-            // _logger.d('value.docs[j].data(): ${value.docs[j].data()}');
+            // AppLog.to.d('value.docs[j].data(): ${value.docs[j].data()}');
             value.docs[j].reference.delete();
           }
         });
@@ -574,7 +566,7 @@ class FeedController extends GetxController {
       //Get.back();
 
     } catch (e) {
-      _logger.e('deleteComment error: $e');
+      AppLog.to.e('deleteComment error: $e');
     }
   }
 
@@ -615,7 +607,7 @@ class FeedController extends GetxController {
         await refreshComments(feedId, feedIndex);
       });
     } catch (e) {
-      _logger.e('likeComment error: $e');
+      AppLog.to.e('likeComment error: $e');
     }
   }
 
@@ -642,7 +634,7 @@ class FeedController extends GetxController {
         await refreshComments(feedId, feedIndex);
       });
     } catch (e) {
-      _logger.e('cancelCommentLike error: $e');
+      AppLog.to.e('cancelCommentLike error: $e');
     }
   }
 
@@ -665,7 +657,7 @@ class FeedController extends GetxController {
         await refreshComments(feedId, feedIndex);
       });
     } catch (e) {
-      _logger.e('updateComment error: $e');
+      AppLog.to.e('updateComment error: $e');
     }
   }
 
@@ -689,10 +681,10 @@ class FeedController extends GetxController {
           FeedController.to.feedList[currentFeedIndex.value].isBookmark = false;
           isFeedBookmark = false;
         }
-        // _logger.d('isFeedBookmark: $isFeedBookmark');
+        // AppLog.to.d('isFeedBookmark: $isFeedBookmark');
       });
     } catch (e) {
-      _logger.e('fetchBookmarks error: $e');
+      AppLog.to.e('fetchBookmarks error: $e');
     }
   }
 
@@ -729,7 +721,7 @@ class FeedController extends GetxController {
             });
             _feedList[target].bookmarkCount =
                 value.docs[i].data()['bookmarkCount'] + 1;
-            _logger.d('add bookmarkCount: ${_feedList[target].bookmarkCount}');
+            AppLog.to.d('add bookmarkCount: ${_feedList[target].bookmarkCount}');
           }
         }
       });
@@ -740,7 +732,7 @@ class FeedController extends GetxController {
       fetchBookmarks(feedId);
       GlobalToastController.to.showToast('북마크에 추가되었습니다.');
     } catch (e) {
-      _logger.e('addBookmark error: $e');
+      AppLog.to.e('addBookmark error: $e');
     }
   }
 
@@ -770,7 +762,7 @@ class FeedController extends GetxController {
             });
             _feedList[target].bookmarkCount =
                 value.docs[i].data()['bookmarkCount'] - 1;
-            _logger
+            AppLog.to
                 .d('remove bookmarkCount: ${_feedList[target].bookmarkCount}');
           }
         }
@@ -779,7 +771,7 @@ class FeedController extends GetxController {
       fetchBookmarks(feedId);
       GlobalToastController.to.showToast('북마크에서 삭제되었습니다.');
     } catch (e) {
-      _logger.e('deleteBookmark error: $e');
+      AppLog.to.e('deleteBookmark error: $e');
     }
   }
 
@@ -803,10 +795,10 @@ class FeedController extends GetxController {
           FeedController.to.feedList[currentFeedIndex.value].isLike = false;
           isFeedLike = false;
         }
-        // _logger.d('isLike: ${FeedController.to.feedList[currentFeedIndex.value].isLike}');
+        // AppLog.to.d('isLike: ${FeedController.to.feedList[currentFeedIndex.value].isLike}');
       });
     } catch (e) {
-      _logger.e('fetchLikes error: $e');
+      AppLog.to.e('fetchLikes error: $e');
     }
   }
 
@@ -840,7 +832,7 @@ class FeedController extends GetxController {
               'likeCount': FieldValue.increment(1),
             });
             _feedList[target].likeCount = value.docs[i].data()['likeCount'] + 1;
-            _logger.d('add likeCount: ${_feedList[target].likeCount}');
+            AppLog.to.d('add likeCount: ${_feedList[target].likeCount}');
           }
         }
       });
@@ -851,7 +843,7 @@ class FeedController extends GetxController {
       fetchLikes(feedId);
       GlobalToastController.to.showToast('좋아요를 눌렀습니다.');
     } catch (e) {
-      _logger.e('addLike error: $e');
+      AppLog.to.e('addLike error: $e');
     }
   }
 
@@ -881,7 +873,7 @@ class FeedController extends GetxController {
               'likeCount': FieldValue.increment(-1),
             });
             _feedList[target].likeCount = value.docs[i].data()['likeCount'] - 1;
-            _logger.d('remove likeCount: ${_feedList[target].likeCount}');
+            AppLog.to.d('remove likeCount: ${_feedList[target].likeCount}');
           }
         }
       });
@@ -889,7 +881,7 @@ class FeedController extends GetxController {
       fetchLikes(feedId);
       GlobalToastController.to.showToast('좋아요를 취소했습니다.');
     } catch (e) {
-      _logger.e('removeLike error: $e');
+      AppLog.to.e('removeLike error: $e');
     }
   }
 
@@ -942,22 +934,22 @@ class FeedController extends GetxController {
 
 
       if (isKakaoTalkSharingAvailable) {
-        _logger.i('카카오톡으로 공유 가능');
+        AppLog.to.i('카카오톡으로 공유 가능');
         try {
           Uri uri =
           await ShareClient.instance.shareDefault(template: locationTemplate);
           await ShareClient.instance.launchKakaoTalk(uri);
-          print('카카오톡 공유 완료');
+          AppLog.to.i('카카오톡 공유 완료');
         } catch (error) {
-          print('카카오톡 공유 실패 $error');
+          AppLog.to.w('카카오톡 공유 실패 $error');
         }
       } else {
-        _logger.t('카카오톡 미설치: 웹 공유 기능 사용 권장');
+        AppLog.to.e('카카오톡 미설치: 웹 공유 기능 사용 권장');
       }
 
 
     } catch (e) {
-      _logger.e('shareFeed error: $e');
+      AppLog.to.e('shareFeed error: $e');
     }
   }
 
@@ -970,7 +962,7 @@ class FeedController extends GetxController {
       // var fcmToken = UserStore.to.userProfile.fcmToken;
 
       var userLoginType = UserStore.to.loginType.value;
-      _logger.i('userLoginType: $userLoginType');
+      AppLog.to.i('userLoginType: $userLoginType');
 
       if (userLoginType == 'kakao') {
         await _firestore
@@ -979,7 +971,7 @@ class FeedController extends GetxController {
             .get()
             .then((value) {
           var fcmToken = value.docs.first.data()['fcmToken'];
-          _logger.i('fcmToken: $fcmToken');
+          AppLog.to.i('fcmToken: $fcmToken');
           // fcm 발송
         });
       } else if (userLoginType == 'google') {
@@ -993,7 +985,7 @@ class FeedController extends GetxController {
           //var fcmToken = UserStore.to.userProfile.fcmToken ?? '';
           var fcmToken = value.docs.first.data()['fcmToken'];
           var nickname = value.docs.first.data()['nickname'];
-          _logger.i('fcmToken: $fcmToken , nickname: $nickname');
+          AppLog.to.i('fcmToken: $fcmToken , nickname: $nickname');
           // fcm 발송
 
           // add notification
@@ -1014,7 +1006,7 @@ class FeedController extends GetxController {
 
       }
     } catch (e) {
-      _logger.e('sendFcm error: $e');
+      AppLog.to.e('sendFcm error: $e');
     }
   }
 
@@ -1033,12 +1025,12 @@ class FeedController extends GetxController {
       );
 
       if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-        _logger.i('User granted permission');
+        AppLog.to.i('User granted permission');
       } else {
-        _logger.i('User declined or has not accepted permission');
+        AppLog.to.i('User declined or has not accepted permission');
       }
 
-      _logger.i('fcmToken: $fcmToken');
+      AppLog.to.i('fcmToken: $fcmToken');
 
       var serverKey = 'AAAAhVt3-CA:APA91bH8odnRSBoVaw07OtnuE5S0co8jch1-GUrkyhT2qivrGbFffjLxLf7FXpMJedQq4aIv4-uXfVbD5_0iPIEBfVfnVpu5SfxOq7TWdyD_9igmKkcDcLKrn5sGogQW7Q5H0ClDFpzu';
 
@@ -1062,17 +1054,17 @@ class FeedController extends GetxController {
       );
 
       if (response.statusCode == 200) {
-        _logger.i('sendPushMessage success');
+        AppLog.to.i('sendPushMessage success');
 
         var result = response.data;
-        _logger.i('sendPushMessage result: $result');
+        AppLog.to.i('sendPushMessage result: $result');
 
       } else {
-        _logger.e('sendPushMessage error: ${response.statusCode}');
+        AppLog.to.e('sendPushMessage error: ${response.statusCode}');
       }
 
     } catch (e) {
-      _logger.e('sendPushMessage error: $e');
+      AppLog.to.e('sendPushMessage error: $e');
     }
   }
 
@@ -1095,14 +1087,14 @@ class FeedController extends GetxController {
 
           for (var i = 0; i < value.docs.length; i++) {
             var user = UserModel.fromJson(value.docs[i].data());
-            _logger.d('nickname: ${user.nickname}');
+            AppLog.to.d('nickname: ${user.nickname}');
             _allUserList.add(user);
           }
 
           if (keyword.length > 1) {
             for (var i = 0; i < _allUserList.length; i++) {
               if (_allUserList[i].nickname!.contains(keyword.substring(1))) {
-                _logger.d('nickname: ${_allUserList[i].nickname}');
+                AppLog.to.d('nickname: ${_allUserList[i].nickname}');
                 _mentionUserList.add(_allUserList[i]);
               }
               _isMentionLoading.value = false;
@@ -1113,7 +1105,7 @@ class FeedController extends GetxController {
       });
 
     } catch (e) {
-      _logger.e('fetchMentionUser error: $e');
+      AppLog.to.e('fetchMentionUser error: $e');
     }
   }
 

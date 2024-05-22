@@ -10,7 +10,7 @@ class FeedModel {
   String? storeType;
   String? storeMenuInfo;
   String? storeContext;
-  String? storeLontlat;
+  String? storeLonlat;
   List<String>? videoUrls;
   List<String>? videoPaths;
   List<String>? thumbnailUrls;
@@ -36,7 +36,7 @@ class FeedModel {
     this.storeType,
     this.storeMenuInfo,
     this.storeContext,
-    this.storeLontlat,
+    this.storeLonlat,
     this.videoUrls,
     this.videoPaths,
     this.thumbnailUrls,
@@ -63,7 +63,7 @@ class FeedModel {
         storeType: json["storeType"],
         storeMenuInfo: json["storeMenuInfo"],
         storeContext: json["storeContext"],
-        storeLontlat: json["storeLontlat"],
+        storeLonlat: json["storeLonlat"],
         videoUrls: List<String>.from(json["videoUrls"].map((x) => x)),
         videoPaths: List<String>.from(json["videoPaths"].map((x) => x)),
         thumbnailUrls: List<String>.from(json["thumbnailUrls"].map((x) => x)),
@@ -90,7 +90,7 @@ class FeedModel {
         "storeType": storeType,
         "storeMenuInfo": storeMenuInfo,
         "storeContext": storeContext,
-        "storeLontlat": storeLontlat,
+        "storeLonlat": storeLonlat,
         "videoUrls": List<dynamic>.from(videoUrls!.map((x) => x)),
         "videoPaths": List<dynamic>.from(videoPaths!.map((x) => x)),
         "thumbnailUrls": List<dynamic>.from(thumbnailUrls!.map((x) => x)),

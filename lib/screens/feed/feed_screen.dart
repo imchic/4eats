@@ -71,8 +71,7 @@ class FeedScreen extends GetView<FeedController> {
                 controller.currentFeedIndex.value = index;
                 controller.allPause();
                 controller.allMute();
-                controller
-                    .initializeVideoPlayer(controller.videoControllerList);
+                controller.initializeVideoPlayer(controller.videoControllerList);
                 controller.fetchLikes(controller.feedList[index].seq ?? '');
                 controller.fetchBookmarks(controller.feedList[index].seq ?? '');
               },
@@ -80,9 +79,7 @@ class FeedScreen extends GetView<FeedController> {
                 return Obx(
                   () => Stack(
                     children: [
-                      CachedVideoPlayerPlus(controller.videoControllerList[
-                              controller.currentFeedIndex.value]
-                          [controller.currentVideoUrlIndex.value]),
+                      CachedVideoPlayerPlus(controller.videoControllerList[controller.currentFeedIndex.value][controller.currentVideoUrlIndex.value]),
                       _topMenu(context, index),
                       _feedInfo(context, index),
                       _indicator(context),
@@ -138,9 +135,9 @@ class FeedScreen extends GetView<FeedController> {
                         'storeAddress': controller.feedList[index].storeAddress,
                         'storeType': controller.feedList[index].storeType,
                         'lonlat': [
-                          double.parse(controller.feedList[index].storeLontlat!
+                          double.parse(controller.feedList[index].storeLonlat!
                               .split(',')[0]),
-                          double.parse(controller.feedList[index].storeLontlat!
+                          double.parse(controller.feedList[index].storeLonlat!
                               .split(',')[1])
                         ]
                       });
@@ -437,29 +434,42 @@ class FeedScreen extends GetView<FeedController> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                // 밑줄에 맞춤
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    controller.feedList[index].storeName ?? '',
-                    style: TextStyle(
-                      color: Colors.cyan[500],
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w800,
+              InkWell(
+                onTap: () {
+                  Get.toNamed(AppRoutes.store, arguments: {
+                    'storeName': controller.feedList[index].storeName,
+                    'storeAddress': controller.feedList[index].storeAddress,
+                    'storeType': controller.feedList[index].storeType,
+                    'lonlat': [
+                      double.parse(controller.feedList[index].storeLonlat!.split(',')[0]),
+                      double.parse(controller.feedList[index].storeLonlat!.split(',')[1])
+                    ]
+                  });
+                },
+                child: Row(
+                  // 밑줄에 맞춤
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      controller.feedList[index].storeName ?? '',
+                      style: TextStyle(
+                        color: Colors.cyan[500],
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
-                  ),
-                  SizedBox(width: 5.w),
-                  Text(
-                    controller.feedList[index].storeType ?? '',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 10.sp,
-                      fontWeight: FontWeight.w600,
-                      height: 2.0,
+                    SizedBox(width: 5.w),
+                    Text(
+                      controller.feedList[index].storeType ?? '',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 10.sp,
+                        fontWeight: FontWeight.w600,
+                        height: 2.0,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
               SizedBox(height: 2.h),
               Text(
@@ -625,7 +635,7 @@ class FeedScreen extends GetView<FeedController> {
     );
   }
 
-  // 댓글 시트
+  /// 댓글 시트
   _commentSheet(BuildContext context, int feedIndex) {
     return Obx(
       () => controller.isCommentLoading

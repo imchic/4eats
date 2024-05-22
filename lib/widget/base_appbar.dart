@@ -34,12 +34,16 @@ class BaseAppBar extends GetWidget implements PreferredSizeWidget {
       shadowColor: Colors.transparent,
       title: Container(
         margin: EdgeInsets.only(left: 10.w),
-        child: Text(
-          title,
-          style: TextStyle(
-            color: gray800,
-            fontSize: 16.sp,
-            fontWeight: FontWeight.w700,
+        child: Container(
+          margin: EdgeInsets.only(top: 4.w),
+          child: Text(
+            textAlign: TextAlign.center,
+            title,
+            style: TextStyle(
+              color: gray800,
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ),
       ),
@@ -48,7 +52,7 @@ class BaseAppBar extends GetWidget implements PreferredSizeWidget {
           ? Container(
               padding: EdgeInsets.only(left: 10.w),
               child: IconButton(
-                icon: Icon(Icons.arrow_back_ios, color: gray800, size: 16.sp),
+                icon: Icon(Icons.arrow_back_ios, color: gray800, size: 14.sp),
                 onPressed: () {
                   print('leading');
                   if (callback != null) {
