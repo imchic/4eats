@@ -273,9 +273,8 @@ class _RegisterGenderScreen extends State<RegisterGenderScreen> {
                     LoginController.to.userModel.value.gender = genderValue;
                     _logger.t('사용자 정보: ${LoginController.to.userModel.value.toString()}');
                     UserStore.to.setFirebaseUser(LoginController.to.userModel.value);
-                    Get.offNamed(AppRoutes.home);
+                    Get.offAndToNamed(AppRoutes.home);
                     HomeController.to.moveToPage(0);
-                    Get.back();
                   }
                 },
                 child: Container(

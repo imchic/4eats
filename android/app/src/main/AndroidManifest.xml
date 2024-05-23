@@ -48,7 +48,7 @@
                 <!-- 카카오 로그인 Redirect URI -->
                 <data
                     android:host="oauth"
-                    android:scheme="kakaod00ccef3ef78e88b2fadabeba96a69b6" />
+                    android:scheme="kakao1ea71cd66f79092d09fca8a3008c615d" />
             </intent-filter>
         </activity>
 

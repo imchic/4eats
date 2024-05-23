@@ -38,6 +38,7 @@ class UserStore extends GetxController {
   RxString photoUrl = ''.obs;
   RxString displayName = ''.obs;
   RxString emailAddress = ''.obs;
+  RxString fcmToken = ''.obs;
 
   @override
   Future<void> onInit() async {
@@ -138,6 +139,7 @@ class UserStore extends GetxController {
           await FirebaseFirestore.instance
               .collection('users')
               .add(userModel.toJson());
+
           UserStore.to.setSharedPref(userModel);
           UserStore.to.setLoginStatus(true);
           UserStore.to.getUserProfile();
@@ -165,6 +167,7 @@ class UserStore extends GetxController {
       photoUrl.value = prefs.getString('profileImage') ?? '';
       emailAddress.value = prefs.getString('email') ?? '';
       loginType.value = prefs.getString('loginType') ?? '';
+      fcmToken.value = prefs.getString('fcmToken') ?? '';
 
       userProfile = UserModel(
         id: id.value,
@@ -210,6 +213,7 @@ class UserStore extends GetxController {
       prefs.remove('nickname');
       prefs.remove('profileImage');
       prefs.remove('loginType');
+      prefs.remove('fcmToken');
     });
   }
 
@@ -223,6 +227,7 @@ class UserStore extends GetxController {
       prefs.setString('nickname', userModel.nickname ?? '');
       prefs.setString('profileImage', userModel.photoUrl ?? '');
       prefs.setString('loginType', userModel.loginType ?? '');
+      prefs.setString('fcmToken', userModel.fcmToken ?? '');
     });
     userProfile = userModel;
   }

@@ -645,7 +645,6 @@ class FeedScreen extends GetView<FeedController> {
       () => controller.isCommentLoading
           ? Container(
               width: Get.width,
-              height: 0.25.sh,
               color: Colors.white,
               child: Center(
                 child: CircularProgressIndicator(
@@ -697,9 +696,9 @@ class FeedScreen extends GetView<FeedController> {
                               children: [
                                 SizedBox(
                                   width: Get.width,
-                                  // height: controller.commentArrayList[feedIndex].length < 10
-                                  //     ? 0.4.sh
-                                  //     : 0.8.sh,
+                                  height: controller.commentArrayList[feedIndex].length < 10
+                                      ? 0.4.sh
+                                      : 0.3.sh,
                                   child: Obx(
                                     () => RefreshIndicator(
                                       onRefresh: () async {

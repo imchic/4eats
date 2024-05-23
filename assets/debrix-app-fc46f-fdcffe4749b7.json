@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "debrix-app-fc46f",
+  "private_key_id": "fdcffe4749b71f6c7264f3f8bed6264e84fc024b",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC/GJfH6keLKj61\nvsO0xjEIuFB35Xum80zMJzCaYlvhigawFJUtoiNwAnkv0OQINaYtRz3t35UzpqNy\noUVgGn4obp4YT/xL5SnP6XQNdx1XnwEg3gjY6ZR5OZ0ki93hgePgFTWxSGN4I9UH\nPi/HjdnXdeln+krQprlkbdpJ5n8PCuWaOUi/tgYpV0ey426lbvHqpUJGr63HrDrz\ny1EY/X8OIFgl7DwUi6T3xv/2Nfu3kECRdnzrZKvGGEvi611qWwWffbMmSFY6PrOG\nLOjK/tj762gRcg8ZsJpF0v0vKtYroLYhZ/HYZrNSv1sQTGrsqS1o8z0tHDzWHFWF\nBXGkd48TAgMBAAECggEATTjPcRqD4cFnCQO3S1CB1R/CaMkEAHG2OZOmqOSRc6FW\n1YXjyMaKIoPlXATCeWzQo+BzrrIYtYAj8bko806RZ55X5cRA1JydGmchHiXh5hwb\nlSAUnC878AbvsSqSNcRLBS0c/vCdPZnhRqWDIlV40ABWm02COTH+ng5kVVO/SaCt\novIuQbUhDXCNO+saqCKt6geaJvqPr3qS2AaSF1Zb4ISGJc0UuYbPSsyS4Am58zRP\nxs+2lne/78OEeynWQSmjknyugP7k+fpsNw0a4sx8Ww5K+Fqt6HZX43hqID8C3yOs\npRO/Tfk3DP2mwKY6hRXEd0zIoPtNo2fAsWGKShnWTQKBgQD+lNq+bUd9I6OOawnG\nT0Tx30L4QtmEB6OiXHKaRt0pEPJEZyBMF3W8JLL8uzxkH/7NqfbmIrhhm4cMLrLO\noEpD5PeQRADYZMq0BzZbW/aBpZj2aa/bJUoCff4Mk3WYKbZ+x20wAJS3cEpS8N0G\nPWR0KoHlT5NGY8xQ8zg1oXv+rQKBgQDAKS4jguP5f/J2OaRmWzTogTjUBDnbGpwr\neJu0upqG2BnENQE5JJKN+BFkLukLHGpuPTNlBP9qtAdf6l53IECH2FKxGVrDAzl3\nVJyMnO4MDNE84pFImwcUpyRWtnuJm15V/JfwU5zd6XVgmyfP302GPRAYWsYDtPGv\n98tfOtQ8vwKBgDJX/Wnq8lgs1As135j31AqAvB2cGqehWxqgbYlUuieE0mP0gM6L\nVRz/pOWVoTurmBfTpJ+d/hhPSUV/dpyl1gnXHZ3J1OD2DZ/MTVODvBunQ7h27e/I\nT/puL+8MuhR9Kzmm9lCnzMD507jTKOIzAcp3HXjbY6Rn19+qOVNhu8OBAoGAMSdX\nggXtQtkTsGI2R2h1NDQ50SHzmrRH1mbXjXdeJ7gHf0T/txo/0sjtye6l9g2iu+gz\nyVdp7mV2rXZKC7bYSudu35ZYvSGKBZhDI0TRL4vnyec6upPNT98hUH0FRMHVc7FV\nPEhnC+y39ao6mNXKAtiD0XcGx9P1Lsn337gwqgkCgYEAkC8YI62jib8sx7EitctJ\nLBmsUO5tlE96ysQTH4R1dRK0BiAMV6/F62tbOMK0iK4+Mvi+ZwZp/PWCe2XrY9mQ\n1kqVMdty93ntEncriXCNF9ws+EFXhwdjrOTzFGFbqEx3ndE0beeYxHh1LB+ixLSt\n1jza/m2Mtxyizd4M2iAdY/Q=\n-----END PRIVATE KEY-----\n",
+  "client_email": "debrix-app-fc46f@appspot.gserviceaccount.com",
+  "client_id": "111604579711176413461",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/debrix-app-fc46f%40appspot.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

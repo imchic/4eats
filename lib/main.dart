@@ -30,7 +30,7 @@ Future<void> main() async {
   // 가로모드 대응
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
-  KakaoSdk.init(nativeAppKey: 'd00ccef3ef78e88b2fadabeba96a69b6');
+  KakaoSdk.init(nativeAppKey: '1ea71cd66f79092d09fca8a3008c615d');
 
   Get.put(UserStore());
   Get.put(LocationService());

@@ -64,7 +64,7 @@ class LoungeController extends GetxController {
   void onInit() {
     super.onInit();
     searchController = TextEditingController();
-    getUserProfile();
+    //getUserProfile();
   }
 
   Future<void> getFeedList() async {

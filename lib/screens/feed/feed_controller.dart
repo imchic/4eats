@@ -1,12 +1,16 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:cached_video_player_plus/cached_video_player_plus.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:dio/dio.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:googleapis_auth/auth.dart';
+import 'package:googleapis_auth/auth_io.dart';
 import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart';
 import 'package:kakao_flutter_sdk/kakao_flutter_sdk_share.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
@@ -21,6 +25,10 @@ import '../../utils/logger.dart';
 import '../login/user_store.dart';
 import '../lounge/lounge_controller.dart';
 import 'feed_service.dart';
+
+// http
+import 'package:http/http.dart' as http;
+
 
 class FeedController extends GetxController {
   static FeedController get to => Get.find();
@@ -419,8 +427,8 @@ class FeedController extends GetxController {
         }
       });
 
-      // 새로고침
-      await refreshComments(feedId, currentFeedIndex.value);
+      // fcm 발송
+      await sendFcm(feedId, comment, '댓글');
 
     } catch (e) {
       AppLog.to.e('addComment error: $e');
@@ -604,6 +612,7 @@ class FeedController extends GetxController {
             'likeUserIds': FieldValue.arrayUnion([UserStore.to.id.value]),
           });
         }
+
         await refreshComments(feedId, feedIndex);
       });
     } catch (e) {
@@ -956,7 +965,7 @@ class FeedController extends GetxController {
   /// 푸시메세지 발송
   Future<void> sendFcm(String feedId, String comment, String type) async {
     try {
-      UserStore.to.getUserProfile();
+      //UserStore.to.getUserProfile();
 
       var feed = _feedList.firstWhere((element) => element.seq == feedId);
       // var fcmToken = UserStore.to.userProfile.fcmToken;
@@ -1004,11 +1013,15 @@ class FeedController extends GetxController {
 
         });
 
+        // 새로고침
+        await refreshComments(feedId, currentFeedIndex.value);
+
       }
     } catch (e) {
       AppLog.to.e('sendFcm error: $e');
     }
   }
+
 
   /// 푸시메세지 발송
   /// fcmToken: FCM 토큰
@@ -1032,35 +1045,56 @@ class FeedController extends GetxController {
 
       AppLog.to.i('fcmToken: $fcmToken');
 
-      var serverKey = 'AAAAhVt3-CA:APA91bH8odnRSBoVaw07OtnuE5S0co8jch1-GUrkyhT2qivrGbFffjLxLf7FXpMJedQq4aIv4-uXfVbD5_0iPIEBfVfnVpu5SfxOq7TWdyD_9igmKkcDcLKrn5sGogQW7Q5H0ClDFpzu';
+      // get assets
+      final accountCredentials = ServiceAccountCredentials.fromJson(
+        jsonDecode(await rootBundle.loadString('assets/debrix-app-fc46f-fdcffe4749b7.json')),
+      );
 
-      var response = await _dio.post(
-        'https://fcm.googleapis.com/fcm/send',
-        data: {
+      const scope = 'https://www.googleapis.com/auth/firebase.messaging';
+      final client = await obtainAccessCredentialsViaServiceAccount(
+        accountCredentials,
+        [scope],
+        http.Client(),
+      );
+
+      final accessToken = client.accessToken.data;
+      AppLog.to.i('accessToken: $accessToken');
+
+      final message = {
+        // 토큰 값 사용
+        'message' : {
+          'token': 'fLDzYBDWRBuSdMssaPpWxp:APA91bHJB-9EqiPm02vio0BaDRBwF94B7fvpqIzsFiDj1RU9bYBAD0Xgv3F26YMGd4BSBgSSDifOsbSkdA3t_Zhof1sSWIV1UetuWoeeF-j0YGpHq6yo9Pwu5t8VnJbRBA8QGcD0zI-x',
+          //'token': fcmToken,
           'notification': {
             'title': title,
             'body': comment,
+          },
+          'data': {
             'click_action': 'FLUTTER_NOTIFICATION_CLICK',
+            'sound': 'default',
+            'status': 'done',
           },
-          'to': fcmToken,
-          // 'to': 'fzszAKebRd2WhIZHwEDX_1:APA91bFxelF9eQtAm1fuRWKuZmh0dVljiXkg5zgU9tm1sCRtrY3USUj44zKMsgd0AUHqLN2hAphkULIoCPICfHhktHUZjNYoKr99540pWxP-tpte_otXAW9X4_uW5dHedZuc-CdXb1zv',
         },
-        options: Options(
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'key=$serverKey',
-          },
-        ),
+
+      };
+
+      // fLDzYBDWRBuSdMssaPpWxp:APA91bHJB-9EqiPm02vio0BaDRBwF94B7fvpqIzsFiDj1RU9bYBAD0Xgv3F26YMGd4BSBgSSDifOsbSkdA3t_Zhof1sSWIV1UetuWoeeF-j0YGpHq6yo9Pwu5t8VnJbRBA8QGcD0zI-x
+
+      final response = await http.post(
+        Uri.parse('https://fcm.googleapis.com/v1/projects/debrix-app-fc46f/messages:send'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+        body: jsonEncode(message),
       );
 
       if (response.statusCode == 200) {
-        AppLog.to.i('sendPushMessage success');
-
-        var result = response.data;
-        AppLog.to.i('sendPushMessage result: $result');
+        AppLog.to.i('Message sent successfully');
 
       } else {
-        AppLog.to.e('sendPushMessage error: ${response.statusCode}');
+        AppLog.to.e('Error sending message: ${response.statusCode}');
+        AppLog.to.e('Response body: ${response.body}');
       }
 
     } catch (e) {
