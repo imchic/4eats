@@ -30,7 +30,7 @@ class BizScreen extends GetView<BizController> {
           child: Column(
             children: [
               Obx(
-                () => UserStore.to.id.value.isEmpty
+                () => UserStore.to.userProfile.id == null
                     ? Center(
                       child: Text(
                           '로그인이 필요한 서비스입니다',

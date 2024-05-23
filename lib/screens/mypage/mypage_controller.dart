@@ -27,7 +27,6 @@ class MyPageController extends GetxController with GetSingleTickerProviderStateM
   void onInit() {
     super.onInit();
     //tabController = TabController(length: tabs.length, vsync: this);
-    UserStore.to.getUserProfile();
   }
 
   Future<void> getMyFeeds() async {

@@ -16,8 +16,6 @@ class UploadRegisterScreen extends GetView<UploadController> {
 
   UploadRegisterScreen({super.key});
 
-  final _logger = Logger();
-
   @override
   Widget build(BuildContext context) {
 

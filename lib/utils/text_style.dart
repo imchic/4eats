@@ -35,11 +35,11 @@ class TextStyleUtils {
   }
 
   // 흰색
-  TextStyle whiteTextStyle() {
+  TextStyle whiteTextStyle({required double fontSize, required FontWeight fontWeight}) {
     return TextStyle(
       color: Colors.white,
-      fontSize: 12.sp,
-      fontWeight: FontWeight.w400,
+      fontSize: fontSize.sp,
+      fontWeight: fontWeight,
     );
   }
 

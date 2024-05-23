@@ -139,9 +139,9 @@ class FeedScreen extends GetView<FeedController> {
                         'storeAddress': controller.feedList[index].storeAddress,
                         'storeType': controller.feedList[index].storeType,
                         'lonlat': [
-                          double.parse(controller.feedList[index].storeLonlat!
+                          double.parse(controller.feedList[index].storeLngLat!
                               .split(',')[0]),
-                          double.parse(controller.feedList[index].storeLonlat!
+                          double.parse(controller.feedList[index].storeLngLat!
                               .split(',')[1])
                         ]
                       });
@@ -231,7 +231,7 @@ class FeedScreen extends GetView<FeedController> {
             Container(
                 padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.5),
+                  color: Colors.black.withOpacity(0.25),
                   borderRadius: BorderRadius.circular(10.r),
                 ),
                 child: Column(
@@ -275,7 +275,7 @@ class FeedScreen extends GetView<FeedController> {
                       child: Obx(
                         () => CachedNetworkImage(
                           imageUrl:
-                              controller.feedList[index].profilePhoto ?? '',
+                              controller.feedList[index].userProfilePhoto ?? '',
                           imageBuilder: (context, imageProvider) => Container(
                             width: 40.w,
                             height: 40.h,
@@ -317,22 +317,18 @@ class FeedScreen extends GetView<FeedController> {
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         Text(
-                          controller.feedList[index].usernickname ?? '',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 14.sp,
-                            fontWeight: FontWeight.w700,
-                            height: 0,
+                          controller.feedList[index].userNickname ?? '',
+                          style: TextStyleUtils().whiteTextStyle(
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.w800,
                           ),
                         ),
                         SizedBox(height: 2.h),
                         Text(
                           '@${controller.feedList[index].userid ?? ''}',
-                          style: TextStyle(
-                            color: gray500,
-                            fontSize: 12.sp,
+                          style: TextStyleUtils().whiteTextStyle(
+                            fontSize: 10.sp,
                             fontWeight: FontWeight.w400,
-                            height: 0,
                           ),
                         ),
                       ],
@@ -396,8 +392,7 @@ class FeedScreen extends GetView<FeedController> {
               InkWell(
                 onTap: () {
                   // 공유
-                  controller
-                      .shareFeed(FeedController.to.feedList[index].seq ?? '');
+                  controller.shareFeed(FeedController.to.feedList[index].seq ?? '');
                 },
                 child: Container(
                   padding: EdgeInsets.only(top: 4.h),
@@ -445,8 +440,8 @@ class FeedScreen extends GetView<FeedController> {
                     'storeAddress': controller.feedList[index].storeAddress,
                     'storeType': controller.feedList[index].storeType,
                     'lonlat': [
-                      double.parse(controller.feedList[index].storeLonlat!.split(',')[0]),
-                      double.parse(controller.feedList[index].storeLonlat!.split(',')[1])
+                      double.parse(controller.feedList[index].storeLngLat!.split(',')[0]),
+                      double.parse(controller.feedList[index].storeLngLat!.split(',')[1])
                     ]
                   });
                 },
@@ -1001,6 +996,7 @@ class FeedScreen extends GetView<FeedController> {
                   Get.bottomSheet(
                     Container(
                       width: 1.sw,
+                      height: 0.2.sh,
                       padding: EdgeInsets.symmetric(
                           horizontal: 10.w),
                       decoration: BoxDecoration(

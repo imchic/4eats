@@ -164,7 +164,7 @@ class _FeedDetailScreenState extends State<FeedDetailScreen> {
                           shape: BoxShape.circle,
                         ),
                         child: CachedNetworkImage(
-                          imageUrl: feedDetail.profilePhoto ?? '',
+                          imageUrl: feedDetail.userProfilePhoto ?? '',
                           imageBuilder: (context, imageProvider) => Container(
                             width: 40.w,
                             height: 40.h,
@@ -205,7 +205,7 @@ class _FeedDetailScreenState extends State<FeedDetailScreen> {
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           Text(
-                            feedDetail.usernickname ?? '',
+                            feedDetail.userNickname ?? '',
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 14.sp,

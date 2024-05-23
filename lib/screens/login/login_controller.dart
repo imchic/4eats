@@ -236,7 +236,6 @@ class LoginController extends GetxController {
             ));
             UserStore.to.setSharedPref(UserModel.fromJson(doc.data()));
             UserStore.to.setLoginStatus(true);
-            UserStore.to.getUserProfile();
             Get.offAllNamed(AppRoutes.home);
           }
         });
@@ -315,7 +314,7 @@ class LoginController extends GetxController {
     try {
       // _logger.d('loginController > ${UserStore.to.userProfile.toJson()}');
 
-      if (UserStore.to.loginType == 'google') {
+      if (UserStore.to.getLoginType() == 'google') {
         await auth.signOut();
         await GoogleSignIn().signOut();
         UserStore.to.removeSharedPref();

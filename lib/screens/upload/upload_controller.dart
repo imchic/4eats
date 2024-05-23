@@ -267,8 +267,6 @@ class UploadController extends GetxController {
       var videoPath = <String>[];
       var thumbnailDownloadUrls = <String>[];
 
-      UserStore.to.getUserProfile();
-
       for (int i = 0; i < uploadFiles.length; i++) {
         final MediaInfo? compressVideoFile = await compressVideo(uploadFiles[i]);
         _logger.i('uploadVideo > compressVideoFile: ${compressVideoFile?.filesize}');
@@ -299,7 +297,6 @@ class UploadController extends GetxController {
       }
 
       var doc = _firestore.collection('feeds').doc();
-      // _logger.i('uploadVideo > storeName: ${MapController.to.storeContext}');
 
       var model = FeedModel(
         seq: doc.id,
@@ -308,15 +305,15 @@ class UploadController extends GetxController {
         storeType: MapController.to.storeCategory.value,
         storeMenuInfo: MapController.to.storeMenuInfo.value,
         storeContext: MapController.to.storeContext.value,
-        storeLonlat: '${MapController.to.currentLocation.value.latitude}, ${MapController.to.currentLocation.value.longitude}',
+        storeLngLat: '${MapController.to.currentLocation.value.latitude}, ${MapController.to.currentLocation.value.longitude}',
         videoUrls: videoUrls,
-        videoPaths: videoPath,
         thumbnailUrls: thumbnailDownloadUrls,
         description: storeDescription,
         hashTags: selectedHashtagStringList,
-        profilePhoto: UserStore.to.userProfile.photoUrl,
+        userProfilePhoto: UserStore.to.userProfile.photoUrl,
         userid: UserStore.to.userProfile.id,
-        usernickname: UserStore.to.userProfile.nickname,
+        userNickname: UserStore.to.userProfile.nickname,
+        userFcmToken: UserStore.to.userProfile.fcmToken,
         uid: UserStore.to.userProfile.uid,
         createdAt: DateTime.now().toString(),
         likeCount: 0,

@@ -128,17 +128,16 @@ class CustomGallery extends GetView<UploadController> {
               right: 8.w,
               child: InkWell(
                 onTap: () async {
-
                   if (controller.selectedList
                       .contains(controller.assets.indexOf(asset))) {
                     controller.selectedList
                         .remove(controller.assets.indexOf(asset));
                   } else {
-                    controller.selectedList.add(controller.assets.indexOf(asset));
+                    controller.selectedList
+                        .add(controller.assets.indexOf(asset));
                   }
 
                   await controller.setSelectVideoFiles();
-
                 },
                 child: Container(
                   width: 18.w,
@@ -161,33 +160,6 @@ class CustomGallery extends GetView<UploadController> {
             ),
           );
   }
-
-  // 동영상 선택 다이얼로그
-  /*_showVideoDialog(BuildContext context, AssetEntity asset) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('동영상 선택'),
-          content: Text('선택한 동영상: ${asset.title}'),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Get.back();
-              },
-              child: Text('취소'),
-            ),
-            TextButton(
-              onPressed: () {
-                Get.back();
-              },
-              child: Text('확인'),
-            ),
-          ],
-        );
-      },
-    );
-  }*/
 
   // 동영상 길이 표시
   _playTime(AssetEntity asset) {
@@ -213,33 +185,6 @@ class CustomGallery extends GetView<UploadController> {
           : Container(),
     );
   }
-
-  // 선택한 동영상 리스트
-  /*_selectVideoList(BuildContext context, AssetEntity asset) {
-    return Obx(
-      () => Positioned(
-        bottom: 5.h,
-        left: 8.w,
-        child: controller.selectedList.isNotEmpty
-            ? Container(
-                padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 1.h),
-                decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(5.r),
-                ),
-                child: Text(
-                  '${controller.selectedList.length}개 선택',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 10.sp,
-                    fontWeight: FontWeight.w400,
-                  ),
-                ),
-              )
-            : Container(),
-      ),
-    );
-  }*/
 
   // 동영상 길이 텍스트 변환
   _convertDuration(int duration) {

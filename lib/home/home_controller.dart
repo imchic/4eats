@@ -23,6 +23,12 @@ class HomeController extends GetxController {
   int get currentIndex => _currentIndex.value;
   int get prevIndex => _prevIndex.value;
 
+  @override
+  void onInit() {
+    super.onInit();
+    UserStore.to.getUserProfile();
+  }
+
   final List<Widget> _screens = [
     FeedScreen(),
     LoungeScreen(),

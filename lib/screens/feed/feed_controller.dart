@@ -8,8 +8,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:googleapis_auth/auth.dart';
 import 'package:googleapis_auth/auth_io.dart';
 import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart';
 import 'package:kakao_flutter_sdk/kakao_flutter_sdk_share.dart';
@@ -411,14 +409,13 @@ class FeedController extends GetxController {
             'comment': comment,
             'createdAt': Timestamp.now(),
             'uid': '',
-            'userName': UserStore.to.displayName.value,
-            'userNickname': UserStore.to.nickname.value,
-            'userPhotoUrl': UserStore.to.photoUrl.value,
+            'userId': UserStore.to.userProfile.id,
+            'userName': UserStore.to.userProfile.displayName,
+            'userNickname': UserStore.to.userProfile.nickname,
+            'userPhotoUrl': UserStore.to.userProfile.photoUrl,
             'feedId': feedId,
             'commentId': commentId,
-            'registerUserId': UserStore.to.id.value,
             'likeCount': 0,
-            'userId': UserStore.to.id.value,
             'likeUserIds': [],
             'isReply': _isReply.value,
             'replyCommentId': '',
@@ -426,6 +423,10 @@ class FeedController extends GetxController {
           });
         }
       });
+
+      _isCommentLoading.value = false;
+
+      await refreshComments(feedId, currentFeedIndex.value);
 
       // fcm 발송
       await sendFcm(feedId, comment, '댓글');
@@ -461,14 +462,13 @@ class FeedController extends GetxController {
               'comment': comment,
               'createdAt': Timestamp.now(),
               'uid': '',
-              'userName': UserStore.to.displayName.value,
-              'userNickname': UserStore.to.nickname.value,
-              'userPhotoUrl': UserStore.to.photoUrl.value,
+              'userId': UserStore.to.userProfile.id,
+              'userName': UserStore.to.userProfile.displayName,
+              'userNickname': UserStore.to.userProfile.nickname,
+              'userPhotoUrl': UserStore.to.userProfile.photoUrl,
               'feedId': feedId,
               'commentId': commentId,
-              'registerUserId': UserStore.to.id.value,
               'likeCount': 0,
-              'userId': UserStore.to.id.value,
               'likeUserIds': [],
               'isReply': true,
               'replyCommentId': commentId,
@@ -535,8 +535,10 @@ class FeedController extends GetxController {
 
           //AppLog.to.d('_commentArrayList: ${comments[j].toString()}');
           _commentArrayList.add(comments);
-
         }
+
+        _isCommentLoading.value = false;
+
       }
 
 
@@ -571,7 +573,7 @@ class FeedController extends GetxController {
       }
 
       await refreshComments(feedId, feedIndex);
-      //Get.back();
+      Get.back();
 
     } catch (e) {
       AppLog.to.e('deleteComment error: $e');
@@ -583,7 +585,7 @@ class FeedController extends GetxController {
       String feedId, String commentId, int feedIndex) async {
     try {
       // 자신이 올린 게시물 제외
-      if (UserStore.to.id.value ==
+      if (UserStore.to.userProfile.id ==
           _commentArrayList[feedIndex]
               .firstWhere((element) => element.commentId == commentId).userId) {
         GlobalToastController.to.showToast('자신이 작성한 댓글은 좋아요를 누를 수 없습니다.');
@@ -594,7 +596,7 @@ class FeedController extends GetxController {
       if (_commentArrayList[feedIndex]
           .firstWhere((element) => element.commentId == commentId)
           .likeUserIds!
-          .contains(UserStore.to.id.value)) {
+          .contains(UserStore.to.userProfile.id)) {
         GlobalToastController.to.showToast('이미 좋아요를 누르셨습니다.');
         return;
       }
@@ -609,7 +611,7 @@ class FeedController extends GetxController {
         for (var i = 0; i < value.docs.length; i++) {
           value.docs[i].reference.update({
             'likeCount': FieldValue.increment(1),
-            'likeUserIds': FieldValue.arrayUnion([UserStore.to.id.value]),
+            'likeUserIds': FieldValue.arrayUnion([UserStore.to.userProfile.id]),
           });
         }
 
@@ -637,7 +639,7 @@ class FeedController extends GetxController {
         for (var i = 0; i < value.docs.length; i++) {
           value.docs[i].reference.update({
             'likeCount': FieldValue.increment(-1),
-            'likeUserIds': FieldValue.arrayRemove([UserStore.to.id.value]),
+            'likeUserIds': FieldValue.arrayRemove([UserStore.to.userProfile.id]),
           });
         }
         await refreshComments(feedId, feedIndex);
@@ -678,7 +680,7 @@ class FeedController extends GetxController {
     try {
       await _firestore
           .collection('users')
-          .doc(UserStore.to.id.value)
+          .doc(UserStore.to.userProfile.id)
           .collection('bookmarks')
           .where('feedId', isEqualTo: feedId)
           .get()
@@ -707,7 +709,7 @@ class FeedController extends GetxController {
       // 유저 북마크 추가
       await _firestore
           .collection('users')
-          .doc(UserStore.to.id.value)
+          .doc(UserStore.to.userProfile.id)
           .collection('bookmarks')
           .doc(feedId)
           .set({
@@ -716,7 +718,7 @@ class FeedController extends GetxController {
       });
 
       // 자신이 올린 게시물 제외
-      if (UserStore.to.id.value == feed.userid) {
+      if (UserStore.to.userProfile.id == feed.userid) {
         GlobalToastController.to.showToast('자신이 작성한 게시물은 북마크를 누를 수 없습니다.');
         return;
       }
@@ -750,7 +752,7 @@ class FeedController extends GetxController {
     try {
       await _firestore
           .collection('users')
-          .doc(UserStore.to.id.value)
+          .doc(UserStore.to.userProfile.id)
           .collection('bookmarks')
           .where('feedId', isEqualTo: feedId)
           .get()
@@ -792,7 +794,7 @@ class FeedController extends GetxController {
     try {
       await _firestore
           .collection('users')
-          .doc(UserStore.to.id.value)
+          .doc(UserStore.to.userProfile.id)
           .collection('likes')
           .where('feedId', isEqualTo: feedId)
           .get()
@@ -816,7 +818,7 @@ class FeedController extends GetxController {
     try {
       await _firestore
           .collection('users')
-          .doc(UserStore.to.id.value)
+          .doc(UserStore.to.userProfile.id)
           .collection('likes')
           .doc(feedId)
           .set({
@@ -828,7 +830,7 @@ class FeedController extends GetxController {
       var target = _feedList.indexWhere((element) => element.seq == feedId);
 
       // 자신이 올린 게시물 제외
-      if (UserStore.to.id.value == feed.userid) {
+      if (UserStore.to.userProfile.id == feed.userid) {
         GlobalToastController.to.showToast('자신이 작성한 게시물은 좋아요를 누를 수 없습니다.');
         return;
       }
@@ -861,7 +863,7 @@ class FeedController extends GetxController {
     try {
       await _firestore
           .collection('users')
-          .doc(UserStore.to.id.value)
+          .doc(UserStore.to.userProfile.id)
           .collection('likes')
           .where('feedId', isEqualTo: feedId)
           .get()
@@ -965,12 +967,9 @@ class FeedController extends GetxController {
   /// 푸시메세지 발송
   Future<void> sendFcm(String feedId, String comment, String type) async {
     try {
-      //UserStore.to.getUserProfile();
-
       var feed = _feedList.firstWhere((element) => element.seq == feedId);
-      // var fcmToken = UserStore.to.userProfile.fcmToken;
 
-      var userLoginType = UserStore.to.loginType.value;
+      var userLoginType = UserStore.to.userProfile.loginType;
       AppLog.to.i('userLoginType: $userLoginType');
 
       if (userLoginType == 'kakao') {

@@ -32,13 +32,13 @@ class UserStore extends GetxController {
 
   RxBool isExist = false.obs;
 
-  RxString id = ''.obs;
-  RxString nickname = ''.obs;
-  RxString loginType = ''.obs;
-  RxString photoUrl = ''.obs;
-  RxString displayName = ''.obs;
-  RxString emailAddress = ''.obs;
-  RxString fcmToken = ''.obs;
+  // RxString id = ''.obs;
+  // RxString nickname = ''.obs;
+  // RxString loginType = ''.obs;
+  // RxString photoUrl = ''.obs;
+  // RxString displayName = ''.obs;
+  // RxString emailAddress = ''.obs;
+  // RxString fcmToken = ''.obs;
 
   @override
   Future<void> onInit() async {
@@ -158,27 +158,41 @@ class UserStore extends GetxController {
   /// 사용자 정보를 가져와서 [UserModel]에 저장
   Future<void> getUserProfile() async {
     try {
+
       // shared
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      // final SharedPreferences prefs = await SharedPreferences.getInstance();
+      //
+      // id.value = prefs.getString('id') ?? '';
+      // nickname.value = prefs.getString('nickname') ?? '';
+      // displayName.value = prefs.getString('nickname') ?? '';
+      // photoUrl.value = prefs.getString('profileImage') ?? '';
+      // emailAddress.value = prefs.getString('email') ?? '';
+      // loginType.value = prefs.getString('loginType') ?? '';
+      // fcmToken.value = prefs.getString('fcmToken') ?? '';
+      //
+      // userProfile = UserModel(
+      //   id: id.value,
+      //   nickname: nickname.value,
+      //   displayName: displayName.value,
+      //   photoUrl: photoUrl.value,
+      //   email: emailAddress.value,
+      //   loginType: loginType.value,
+      //   fcmToken: fcmToken.value,
+      // );
+      //
+      // _logger.i('getUserProfile > userProfile: ${userProfile.toString()}');
 
-      id.value = prefs.getString('id') ?? '';
-      nickname.value = prefs.getString('nickname') ?? '';
-      displayName.value = prefs.getString('nickname') ?? '';
-      photoUrl.value = prefs.getString('profileImage') ?? '';
-      emailAddress.value = prefs.getString('email') ?? '';
-      loginType.value = prefs.getString('loginType') ?? '';
-      fcmToken.value = prefs.getString('fcmToken') ?? '';
+      QuerySnapshot<Map<String, dynamic>> result = await FirebaseFirestore
+          .instance
+          .collection('users')
+          .where('email', isEqualTo: userProfile.email)
+          .get();
 
-      userProfile = UserModel(
-        id: id.value,
-        nickname: nickname.value,
-        displayName: displayName.value,
-        photoUrl: photoUrl.value,
-        email: emailAddress.value,
-        loginType: loginType.value,
-      );
+      result.docs.forEach((doc) {
+        userProfile = UserModel.fromJson(doc.data());
+        _logger.i('getUserProfile > userProfile: ${userProfile.toJson()}');
+      });
 
-      //_logger.i('getUserProfile > user: ${userProfile.toJson()}');
 
     } catch (e) {
       _logger.e('getUserProfile error: $e');
@@ -232,22 +246,6 @@ class UserStore extends GetxController {
     userProfile = userModel;
   }
 
-  /// 닉네임 가져오기
-  Future<String> getPhotoUrl() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final String? profileImage = prefs.getString('profileImage');
-    photoUrl.value = profileImage ?? '';
-    return profileImage ?? '';
-  }
-
-  /// 아이디 가져오기
-  Future<String> getId() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final String? id = prefs.getString('id');
-    this.id.value = id ?? '';
-    return id ?? '';
-  }
-
   /// 로그인 타입 저장
   Future<void> setLoginType(String s) async {
     prefs.then((SharedPreferences prefs) {
@@ -258,9 +256,6 @@ class UserStore extends GetxController {
   /// 로그인 유형
   Future<String> getLoginType() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final String? type = prefs.getString('loginType');
-    _logger.d('getLoginType: $type');
-    loginType.value = type ?? '';
-    return type ?? '';
+    return prefs.getString('loginType') ?? '';
   }
 }

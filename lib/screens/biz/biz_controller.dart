@@ -28,7 +28,6 @@ class BizController extends GetxController {
   @override
   onInit() async {
     super.onInit();
-    await UserStore.to.getUserProfile();
     await fetchBizApiGoodsList(currentPage.value);
     await fetchBrandList();
   }

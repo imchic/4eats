@@ -10,16 +10,16 @@ class FeedModel {
   String? storeType;
   String? storeMenuInfo;
   String? storeContext;
-  String? storeLonlat;
+  String? storeLngLat;
   List<String>? videoUrls;
-  List<String>? videoPaths;
   List<String>? thumbnailUrls;
   String? createdAt;
   String? updatedAt;
   String? uid;
   String? userid;
-  String? usernickname;
-  String? profilePhoto;
+  String? userNickname;
+  String? userProfilePhoto;
+  String? userFcmToken;
   int? likeCount;
   int? bookmarkCount;
   int? point;
@@ -36,16 +36,16 @@ class FeedModel {
     this.storeType,
     this.storeMenuInfo,
     this.storeContext,
-    this.storeLonlat,
+    this.storeLngLat,
     this.videoUrls,
-    this.videoPaths,
     this.thumbnailUrls,
     this.createdAt,
     this.updatedAt,
     this.uid,
     this.userid,
-    this.usernickname,
-    this.profilePhoto,
+    this.userNickname,
+    this.userProfilePhoto,
+    this.userFcmToken,
     this.likeCount = 0,
     this.bookmarkCount = 0,
     this.point = 0,
@@ -63,16 +63,16 @@ class FeedModel {
         storeType: json["storeType"],
         storeMenuInfo: json["storeMenuInfo"],
         storeContext: json["storeContext"],
-        storeLonlat: json["storeLonlat"],
+        storeLngLat: json["storeLngLat"],
         videoUrls: List<String>.from(json["videoUrls"].map((x) => x)),
-        videoPaths: List<String>.from(json["videoPaths"].map((x) => x)),
         thumbnailUrls: List<String>.from(json["thumbnailUrls"].map((x) => x)),
         createdAt: json["createdAt"],
         updatedAt: json["updatedAt"],
         uid: json["uid"],
         userid: json["userid"],
-        usernickname: json["usernickname"],
-        profilePhoto: json["profilePhoto"],
+        userNickname: json["userNickname"],
+        userProfilePhoto: json["userProfilePhoto"],
+        userFcmToken: json["userFcmToken"],
         likeCount: json["likeCount"],
         bookmarkCount: json["bookmarkCount"],
         point: json["point"],
@@ -90,16 +90,16 @@ class FeedModel {
         "storeType": storeType,
         "storeMenuInfo": storeMenuInfo,
         "storeContext": storeContext,
-        "storeLonlat": storeLonlat,
+        "storeLngLat": storeLngLat,
         "videoUrls": List<dynamic>.from(videoUrls!.map((x) => x)),
-        "videoPaths": List<dynamic>.from(videoPaths!.map((x) => x)),
         "thumbnailUrls": List<dynamic>.from(thumbnailUrls!.map((x) => x)),
         "createdAt": createdAt,
         "updatedAt": updatedAt,
         "uid": uid,
         "userid": userid,
-        "usernickname": usernickname,
-        "profilePhoto": profilePhoto,
+        "userNickname": userNickname,
+        "userProfilePhoto": userProfilePhoto,
+        "userFcmToken": userFcmToken,
         "likeCount": likeCount,
         "bookmarkCount": bookmarkCount,
         "point": point,
