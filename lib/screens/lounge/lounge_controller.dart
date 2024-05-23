@@ -64,11 +64,7 @@ class LoungeController extends GetxController {
   void onInit() {
     super.onInit();
     searchController = TextEditingController();
-    //getUserProfile();
-  }
-
-  Future<void> getFeedList() async {
-   //await FeedController.to.fetchFeeds();
+    fetchLoungeFeedList();
   }
 
   Future<void> moveToLocation() async {
@@ -109,25 +105,22 @@ class LoungeController extends GetxController {
 
   }
 
-  Future<void> getUserProfile() async {
-
+  /// 라운지 피드 가져오기
+  Future<void> fetchLoungeFeedList() async {
     try {
-
-      final QuerySnapshot<Map<String, dynamic>> querySnapshot = await FirebaseFirestore.instance.collection('users').get();
-      final List<UserModel> users = querySnapshot.docs.map((doc) => UserModel.fromJson(doc.data())).toList();
-
-      users.forEach((user) {
-        _logger.i('user: ${user.toJson()}');
-      });
-
+      final feedList = <FeedModel>[];
+      final snapshot = await FirebaseFirestore.instance.collection('feed').get();
+      for (final doc in snapshot.docs) {
+        final feed = FeedModel.fromJson(doc.data() as Map<String, dynamic>);
+        feedList.add(feed);
+      }
+      loungeFeedList = feedList;
     } catch (e) {
-      _logger.e('getUserProfile error: $e');
+      _logger.e('fetchLoungeFeedList error: $e');
     }
-
   }
 
-  Future<void> addUsers(UserModel user) async {
-    users.add(user);
-  }
+  /// 가게 썸네일 가져오기
+
 
 }

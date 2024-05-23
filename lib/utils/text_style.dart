@@ -40,6 +40,7 @@ class TextStyleUtils {
       color: Colors.white,
       fontSize: fontSize.sp,
       fontWeight: fontWeight,
+      letterSpacing: 0.1,
     );
   }
 

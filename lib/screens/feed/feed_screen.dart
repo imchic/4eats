@@ -86,7 +86,6 @@ class FeedScreen extends GetView<FeedController> {
                       CachedVideoPlayerPlus(controller.videoControllerList[controller.currentFeedIndex.value][controller.currentVideoUrlIndex.value]),
                       _topMenu(context, index),
                       _feedInfo(context, index),
-                      _indicator(context),
                     ],
                   ),
                 );
@@ -106,111 +105,145 @@ class FeedScreen extends GetView<FeedController> {
         },
         child: Container(
           margin: EdgeInsets.only(top: 24.h, left: 10.w),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
-                child: Text('4Eat',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 28.sp,
-                        fontWeight: FontWeight.w600,
-                        fontFamily: 'Whisper')),
+                margin: EdgeInsets.only(top:4.h),
+                child: TextButton(
+                  onPressed: () {
+                    Get.back();
+                  },
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 2.h),
+                    child: Text(
+                      '포잇.',
+                      textAlign: TextAlign.left,
+                      style: TextStyleUtils().whiteTextStyle(
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+                ),
               ),
-              // 검색, 지도, 음소거
-              Row(
-                children: [
-                  InkWell(
-                    onTap: () {
-                      Get.toNamed(AppRoutes.search);
-                    },
-                    child: Container(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: 10.w, vertical: 10.h),
-                      child: SvgPicture.asset('assets/images/ic_search.svg',
-                          color: Colors.white, width: 20.w, height: 20.h),
-                    ),
-                  ),
-                  InkWell(
-                    onTap: () {
-                      Get.toNamed(AppRoutes.map, arguments: {
-                        'storeName': controller.feedList[index].storeName,
-                        'storeAddress': controller.feedList[index].storeAddress,
-                        'storeType': controller.feedList[index].storeType,
-                        'lonlat': [
-                          double.parse(controller.feedList[index].storeLngLat!
-                              .split(',')[0]),
-                          double.parse(controller.feedList[index].storeLngLat!
-                              .split(',')[1])
-                        ]
-                      });
-                    },
-                    child: Container(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: 10.w, vertical: 10.h),
-                      child: SvgPicture.asset('assets/images/ic_map.svg',
-                          color: Colors.white, width: 20.w, height: 20.h),
-                    ),
-                  ),
-                  InkWell(
-                    onTap: () {
-                      controller.changeMute(index);
-                    },
-                    child: Container(
-                        padding: EdgeInsets.symmetric(
-                            horizontal: 10.w, vertical: 10.h),
-                        child: Obx(
-                          () => SvgPicture.asset(
-                            controller.isMuted
-                                ? 'assets/images/ic_volume_off.svg'
-                                : 'assets/images/ic_volume_up.svg',
-                            width: 20.w,
-                            height: 20.h,
-                            colorFilter:
-                                ColorFilter.mode(Colors.white, BlendMode.srcIn),
+
+              // 시군구
+              Container(
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Container(
+                          width: 0.5.sw,
+                          padding: EdgeInsets.symmetric(horizontal: 10.w),
+                          child: Text(
+                            // 시군구 표현
+                            controller.feedList[index].storeAddress!.split(' ')[0] + ' ' + controller.feedList[index].storeAddress!.split(' ')[1],
+                            style: TextStyleUtils().whiteTextStyle(
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.w800,
+                            ),
                           ),
-                        )),
-                  ),
-                ],
+                        ),
+                        // 검색, 지도, 음소거
+                        Row(
+                          children: [
+                            InkWell(
+                              onTap: () {
+                                Get.toNamed(AppRoutes.search);
+                              },
+                              child: Container(
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 10.w, vertical: 10.h),
+                                child: SvgPicture.asset('assets/images/ic_search.svg',
+                                    color: Colors.white, width: 20.w, height: 20.h),
+                              ),
+                            ),
+                            InkWell(
+                              onTap: () {
+                                Get.toNamed(AppRoutes.map, arguments: {
+                                  'storeName': controller.feedList[index].storeName,
+                                  'storeAddress': controller.feedList[index].storeAddress,
+                                  'storeType': controller.feedList[index].storeType,
+                                  'lonlat': [
+                                    double.parse(controller.feedList[index].storeLngLat!
+                                        .split(',')[0]),
+                                    double.parse(controller.feedList[index].storeLngLat!
+                                        .split(',')[1])
+                                  ]
+                                });
+                              },
+                              child: Container(
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 10.w, vertical: 10.h),
+                                child: SvgPicture.asset('assets/images/ic_map.svg',
+                                    color: Colors.white, width: 20.w, height: 20.h),
+                              ),
+                            ),
+                            InkWell(
+                              onTap: () {
+                                controller.changeMute(index);
+                              },
+                              child: Container(
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 10.w, vertical: 10.h),
+                                  child: Obx(
+                                    () => SvgPicture.asset(
+                                      controller.isMuted
+                                          ? 'assets/images/ic_volume_off.svg'
+                                          : 'assets/images/ic_volume_up.svg',
+                                      width: 20.w,
+                                      height: 20.h,
+                                      colorFilter:
+                                          ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                                    ),
+                                  )),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    Divider(
+                      height: 0.h,
+                      color: Colors.white,
+                      thickness: 0.5,
+                      indent: 10.w,
+                      endIndent: 10.w,
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 10.h),
+              // 가게상호명
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 10.w),
+                child:
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      controller.feedList[index].storeName ?? '',
+                      style: TextStyleUtils().whiteTextStyle(
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    Text(
+                      '  ${controller.feedList[index].storeType ?? ''}',
+                      style: TextStyleUtils().whiteTextStyle(
+                        fontSize: 10.sp,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
         ));
-  }
-
-  /// 비디오 인디케이터
-  _indicator(BuildContext context) {
-    return Positioned(
-      left: 0,
-      right: 0,
-      bottom: 0,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Obx(
-          //   () =>
-          //       SizedBox(
-          //       width: 1.sw,
-          //       height: 2.h,
-          //       child: LinearProgressIndicator(
-          //         value: controller.duration.value.toDouble() /
-          //             controller
-          //                 .videoControllerList[
-          //                     controller.currentVideoIndex.value]
-          //                 .value
-          //                 .duration
-          //                 .inSeconds
-          //                 .toDouble(),
-          //         valueColor: AlwaysStoppedAnimation(
-          //             Theme.of(context).colorScheme.secondary),
-          //         backgroundColor: Colors.grey[300],
-          //       )),
-          // ),
-        ],
-      ),
-    );
   }
 
   /// 게시물 정보
@@ -230,10 +263,10 @@ class FeedScreen extends GetView<FeedController> {
           children: [
             Container(
                 padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
-                decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.25),
-                  borderRadius: BorderRadius.circular(10.r),
-                ),
+                // decoration: BoxDecoration(
+                //   color: Colors.black.withOpacity(0.25),
+                //   borderRadius: BorderRadius.circular(10.r),
+                // ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -266,9 +299,10 @@ class FeedScreen extends GetView<FeedController> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
+                    // 프로필 사진
                     Container(
-                      width: 40.w,
-                      height: 40.h,
+                      width: 50.w,
+                      height: 50.h,
                       decoration: const BoxDecoration(
                         shape: BoxShape.circle,
                       ),
@@ -277,8 +311,8 @@ class FeedScreen extends GetView<FeedController> {
                           imageUrl:
                               controller.feedList[index].userProfilePhoto ?? '',
                           imageBuilder: (context, imageProvider) => Container(
-                            width: 40.w,
-                            height: 40.h,
+                            width: 50.w,
+                            height: 50.h,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               image: DecorationImage(
@@ -288,8 +322,8 @@ class FeedScreen extends GetView<FeedController> {
                             ),
                           ),
                           placeholder: (context, url) => Container(
-                            width: 40.w,
-                            height: 40.h,
+                            width: 50.w,
+                            height: 50.h,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               color: Colors.grey[200],
@@ -311,6 +345,7 @@ class FeedScreen extends GetView<FeedController> {
                       ),
                     ),
                     SizedBox(width: 10.w),
+                    // 닉네임
                     Column(
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -323,14 +358,24 @@ class FeedScreen extends GetView<FeedController> {
                             fontWeight: FontWeight.w800,
                           ),
                         ),
-                        SizedBox(height: 2.h),
-                        Text(
-                          '@${controller.feedList[index].userid ?? ''}',
-                          style: TextStyleUtils().whiteTextStyle(
-                            fontSize: 10.sp,
-                            fontWeight: FontWeight.w400,
+                        SizedBox(height: 4.h),
+                        Container(
+                          alignment: Alignment.center,
+                          height: 0.028.sh,
+                          padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                          decoration: BoxDecoration(
+                            color: Color(0xff5acca8),
+                            borderRadius: BorderRadius.circular(50.r),
                           ),
-                        ),
+                          child: Text(
+                            '포잇터',
+                            textAlign: TextAlign.center,
+                            style: TextStyleUtils().whiteTextStyle(
+                              fontSize: 9.sp,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        )
                       ],
                     ),
                   ],
@@ -417,6 +462,8 @@ class FeedScreen extends GetView<FeedController> {
       child: Obx(
         () => DescriptionText(
           text: controller.feedList[index].description ?? '',
+          fontSize: 12.sp,
+          fontWeight: FontWeight.w600,
         ),
       ),
     );
@@ -433,52 +480,54 @@ class FeedScreen extends GetView<FeedController> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              InkWell(
-                onTap: () {
-                  Get.toNamed(AppRoutes.store, arguments: {
-                    'storeName': controller.feedList[index].storeName,
-                    'storeAddress': controller.feedList[index].storeAddress,
-                    'storeType': controller.feedList[index].storeType,
-                    'lonlat': [
-                      double.parse(controller.feedList[index].storeLngLat!.split(',')[0]),
-                      double.parse(controller.feedList[index].storeLngLat!.split(',')[1])
-                    ]
-                  });
-                },
-                child: Row(
-                  // 밑줄에 맞춤
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      controller.feedList[index].storeName ?? '',
-                      style: TextStyle(
-                        color: Colors.cyan[500],
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    SizedBox(width: 5.w),
-                    Text(
-                      controller.feedList[index].storeType ?? '',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 10.sp,
-                        fontWeight: FontWeight.w600,
-                        height: 2.0,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: 2.h),
-              Text(
-                controller.feedList[index].storeAddress ?? '',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 11.sp,
-                  fontWeight: FontWeight.w400,
-                ),
-              ),
+              // InkWell(
+              //   onTap: () {
+              //     Get.toNamed(AppRoutes.store, arguments: {
+              //       'storeName': controller.feedList[index].storeName,
+              //       'storeAddress': controller.feedList[index].storeAddress,
+              //       'storeType': controller.feedList[index].storeType,
+              //       'lonlat': [
+              //         double.parse(controller.feedList[index].storeLngLat!.split(',')[0]),
+              //         double.parse(controller.feedList[index].storeLngLat!.split(',')[1])
+              //       ]
+              //     });
+              //   },
+              //   child:
+              //   Row(
+              //     // 밑줄에 맞춤
+              //     crossAxisAlignment: CrossAxisAlignment.end,
+              //     children: [
+              //       Text(
+              //         controller.feedList[index].storeName ?? '',
+              //         style: TextStyle(
+              //           color: Colors.cyan[500],
+              //           fontSize: 14.sp,
+              //           fontWeight: FontWeight.w800,
+              //         ),
+              //       ),
+              //       SizedBox(width: 5.w),
+              //       Text(
+              //         controller.feedList[index].storeType ?? '',
+              //         style: TextStyle(
+              //           color: Colors.white,
+              //           fontSize: 10.sp,
+              //           fontWeight: FontWeight.w600,
+              //           height: 2.0,
+              //         ),
+              //       ),
+              //     ],
+              //   ),
+              // ),
+              // SizedBox(height: 2.h),
+              // Text(
+              //   controller.feedList[index].storeAddress ?? '',
+              //   style: TextStyle(
+              //     color: Colors.white,
+              //     fontSize: 11.sp,
+              //     fontWeight: FontWeight.w400,
+              //   ),
+              // ),
+              // 확장이 되었을 경우
               controller.isFeedMore
                   ? Container(
                       width: 0.8.sw,
@@ -488,8 +537,7 @@ class FeedScreen extends GetView<FeedController> {
                         children: [
                           Text(
                             '메뉴',
-                            style: TextStyle(
-                              color: Colors.white,
+                            style: TextStyleUtils().whiteTextStyle(
                               fontSize: 12.sp,
                               fontWeight: FontWeight.w600,
                             ),
@@ -516,10 +564,7 @@ class FeedScreen extends GetView<FeedController> {
                             ),
                           ),
                           SizedBox(height: 10.h),
-                          controller.convertNaverPlaceContext(
-                                      controller.feedList[index].storeContext ??
-                                          '') !=
-                                  ''
+                          controller.convertNaverPlaceContext(controller.feedList[index].storeContext ?? '') != ''
                               ? Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
@@ -609,19 +654,17 @@ class FeedScreen extends GetView<FeedController> {
               isScrollControlled: true,
             );
           },
-          child: SizedBox(
-            width: 260.w,
+          child: Container(
+            width: 0.2.w,
+            margin: EdgeInsets.only(top: 10.h, left: 4.w),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(
-                  controller.commentArrayList.isEmpty
-                      ? '댓글 0개'
-                      : '댓글 ${controller.commentArrayList[index].length + controller.commentArrayList[index].fold(0, (previousValue, element) => previousValue + element.replyCommentList!.length)}개',
-                  style: TextStyle(
-                    color: Colors.white,
+                  controller.feedList[index].comments.toString(),
+                  style: TextStyleUtils().whiteTextStyle(
                     fontSize: 10.sp,
                     fontWeight: FontWeight.w500,
                   ),
@@ -828,7 +871,7 @@ class FeedScreen extends GetView<FeedController> {
   }
 
   /// 댓글 리스트
-  ListView buildComment(int feedIndex) {
+  Widget buildComment(int feedIndex) {
     return ListView.separated(
       shrinkWrap: true,
       itemCount: controller.commentArrayList[feedIndex].length,

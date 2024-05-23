@@ -480,6 +480,9 @@ class FeedController extends GetxController {
 
       await refreshComments(feedId, currentFeedIndex.value);
 
+      // fcm 발송
+      await sendFcm(feedId, comment, '대댓글');
+
     } catch (e) {
       AppLog.to.e('addReplyComment error: $e');
     }
@@ -518,27 +521,47 @@ class FeedController extends GetxController {
 
       for (var i = 0; i < feedSnapshot.docs.length; i++) {
 
-        QuerySnapshot<Map<String, dynamic>> commentSnapshot = await feedSnapshot.docs[i].reference.collection('comments').orderBy('createdAt', descending: true).get();
+        // QuerySnapshot<Map<String, dynamic>> commentSnapshot = await feedSnapshot.docs[i].reference.collection('comments').orderBy('createdAt', descending: true).get();
+        //
+        // for (var j = 0; j < commentSnapshot.docs.length; j++) {
+        //   comments.add(CommentModel.fromMap(commentSnapshot.docs[j].data()));
+        //   comments[j].replyCommentList = [];
+        //
+        //   if(commentSnapshot.docs[j].data()['isReply'] == true) {
+        //     QuerySnapshot<Map<String, dynamic>> replySnapshot = await commentSnapshot.docs[j].reference.collection('reply').orderBy('createdAt', descending: true).get();
+        //     for (var k = 0; k < replySnapshot.docs.length; k++) {
+        //       comments[j].replyCommentList!.add(CommentModel.fromMap(replySnapshot.docs[k].data()));
+        //     }
+        //   } else {
+        //     comments[j].replyCommentList = [];
+        //   }
+        //
+        //   //AppLog.to.d('_commentArrayList: ${comments[j].toString()}');
+        //   _commentArrayList.add(comments);
+        // }
+        //
+        // _isCommentLoading.value = false;
 
-        for (var j = 0; j < commentSnapshot.docs.length; j++) {
-          comments.add(CommentModel.fromMap(commentSnapshot.docs[j].data()));
-          comments[j].replyCommentList = [];
-
-          if(commentSnapshot.docs[j].data()['isReply'] == true) {
-            QuerySnapshot<Map<String, dynamic>> replySnapshot = await commentSnapshot.docs[j].reference.collection('reply').orderBy('createdAt', descending: true).get();
-            for (var k = 0; k < replySnapshot.docs.length; k++) {
-              comments[j].replyCommentList!.add(CommentModel.fromMap(replySnapshot.docs[k].data()));
-            }
-          } else {
+        await feedSnapshot.docs[i].reference.collection('comments').orderBy('createdAt', descending: true).snapshots().listen((event) {
+          comments = [];
+          for (var j = 0; j < event.docs.length; j++) {
+            comments.add(CommentModel.fromMap(event.docs[j].data()));
             comments[j].replyCommentList = [];
+
+            if(event.docs[j].data()['isReply'] == true) {
+              event.docs[j].reference.collection('reply').orderBy('createdAt', descending: true).get().then((value) {
+                for (var k = 0; k < value.docs.length; k++) {
+                  comments[j].replyCommentList!.add(CommentModel.fromMap(value.docs[k].data()));
+                }
+              });
+            } else {
+              comments[j].replyCommentList = [];
+            }
+
+            //AppLog.to.d('_commentArrayList: ${comments[j].toString()}');
+            _commentArrayList.add(comments);
           }
-
-          //AppLog.to.d('_commentArrayList: ${comments[j].toString()}');
-          _commentArrayList.add(comments);
-        }
-
-        _isCommentLoading.value = false;
-
+        });
       }
 
 
@@ -706,6 +729,12 @@ class FeedController extends GetxController {
       var feed = _feedList.firstWhere((element) => element.seq == feedId);
       var target = _feedList.indexWhere((element) => element.seq == feedId);
 
+      // 자신이 올린 게시물 제외
+      if (UserStore.to.userProfile.id == feed.userid) {
+        GlobalToastController.to.showToast('자신이 작성한 게시물은 북마크를 누를 수 없습니다.');
+        return;
+      }
+
       // 유저 북마크 추가
       await _firestore
           .collection('users')
@@ -716,12 +745,6 @@ class FeedController extends GetxController {
         'feedId': feedId,
         'createdAt': Timestamp.now(),
       });
-
-      // 자신이 올린 게시물 제외
-      if (UserStore.to.userProfile.id == feed.userid) {
-        GlobalToastController.to.showToast('자신이 작성한 게시물은 북마크를 누를 수 없습니다.');
-        return;
-      }
 
       await _firestore
           .collection('feeds').get().then((value) {
@@ -816,15 +839,6 @@ class FeedController extends GetxController {
   /// 피드 좋아요 추가
   Future<void> addLike(String feedId) async {
     try {
-      await _firestore
-          .collection('users')
-          .doc(UserStore.to.userProfile.id)
-          .collection('likes')
-          .doc(feedId)
-          .set({
-        'feedId': feedId,
-        'createdAt': Timestamp.now(),
-      });
 
       var feed = _feedList.firstWhere((element) => element.seq == feedId);
       var target = _feedList.indexWhere((element) => element.seq == feedId);
@@ -834,6 +848,16 @@ class FeedController extends GetxController {
         GlobalToastController.to.showToast('자신이 작성한 게시물은 좋아요를 누를 수 없습니다.');
         return;
       }
+
+      await _firestore
+          .collection('users')
+          .doc(UserStore.to.userProfile.id)
+          .collection('likes')
+          .doc(feedId)
+          .set({
+        'feedId': feedId,
+        'createdAt': Timestamp.now(),
+      });
 
       // 피드 좋아요 수 추가
       await _firestore.collection('feeds').get().then((value) {
@@ -956,6 +980,7 @@ class FeedController extends GetxController {
         }
       } else {
         AppLog.to.e('카카오톡 미설치: 웹 공유 기능 사용 권장');
+        GlobalToastController.to.showToast('카카오톡이 설치되어 있지 않아 웹으로 공유합니다.');
       }
 
 

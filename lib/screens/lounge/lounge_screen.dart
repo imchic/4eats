@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:foreats/utils/logger.dart';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
 
@@ -15,7 +16,6 @@ import 'lounge_controller.dart';
 
 class LoungeScreen extends GetView<LoungeController> {
 
-  final _logger = Logger();
   LoungeScreen({super.key});
 
   @override
@@ -44,7 +44,6 @@ class LoungeScreen extends GetView<LoungeController> {
           padding: EdgeInsets.only(top: 10.h, bottom: 20.h),
           child: Column(
             children: [
-              // _buildSearchBar(context),
               _popularThumbnail(context),
               _popularSupporters(context),
               _popularFeeds(context),
@@ -117,12 +116,6 @@ class LoungeScreen extends GetView<LoungeController> {
                     ),
                     Row(
                       children: [
-                        // SvgPicture.asset(
-                        //   controller.locationIconList[index],
-                        //   width: 8.w,
-                        //   height: 8.h,
-                        // ),
-                        // SizedBox(width: 5.w),
                         Text(
                           controller.locationList[index],
                           style: TextStyle(
@@ -253,63 +246,50 @@ class LoungeScreen extends GetView<LoungeController> {
         scrollDirection: Axis.horizontal,
         itemCount: controller.loungeFeedList.length,
         itemBuilder: (context, index) {
-          return InkWell(
-            onTap: () async {
-              await FeedController.to.showFeedDetail(index);
-            },
-            child: Container(
-              width: 100.w,
-              height: 150.h,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(6.r),
-              ),
-              child: Stack(
-                children: [
-                  Column(
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(6.r),
-                        child: CachedNetworkImage(
-                          imageUrl: FeedController.to.thumbnailList[index],
-                          fit: BoxFit.cover,
-                          placeholder: (context, url) => const Center(
-                            child: CircularProgressIndicator(),
-                          ),
-                          errorWidget: (context, url, error) => const Icon(Icons.error),
+          return Column(
+            children: [
+              InkWell(
+                onTap: () {
+                  //Get.toNamed(AppRoutes.feedDetail, arguments: controller.loungeFeedList[index]);
+                },
+                child: Container(
+                  width: 100.w,
+                  height: 150.h,
+                  alignment: Alignment.center,
+                  child: Container(
+                    width: 100.w,
+                    height: 150.h,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(6.r),
+                      child: CachedNetworkImage(
+                        imageUrl: controller.loungeFeedList[index].thumbnailUrls![0],
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) => const Center(
+                          child: CircularProgressIndicator(),
                         ),
+                        errorWidget: (context, url, error) => const Icon(Icons.error),
                       ),
-                    ],
+                    ),
                   ),
-                  // 좋아요
-                  Positioned(
-                    top: 5.h,
-                    right: 5.w,
-                    child: Container(
-                      padding: EdgeInsets.all(5),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.favorite,
-                            color: Colors.red,
-                            size: 12.sp,
-                          ),
-                          SizedBox(width: 3.w),
-                          Text(
-                            FeedController.to.feedList[index].likeCount.toString(),
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 10.sp,
-                              fontWeight: FontWeight.w600,
-                              height: 0,
-                            ),
-                          ),
-                        ],
-                      ),
-                  ),
+                ),
+              ),
+              Row(
+                children: [
+                  Text(
+                    controller.loungeFeedList[index].storeName ?? '',
+                    style: TextStyle(
+                      color: gray800,
+                      fontSize: 11.sp,
+                      fontWeight: FontWeight.w500,
+                      height: 0,
+                    ),
                   ),
                 ],
               ),
-            ),
+            ],
           );
         },
         separatorBuilder: (BuildContext context, int index) {

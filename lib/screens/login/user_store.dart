@@ -190,7 +190,7 @@ class UserStore extends GetxController {
 
       result.docs.forEach((doc) {
         userProfile = UserModel.fromJson(doc.data());
-        _logger.i('getUserProfile > userProfile: ${userProfile.toJson()}');
+        _logger.i('getUserProfile > userProfile: ${userProfile.toString()}');
       });
 
 

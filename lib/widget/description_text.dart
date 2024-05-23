@@ -49,8 +49,9 @@ class _DescriptionTextState extends State<DescriptionText> {
           ? Text(
               firstHalf,
               style: TextStyle(
-                fontSize: widget.fontSize ?? 11.sp,
+                fontSize: widget.fontSize ?? 12.sp,
                 color: widget.color ?? Colors.white,
+                fontWeight: widget.fontWeight ?? FontWeight.normal,
               ),
             )
           : Column(
@@ -67,8 +68,10 @@ class _DescriptionTextState extends State<DescriptionText> {
                         child: Text(
                           flag ? (firstHalf + "...") : (firstHalf + secondHalf),
                           style: TextStyle(
-                            fontSize: widget.fontSize ?? 11.sp,
+                            fontSize: widget.fontSize ?? 12.sp,
                             color: widget.color ?? Colors.white,
+                            fontWeight: widget.fontWeight ?? FontWeight.normal,
+                            height: 1.5,
                           ),
                         ),
                       ),
@@ -79,6 +82,7 @@ class _DescriptionTextState extends State<DescriptionText> {
                             color: Theme.of(context).colorScheme.tertiary,
                             fontSize: widget.fontSize ?? 11.sp,
                             fontWeight: widget.fontWeight ?? FontWeight.bold,
+                            height: 1.5,
                           ),
                         ),
                       ),
