@@ -66,12 +66,12 @@ class MyApp extends StatelessWidget {
         title: 'Flutter Demo',
         theme: ThemeData(
           colorScheme: lightColorScheme,
-          fontFamily: 'Pretendard',
+          fontFamily: 'GmarketSans',
           useMaterial3: false,
         ),
         darkTheme: ThemeData(
           colorScheme: darkColorScheme,
-          fontFamily: 'Pretendard',
+          fontFamily: 'GmarketSans',
           useMaterial3: false,
         ),
         themeMode: ThemeMode.system,

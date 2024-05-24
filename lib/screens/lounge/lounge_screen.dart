@@ -1,21 +1,20 @@
-import 'dart:io';
 import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:foreats/utils/logger.dart';
 import 'package:get/get.dart';
-import 'package:logger/logger.dart';
 
 import '../../utils/app_routes.dart';
 import '../../utils/colors.dart';
+import '../../utils/dialog_util.dart';
+import '../../utils/logger.dart';
+import '../../utils/text_style.dart';
 import '../../widget/base_appbar.dart';
-import '../feed/feed_controller.dart';
+import '../map/map_controller.dart';
 import 'lounge_controller.dart';
 
 class LoungeScreen extends GetView<LoungeController> {
-
   LoungeScreen({super.key});
 
   @override
@@ -25,14 +24,7 @@ class LoungeScreen extends GetView<LoungeController> {
       appBar: BaseAppBar(
         title: '라운지',
       ),
-      body:
-      Column(
-        children: [
-          Expanded(
-            child: _buildLoungeBody(context),
-          ),
-        ],
-      ),
+      body: _buildLoungeBody(context),
     );
   }
 
@@ -40,13 +32,36 @@ class LoungeScreen extends GetView<LoungeController> {
     return SingleChildScrollView(
       child: SizedBox(
         width: 390.w,
+        height: 1.sh,
         child: Container(
           padding: EdgeInsets.only(top: 10.h, bottom: 20.h),
           child: Column(
             children: [
-              _popularThumbnail(context),
+              SizedBox(height: 10.h),
               _popularSupporters(context),
-              _popularFeeds(context),
+              // 오늘의 추천 타이틀
+              _feedRecommandedTitle(),
+              // 오늘의 추천
+              FutureBuilder(
+                future: controller.fetchLoungeFeedList(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return DialogUtil().buildLoadingDialog();
+                  } else {
+                    return _popularFeeds(context);
+                  }
+                },
+              ),
+              FutureBuilder(
+                future: MapController.to.convertLatLngToAddress(MapController.to.currentLocation.value),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return DialogUtil().buildLoadingDialog();
+                  } else {
+                    return _popularThumbnail(context, snapshot.data.toString());
+                  }
+                },
+              ),
             ],
           ),
         ),
@@ -54,88 +69,144 @@ class LoungeScreen extends GetView<LoungeController> {
     );
   }
 
+  Container _feedRecommandedTitle() {
+    return Container(
+              width: 1.sw,
+              padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 5.h),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('오늘의 추천은 어떠세요? 😎', style: TextStyleUtils().loungeTitleTextStyle()),
+                  SizedBox(height: 5.h),
+                  Text('포잇에서 추천하는 가게들이에요', style: TextStyleUtils().bodyTextStyle(color: gray600),)
+                ],
+              ),
+            );
+  }
+
   /// 인기 있는 지역 썸네일
-  Widget _popularThumbnail(BuildContext context) {
+  Widget _popularThumbnail(BuildContext context, String currentLocation) {
+
+    var sigungu = currentLocation.split(' ')[1];
+
     return Container(
       width: 390.w,
-      padding: EdgeInsets.only(left: 20.w, right: 20.w),
+      // color: randomColor(),
+      padding: EdgeInsets.only(left: 20.w, right: 20.w, top: 10.h, bottom: 10.h),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '인기 있는 지역이에요 🔥',
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onBackground,
-              fontSize: 14.sp,
-              fontWeight: FontWeight.w700,
-              height: 0,
-            ),
+            currentLocation == 'null'
+                ? '인기 있는 가게를 확인해보세요 ??'
+                : '${currentLocation.split(' ')[1]}에서 인기 있는 가게를 확인해보세요 😋',
+            style: TextStyleUtils().loungeTitleTextStyle(),
           ),
-          SizedBox(
-            width: 390.w,
-            height: 215.h,
-            child: ListView.separated(
-              shrinkWrap: true,
-              scrollDirection: Axis.horizontal,
-              itemCount: controller.locationList.length,
-              itemBuilder: (context, index) {
-                return Column(
-                  children: [
-                    InkWell(
-                      onTap: () {
-                        controller.locationIndex.value = index;
-                        controller.moveToLocation();
-                        Get.toNamed(AppRoutes.map, arguments: {
-                          'lonlat': controller.lonlat,
-                          'location': controller.locationList[index],
-                        });
-                      },
-                      child: Container(
-                        width: 100.w,
-                        height: 175.h,
-                        alignment: Alignment.center,
-                        child: Container(
-                          width: 100.w,
-                          height: 150.h,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(6.r),
-                            child: CachedNetworkImage(
-                              imageUrl: controller.locationThumbnailList[index],
-                              fit: BoxFit.cover,
-                              placeholder: (context, url) => const Center(
-                                child: CircularProgressIndicator(),
-                              ),
-                              errorWidget: (context, url, error) => const Icon(Icons.error),
-                            ),
-                          )
-                        ),
-                      ),
-                    ),
-                    Row(
-                      children: [
-                        Text(
-                          controller.locationList[index],
-                          style: TextStyle(
-                            color: gray800,
-                            fontSize: 11.sp,
-                            fontWeight: FontWeight.w500,
-                            height: 0,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                );
-              },
-              separatorBuilder: (BuildContext context, int index) {
-                return SizedBox(width: 10.w);
-              },
+          /*RichText(
+            text: TextSpan(
+              text: sigungu == 'null'
+                  ? '인기 있는 가게를 확인해보세요 ??'
+                  : '$sigungu',
+              style: TextStyleUtils().loungeSubTitleTextStyle(null),
+              children: [
+                TextSpan(
+                  text: '에서 인기 있는 가게를 확인해보세요 ??',
+                  style: TextStyleUtils().loungeSubTitleTextStyle(null),
+                ),
+              ],
             ),
+          ),*/
+          SizedBox(height: 10.h),
+          FutureBuilder(
+            future: MapController.to.fetchSearchPlace('중구맛집', page: 1),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return DialogUtil().buildLoadingDialog();
+              } else {
+                return _feedRecommendList(context, snapshot.data);
+              }
+            },
           ),
         ],
+      ),
+    );
+  }
+
+  /// 인기 있는 가게 리스트
+  Widget _feedRecommendList(BuildContext context, List<dynamic>? data) {
+    return SizedBox(
+      width: 390.w,
+      height: 0.25.sh,
+      child: ListView.separated(
+        shrinkWrap: true,
+        scrollDirection: Axis.horizontal,
+        itemCount: controller.loungeFeedList.length,
+        itemBuilder: (context, index) {
+          return Column(
+            children: [
+              InkWell(
+                onTap: () {
+                  Get.toNamed(AppRoutes.feedDetail, arguments: data![index]);
+                },
+                child: Container(
+                  width: 0.3.sw,
+                  height: 0.5.sw,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Stack(
+                    children: [
+                      Container(
+                        width: 0.3.sw,
+                        height: 0.5.sw,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(6.r),
+                          child: CachedNetworkImage(
+                            imageUrl: data![index].thumbnail ?? '',
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) => const Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                            errorWidget: (context, url, error) =>
+                                const Icon(Icons.error),
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        bottom: 5.h,
+                        left: 5.w,
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 5.w, vertical: 2.h),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.5),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                data[index].name ?? '',
+                                style: TextStyleUtils().bodyTextStyle(
+                                  fontSize: 9.sp,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
+        separatorBuilder: (BuildContext context, int index) {
+          return SizedBox(width: 10.w);
+        },
       ),
     );
   }
@@ -148,54 +219,41 @@ class LoungeScreen extends GetView<LoungeController> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            '인기가 많은 서포터즈를 확인해보세요 🌟',
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onBackground,
-              fontSize: 14.sp,
-              fontWeight: FontWeight.w700,
-              height: 0,
-            ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('이달의 포잇터분들이에요 👀', style: TextStyleUtils().loungeTitleTextStyle(),),
+              SizedBox(height: 5.h),
+              Text('포잇에서 왕성하게 활동중이신 분들이에요', style: TextStyleUtils().bodyTextStyle(color: gray600,),),
+            ],
           ),
           SizedBox(height: 10.h),
-          Obx(() {
-            if (controller.users.isEmpty) {
-              return Container(
-                  width: 390.w,
-                  height: 90.h,
-                  child: Center(
-                    child: Text('서포터즈가 없습니다 🌟', style: TextStyle(color: gray500, fontSize: 14.sp, fontWeight: FontWeight.w600)),
-                  ));
-            } else {
-              return SizedBox(
-                width: 390.w,
-                height: 90.h,
-                child:
-                Obx(() => controller.users.isEmpty
-                  ? Container(
-                    width: 390.w,
-                    height: 90.h,
-                    child: Center(
-                      child: Text('서포터즈가 없습니다 🌟', style: TextStyle(color: gray500, fontSize: 14.sp, fontWeight: FontWeight.w600)),
-                    ),
-                )
-                  : // 리스트 아이템 겹치기
-                  ListView.separated(
-                    shrinkWrap: true,
-                    scrollDirection: Axis.horizontal,
-                    itemCount: controller.users.length,
-                    itemBuilder: (context, index) {
-                      return _circleAvatarItem(controller.users[index].photoUrl, controller.users[index].nickname ?? '');
-                    },
-                    separatorBuilder: (BuildContext context, int index) {
-                      // 간격 겹치기
-                      return SizedBox(width: 8.w);
-                    },
-                  ),
-                )
-              );
-            }
-          }),
+          SizedBox(
+              width: 390.w,
+              height: 80.h,
+              child: FutureBuilder(
+                future: controller.fetchSupportersList(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return DialogUtil().buildLoadingDialog();
+                  } else {
+                    AppLog.to.i('snapshot.data: ${snapshot.data}');
+                    return ListView.separated(
+                      shrinkWrap: true,
+                      scrollDirection: Axis.horizontal,
+                      itemCount: snapshot.data!.length,
+                      itemBuilder: (context, index) {
+                        return _circleAvatarItem(
+                            snapshot.data![index].photoUrl ?? '',
+                            snapshot.data![index].nickname ?? '');
+                      },
+                      separatorBuilder: (BuildContext context, int index) {
+                        return SizedBox(width: 10.w);
+                      },
+                    );
+                  }
+                },
+              )),
         ],
       ),
     );
@@ -204,96 +262,90 @@ class LoungeScreen extends GetView<LoungeController> {
   /// 인기 피드
   Widget _popularFeeds(BuildContext context) {
     return Container(
-      width: 390.w,
+      width: Get.width,
       padding: EdgeInsets.only(left: 20.w, right: 20.w),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            '인기가 많은 피드를 확인해보세요 👀',
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onBackground,
-              fontSize: 14.sp,
-              fontWeight: FontWeight.w700,
-              height: 0,
-            ),
-          ),
-          SizedBox(height: 10.h),
-          Obx(() {
-            if (FeedController.to.thumbnailList.isEmpty) {
-              return SizedBox(
-                width: 390.w,
-                height: 175.h,
-                child: Center(
-                  child: Text('피드가 없습니다 👀', style: TextStyle(color: gray500, fontSize: 14.sp, fontWeight: FontWeight.w600)),
-                ),
-              );
-            } else {
-              return _feedThumbnailList();
-            }
-          }),
-        ],
-      ),
+      child: _feedThumbnailList(),
     );
   }
 
   Widget _feedThumbnailList() {
-    return SizedBox(
+    return Container(
       width: 390.w,
-      height: 175.h,
-      child: ListView.separated(
-        shrinkWrap: true,
-        scrollDirection: Axis.horizontal,
-        itemCount: controller.loungeFeedList.length,
-        itemBuilder: (context, index) {
-          return Column(
-            children: [
-              InkWell(
-                onTap: () {
-                  //Get.toNamed(AppRoutes.feedDetail, arguments: controller.loungeFeedList[index]);
-                },
-                child: Container(
-                  width: 100.w,
-                  height: 150.h,
-                  alignment: Alignment.center,
-                  child: Container(
-                    width: 100.w,
-                    height: 150.h,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(6.r),
-                      child: CachedNetworkImage(
-                        imageUrl: controller.loungeFeedList[index].thumbnailUrls![0],
-                        fit: BoxFit.cover,
-                        placeholder: (context, url) => const Center(
-                          child: CircularProgressIndicator(),
+      height: 0.25.sh,
+      margin: EdgeInsets.only(top: 10.h),
+      child: FutureBuilder(
+        future: controller.fetchLoungeFeedList(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return DialogUtil().buildLoadingDialog();
+          } else {
+            return ListView.separated(
+              shrinkWrap: true,
+              scrollDirection: Axis.horizontal,
+              itemCount: controller.loungeFeedList.length,
+              itemBuilder: (context, index) {
+                return Column(
+                  children: [
+                    InkWell(
+                      onTap: () {
+                        Get.toNamed(AppRoutes.feedDetail,
+                            arguments: snapshot.data![index]);
+                      },
+                      child: Container(
+                        width: 0.3.sw,
+                        height: 0.5.sw,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(6),
                         ),
-                        errorWidget: (context, url, error) => const Icon(Icons.error),
+                        child: Stack(
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(6.r),
+                              child: CachedNetworkImage(
+                                imageUrl: snapshot.data![index].thumbnailUrls![0] ?? '',
+                                fit: BoxFit.cover,
+                                placeholder: (context, url) => const Center(
+                                  child: CircularProgressIndicator(),
+                                ),
+                                errorWidget: (context, url, error) => const Icon(Icons.error),
+                              ),
+                            ),
+                            Positioned(
+                              bottom: 5.h,
+                              left: 5.w,
+                              child: Container(
+                                padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 2.h),
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withOpacity(0.5),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      snapshot.data![index].userNickname ?? '',
+                                      style: TextStyleUtils().bodyTextStyle(
+                                        fontSize: 9.sp,
+                                        fontWeight: FontWeight.w500,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                ),
-              ),
-              Row(
-                children: [
-                  Text(
-                    controller.loungeFeedList[index].storeName ?? '',
-                    style: TextStyle(
-                      color: gray800,
-                      fontSize: 11.sp,
-                      fontWeight: FontWeight.w500,
-                      height: 0,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          );
-        },
-        separatorBuilder: (BuildContext context, int index) {
-          return SizedBox(width: 10.w);
+                  ],
+                );
+              },
+              separatorBuilder: (BuildContext context, int index) {
+                return SizedBox(width: 10.w);
+              },
+            );
+          }
         },
       ),
     );
@@ -347,12 +399,7 @@ class LoungeScreen extends GetView<LoungeController> {
           children: [
             Text(
               value,
-              style: TextStyle(
-                color: gray500,
-                fontSize: 11.sp,
-                fontWeight: FontWeight.w600,
-                height: 0,
-              ),
+              style: TextStyleUtils().bodyTextStyle(fontSize: 8.sp, fontWeight: FontWeight.w500),
             ),
           ],
         ),
@@ -365,20 +412,21 @@ class LoungeScreen extends GetView<LoungeController> {
     final random = Random();
 
     final pastelColors = [
-      Color(0xffFFC0CB),
-      Color(0xffFFB6C1),
-      Color(0xffFF69B4),
-      Color(0xffFF1493),
-      Color(0xffDB7093),
-      Color(0xffC71585),
-      Color(0xffFFA07A),
-      Color(0xffFA8072),
-      Color(0xffE9967A),
-      Color(0xffF08080),
-      Color(0xffCD5C5C),
+     Colors.pink[200],
+      Colors.purple[200],
+      Colors.blue[200],
+      Colors.green[200],
+      Colors.yellow[200],
+      Colors.orange[200],
+      Colors.red[200],
+      Colors.teal[200],
+      Colors.indigo[200],
+      Colors.cyan[200],
+      Colors.lime[200],
+      Colors.amber[200],
+      Colors.deepOrange[200],
     ];
 
     return pastelColors[random.nextInt(pastelColors.length)];
   }
-
 }

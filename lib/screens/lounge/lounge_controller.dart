@@ -19,6 +19,10 @@ class LoungeController extends GetxController {
   List<FeedModel> get loungeFeedList => _loungeFeedList;
   set loungeFeedList(List<FeedModel> value) => _loungeFeedList.value = value;
 
+  final _supportersList = <UserModel>[].obs;
+  List<UserModel> get supportersList => _supportersList;
+  set supportersList(List<UserModel> value) => _supportersList.value = value;
+
   final _loungeThumbnailList = <String>[].obs;
   List<String> get loungeThumbnailList => _loungeThumbnailList;
 
@@ -105,18 +109,38 @@ class LoungeController extends GetxController {
 
   }
 
-  /// 라운지 피드 가져오기
-  Future<void> fetchLoungeFeedList() async {
+  // 서포터즈 리스트 가져오기
+  Future<List<UserModel>> fetchSupportersList() async {
     try {
-      final feedList = <FeedModel>[];
-      final snapshot = await FirebaseFirestore.instance.collection('feed').get();
-      for (final doc in snapshot.docs) {
-        final feed = FeedModel.fromJson(doc.data() as Map<String, dynamic>);
-        feedList.add(feed);
+      final supportersList = <UserModel>[];
+      final querySnapshot = await FirebaseFirestore.instance.collection('users').get();
+      for (final query in querySnapshot.docs) {
+        final user = UserModel.fromJson(query.data() as Map<String, dynamic>);
+        supportersList.add(user);
       }
-      loungeFeedList = feedList;
+      _logger.d('fetchSupportersList: $supportersList');
+      _supportersList.value = supportersList;
+      return supportersList;
     } catch (e) {
-      _logger.e('fetchLoungeFeedList error: $e');
+      _logger.d('fetchSupportersList error: $e');
+      return [];
+    }
+  }
+
+  /// 라운지 피드 가져오기
+  Future<List<FeedModel>> fetchLoungeFeedList() async {
+    try {
+      final loungeFeedList = <FeedModel>[];
+      final querySnapshot = await FirebaseFirestore.instance.collection('feeds').get();
+      for (final query in querySnapshot.docs) {
+        final feed = FeedModel.fromJson(query.data() as Map<String, dynamic>);
+        loungeFeedList.add(feed);
+      }
+      _loungeFeedList.value = loungeFeedList;
+      return loungeFeedList;
+    } catch (e) {
+      _logger.d('fetchLoungeFeedList error: $e');
+      return [];
     }
   }
 

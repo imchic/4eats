@@ -8,6 +8,7 @@ import 'package:logger/logger.dart';
 import '../../model/biz_model.dart';
 import '../../utils/app_routes.dart';
 import '../../utils/colors.dart';
+import '../../utils/text_style.dart';
 import '../../widget/base_appbar.dart';
 import '../login/user_store.dart';
 import 'biz_controller.dart';
@@ -48,26 +49,29 @@ class BizScreen extends GetView<BizController> {
                         child: RichText(
                           text: TextSpan(
                             text: '안녕하세요, ',
-                            style: TextStyle(
+                            style: TextStyleUtils().bodyTextStyle(
+                              color: Theme.of(context).colorScheme.onBackground,
                               fontSize: 14.sp,
-                              color: gray600,
                               fontWeight: FontWeight.w700,
+                              height: 0,
                             ),
                             children: [
                               TextSpan(
                                 text: UserStore.to.userProfile.nickname ?? '',
-                                style: TextStyle(
-                                  fontSize: 14.sp,
+                                style: TextStyleUtils().bodyTextStyle(
                                   color: Theme.of(context).colorScheme.primary,
+                                  fontSize: 14.sp,
                                   fontWeight: FontWeight.w700,
+                                  height: 0,
                                 ),
                               ),
                               TextSpan(
                                 text: '님',
-                                style: TextStyle(
+                                style: TextStyleUtils().bodyTextStyle(
+                                  color: Theme.of(context).colorScheme.onBackground,
                                   fontSize: 14.sp,
-                                  color: gray600,
                                   fontWeight: FontWeight.w700,
+                                  height: 0,
                                 ),
                               ),
                             ],

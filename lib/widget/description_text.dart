@@ -52,6 +52,7 @@ class _DescriptionTextState extends State<DescriptionText> {
                 fontSize: widget.fontSize ?? 12.sp,
                 color: widget.color ?? Colors.white,
                 fontWeight: widget.fontWeight ?? FontWeight.normal,
+                height: 1.5,
               ),
             )
           : Column(

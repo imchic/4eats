@@ -134,6 +134,11 @@ flutter:
         - asset: assets/fonts/pretendard/Pretendard-Thin.ttf
           weight: 100
 
-    - family: Whisper
+    - family: GmarketSans
       fonts:
-        - asset: assets/fonts/Whisper-Regular.ttf
+        - asset: assets/fonts/gmarket/GmarketSansTTFLight.ttf
+          weight: 500
+        - asset: assets/fonts/gmarket/GmarketSansTTFMedium.ttf
+          weight: 700
+        - asset: assets/fonts/gmarket/GmarketSansTTFBold.ttf
+          weight: 800

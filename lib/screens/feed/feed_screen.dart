@@ -110,26 +110,6 @@ class FeedScreen extends GetView<FeedController> {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              /*Container(
-                margin: EdgeInsets.only(top:4.h),
-                child: TextButton(
-                  onPressed: () {
-                    Get.back();
-                  },
-                  child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 2.h),
-                    child: Text(
-                      '포잇.',
-                      textAlign: TextAlign.left,
-                      style: TextStyleUtils().whiteTextStyle(
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ),
-                ),
-              ),*/
-
               // 시군구
               Container(
                 child: Column(
@@ -158,10 +138,8 @@ class FeedScreen extends GetView<FeedController> {
                                 Get.toNamed(AppRoutes.search);
                               },
                               child: Container(
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: 10.w, vertical: 10.h),
-                                child: SvgPicture.asset('assets/images/ic_search.svg',
-                                    color: Colors.white, width: 20.w, height: 20.h),
+                                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
+                                child: SvgPicture.asset('assets/images/ic_search.svg', color: Colors.white, width: 20.w, height: 20.h),
                               ),
                             ),
                             InkWell(
@@ -179,10 +157,8 @@ class FeedScreen extends GetView<FeedController> {
                                 });
                               },
                               child: Container(
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: 10.w, vertical: 10.h),
-                                child: SvgPicture.asset('assets/images/ic_map.svg',
-                                    color: Colors.white, width: 20.w, height: 20.h),
+                                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
+                                child: SvgPicture.asset('assets/images/ic_map.svg', color: Colors.white, width: 20.w, height: 20.h),
                               ),
                             ),
                             InkWell(
@@ -230,14 +206,14 @@ class FeedScreen extends GetView<FeedController> {
                       controller.feedList[index].storeName ?? '',
                       style: TextStyleUtils().whiteTextStyle(
                         fontSize: 12.sp,
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                     Text(
                       '  ${controller.feedList[index].storeType ?? ''}',
                       style: TextStyleUtils().whiteTextStyle(
                         fontSize: 10.sp,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ],
@@ -310,8 +286,7 @@ class FeedScreen extends GetView<FeedController> {
                       ),
                       child: Obx(
                         () => CachedNetworkImage(
-                          imageUrl:
-                              controller.feedList[index].userProfilePhoto ?? '',
+                          imageUrl: controller.feedList[index].userProfilePhoto ?? '',
                           imageBuilder: (context, imageProvider) => Container(
                             width: 50.w,
                             height: 50.h,
@@ -357,7 +332,7 @@ class FeedScreen extends GetView<FeedController> {
                           controller.feedList[index].userNickname ?? '',
                           style: TextStyleUtils().whiteTextStyle(
                             fontSize: 12.sp,
-                            fontWeight: FontWeight.w800,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                         SizedBox(height: 4.h),
@@ -374,7 +349,7 @@ class FeedScreen extends GetView<FeedController> {
                             textAlign: TextAlign.center,
                             style: TextStyleUtils().whiteTextStyle(
                               fontSize: 9.sp,
-                              fontWeight: FontWeight.w600,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
                         )
@@ -465,7 +440,7 @@ class FeedScreen extends GetView<FeedController> {
         () => DescriptionText(
           text: controller.feedList[index].description ?? '',
           fontSize: 12.sp,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w500,
         ),
       ),
     );
@@ -626,7 +601,7 @@ class FeedScreen extends GetView<FeedController> {
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 12.sp,
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             );
@@ -664,7 +639,7 @@ class FeedScreen extends GetView<FeedController> {
                   '댓글 ${controller.sumReplyCount ?? 0}개',
                   style: TextStyleUtils().whiteTextStyle(
                     fontSize: 10.sp,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ],
@@ -707,22 +682,21 @@ class FeedScreen extends GetView<FeedController> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       // 댓글 리스트
-                      controller.sumReplyCount == 0
+                      controller.commentArrayList.isEmpty
                           ? SizedBox(
                               width: Get.width,
-                              height: 0.25.sh,
+                              height: 0.3.sh,
                               child: Center(
                                 child: Text(
                                   '댓글이 없어요 😢',
-                                  style: TextStyle(
-                                    color: Colors.grey[400],
-                                    fontSize: 12.sp,
-                                    fontWeight: FontWeight.w600,
+                                  style: TextStyleUtils().bodyTextStyle(
+                                    color: gray400,
+                                    fontSize: 11.sp,
+                                    fontWeight: FontWeight.w500,
                                   ),
-                                ),
                               ),
                             )
-
+                          )
                           // 댓글 리스트
                           : Column(
                               mainAxisSize: MainAxisSize.min,
@@ -731,7 +705,7 @@ class FeedScreen extends GetView<FeedController> {
                               children: [
                                 SizedBox(
                                   width: Get.width,
-                                  height: controller.commentArrayList[feedIndex].length < 10
+                                  height: controller.sumReplyCount > 10
                                       ? 0.4.sh
                                       : 0.3.sh,
                                   child: Obx(
@@ -762,8 +736,6 @@ class FeedScreen extends GetView<FeedController> {
                               child: TextField(
                                 controller: controller.commentController,
                                 onTap: () {
-                                  _logger.d('onTap');
-
                                   if (UserStore.to.isLoggedIn) {
                                     if (controller.commentController.text.contains('@')) {
                                       controller.isMentionLoading = true;
@@ -793,7 +765,7 @@ class FeedScreen extends GetView<FeedController> {
                                   hintStyle: TextStyle(
                                     color: gray600,
                                     fontSize: 10.sp,
-                                    fontWeight: FontWeight.w400,
+                                    fontWeight: FontWeight.w500,
                                   ),
                                   border: InputBorder.none,
                                 ),
@@ -871,7 +843,9 @@ class FeedScreen extends GetView<FeedController> {
   Widget buildComment(int feedIndex) {
     return ListView.separated(
       shrinkWrap: true,
-      itemCount: controller.commentArrayList[feedIndex].length,
+      itemCount: controller.commentArrayList[feedIndex].isEmpty
+          ? 0
+          : controller.commentArrayList[feedIndex].length,
       itemBuilder: (context, commentIndex) {
         return SizedBox(
           child: Column(
@@ -1254,7 +1228,7 @@ class FeedScreen extends GetView<FeedController> {
                                               .startsWith('@')
                                           ? '${controller.commentArrayList[feedIndex][commentIndex].replyCommentList![replyIndex].comment!.split(' ')[0]} '
                                           : '',
-                                      style: TextStyleUtils().commentContentSetColorTextStyle(Theme.of(Get.context!).colorScheme.secondary),
+                                      style: TextStyleUtils().commentContentSetColorTextStyle(),
                                     ),
                                     TextSpan(
                                       text: // 골뱅이 제외 다 보여줌

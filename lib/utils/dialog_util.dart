@@ -9,11 +9,22 @@ import 'colors.dart';
 
 class DialogUtil {
 
+  Widget buildLoadingDialog() {
+    return Center(
+      child: Lottie.asset(
+        'assets/lottie/page_loading.json',
+        width: 100.w,
+        height: 100.h,
+        fit: BoxFit.fill,
+      ),
+    );
+  }
+
   static void showLoadingDialog() {
     Get.dialog(
       Center(
         child: Lottie.asset(
-          'assets/lottie/loading.json',
+          'assets/lottie/page_loading.json',
           width: 100.w,
           height: 100.h,
           fit: BoxFit.fill,

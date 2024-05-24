@@ -68,9 +68,7 @@ class MapController extends GetxController {
   Future<void> onInit() async {
     super.onInit();
     searchController = TextEditingController();
-    await getCurrentLocation(
-      Get.arguments['lonlat']
-    );
+    await getCurrentLocation();
   }
 
   @override
@@ -128,15 +126,16 @@ class MapController extends GetxController {
   }
 
   /// 현재 위치 값 구하기
-  Future<void> getCurrentLocation(argument) async {
+  Future<LatLng> getCurrentLocation() async {
 
     await LocationService.to.getLocation();
-    currentLocation.value = LatLng(argument[0], argument[1]);
+    currentLocation.value = LatLng(LocationService.to.locationData.latitude!, LocationService.to.locationData.longitude!);
 
     await addMarker(currentLocation.value, null);
     await convertLatLngToAddress(currentLocation.value);
 
     isMapLoading = false;
+    return currentLocation.value;
   }
 
   /// 현재 위치로 이동
@@ -200,7 +199,7 @@ class MapController extends GetxController {
   }
 
   /// 주소 변환 (위경도 -> 주소)
-  convertLatLngToAddress(LatLng latLng) async {
+  Future<String> convertLatLngToAddress(LatLng latLng) async {
     var lat = currentLocation.value.latitude.toString();
     var lng = currentLocation.value.longitude.toString();
 
@@ -226,7 +225,7 @@ class MapController extends GetxController {
 
     if(response.data['results'].isEmpty) {
       AppLog.to.d('주소가 없습니다.');
-      return;
+      return '';
     }
 
     var sido = response.data['results'][0]['region']['area1']['name'];
@@ -236,13 +235,14 @@ class MapController extends GetxController {
     var ho = response.data['results'][0]['land']['number2'];
 
     searchAddress.value = '$sido $sigungu $dong $land $ho';
+    return searchAddress.value;
     //_logger.d('searchAddress: $searchAddress');
   }
 
   /// 지도 내 네이버 플레이스 검색해서 마커 표출
   /// value: 검색어
   /// page: 페이지
-  Future<void> fetchSearchPlace(String value, {required page}) async {
+  Future<RxList<MapModel>> fetchSearchPlace(String value, {required page}) async {
 
     storeList.clear();
     containStoreList.clear();
@@ -252,7 +252,7 @@ class MapController extends GetxController {
 
       if(value.isEmpty) {
         AppLog.to.d('검색어가 없습니다.');
-        return;
+        return storeList;
       }
 
       isSearchLoading.value = true;
@@ -356,7 +356,7 @@ class MapController extends GetxController {
       if(storeList.isEmpty) {
         AppLog.to.d('검색 결과가 없습니다.');
         isSearchLoading.value = false;
-        return;
+        return storeList;
       }
 
       await checkContainsStore();
@@ -368,9 +368,12 @@ class MapController extends GetxController {
 
       isSearchLoading.value = false;
 
+      return storeList;
+
 
     } catch (e) {
       AppLog.to.e('fetchSearchPlace error: $e');
+      return storeList;
       //GlobalToastto.showToast('검색 결과가 없습니다');
     }
 
@@ -384,7 +387,7 @@ class MapController extends GetxController {
       var x = element.data()['x'];
       var y = element.data()['y'];
       var totalPoint = element.data()['storePoint'];
-      AppLog.to.d('x: $x, y: $y >> total point >> $totalPoint');
+      //AppLog.to.d('x: $x, y: $y >> total point >> $totalPoint');
       containStoreList.add(MapModel(
         name: element.data()['storeName'],
         x: double.parse(x.toString()).toString(),
