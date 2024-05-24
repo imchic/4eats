@@ -76,6 +76,7 @@ class FeedScreen extends GetView<FeedController> {
                 controller.allPause();
                 controller.allMute();
                 controller.initializeVideoPlayer(controller.videoControllerList);
+                controller.fetchComments(controller.feedList[index].seq ?? '', index);
                 controller.fetchLikes(controller.feedList[index].seq ?? '');
                 controller.fetchBookmarks(controller.feedList[index].seq ?? '');
               },
@@ -109,7 +110,7 @@ class FeedScreen extends GetView<FeedController> {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
+              /*Container(
                 margin: EdgeInsets.only(top:4.h),
                 child: TextButton(
                   onPressed: () {
@@ -127,7 +128,7 @@ class FeedScreen extends GetView<FeedController> {
                     ),
                   ),
                 ),
-              ),
+              ),*/
 
               // 시군구
               Container(
@@ -138,6 +139,7 @@ class FeedScreen extends GetView<FeedController> {
                       children: [
                         Container(
                           width: 0.5.sw,
+                          margin: EdgeInsets.only(top: 34.h),
                           padding: EdgeInsets.symmetric(horizontal: 10.w),
                           child: Text(
                             // 시군구 표현
@@ -364,7 +366,7 @@ class FeedScreen extends GetView<FeedController> {
                           height: 0.028.sh,
                           padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
                           decoration: BoxDecoration(
-                            color: Color(0xff5acca8),
+                            color: Color(0xff52A98D),
                             borderRadius: BorderRadius.circular(50.r),
                           ),
                           child: Text(
@@ -552,9 +554,7 @@ class FeedScreen extends GetView<FeedController> {
                             ),
                             child: SingleChildScrollView(
                               child: Text(
-                                controller.convertMenuList(
-                                    controller.feedList[index].storeMenuInfo ??
-                                        ''),
+                                controller.convertMenuList(controller.feedList[index].storeMenuInfo ?? ''),
                                 style: TextStyle(
                                   fontSize: 11.sp,
                                   color: Colors.white,
@@ -608,7 +608,6 @@ class FeedScreen extends GetView<FeedController> {
   _feedHashtags(BuildContext context, int index) {
     return Container(
       height: 24.h,
-      margin: EdgeInsets.only(top: 4.h, left: 4.w),
       child: SizedBox(
         child: ListView.builder(
           shrinkWrap: true,
@@ -626,7 +625,7 @@ class FeedScreen extends GetView<FeedController> {
                 controller.feedList[index].hashTags?[idx] ?? '',
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 11.sp,
+                  fontSize: 12.sp,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -640,8 +639,7 @@ class FeedScreen extends GetView<FeedController> {
 
   /// 댓글
   _feedComments(BuildContext context, int index) {
-    return Obx(
-      () => Container(
+    return Container(
         width: 1.sw,
         margin: EdgeInsets.only(top: 10.h, left: 4.w),
         child: InkWell(
@@ -656,24 +654,23 @@ class FeedScreen extends GetView<FeedController> {
           },
           child: Container(
             width: 0.2.w,
-            margin: EdgeInsets.only(top: 10.h, left: 4.w),
+            margin: EdgeInsets.only(top: 4.h, left: 4.w),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(
-                  controller.feedList[index].comments.toString(),
+                  '댓글 ${controller.sumReplyCount ?? 0}개',
                   style: TextStyleUtils().whiteTextStyle(
                     fontSize: 10.sp,
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ],
             ),
           ),
         ),
-      ),
     );
   }
 
@@ -710,7 +707,7 @@ class FeedScreen extends GetView<FeedController> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       // 댓글 리스트
-                      controller.commentArrayList.isEmpty
+                      controller.sumReplyCount == 0
                           ? SizedBox(
                               width: Get.width,
                               height: 0.25.sh,
@@ -1172,7 +1169,9 @@ class FeedScreen extends GetView<FeedController> {
   Widget buildReplies(int feedIndex, int commentIndex) {
     return ListView.builder(
       shrinkWrap: true,
-      itemCount: controller.commentArrayList[feedIndex][commentIndex].replyCommentList?.length,
+      itemCount: controller.commentArrayList[feedIndex][commentIndex].replyCommentList!.isEmpty
+          ? 0
+          : controller.commentArrayList[feedIndex][commentIndex].replyCommentList!.length,
       itemBuilder: (context, replyIndex) {
         return Container(
           margin: EdgeInsets.only(left: 20.w, top: 4.h,),

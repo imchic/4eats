@@ -49,6 +49,7 @@ class FeedController extends GetxController {
 
   RxInt currentFeedIndex = 0.obs;
   RxInt currentVideoUrlIndex = 0.obs;
+  RxInt sumReplyCount = 0.obs;
 
   RxInt duration = 0.obs;
   List<RxInt> durationList = <RxInt>[].obs;
@@ -512,6 +513,8 @@ class FeedController extends GetxController {
   Future<void> fetchComments(String feedId, int feedIndex) async {
     try {
 
+      sumReplyCount.value = 0;
+
       QuerySnapshot feedSnapshot = await _firestore
           .collection('feeds')
           .where('seq', isEqualTo: feedId)
@@ -521,28 +524,29 @@ class FeedController extends GetxController {
 
       for (var i = 0; i < feedSnapshot.docs.length; i++) {
 
-        // QuerySnapshot<Map<String, dynamic>> commentSnapshot = await feedSnapshot.docs[i].reference.collection('comments').orderBy('createdAt', descending: true).get();
-        //
-        // for (var j = 0; j < commentSnapshot.docs.length; j++) {
-        //   comments.add(CommentModel.fromMap(commentSnapshot.docs[j].data()));
-        //   comments[j].replyCommentList = [];
-        //
-        //   if(commentSnapshot.docs[j].data()['isReply'] == true) {
-        //     QuerySnapshot<Map<String, dynamic>> replySnapshot = await commentSnapshot.docs[j].reference.collection('reply').orderBy('createdAt', descending: true).get();
-        //     for (var k = 0; k < replySnapshot.docs.length; k++) {
-        //       comments[j].replyCommentList!.add(CommentModel.fromMap(replySnapshot.docs[k].data()));
-        //     }
-        //   } else {
-        //     comments[j].replyCommentList = [];
-        //   }
-        //
-        //   //AppLog.to.d('_commentArrayList: ${comments[j].toString()}');
-        //   _commentArrayList.add(comments);
-        // }
-        //
-        // _isCommentLoading.value = false;
+        QuerySnapshot<Map<String, dynamic>> commentSnapshot = await feedSnapshot.docs[i].reference.collection('comments').orderBy('createdAt', descending: true).get();
 
-        await feedSnapshot.docs[i].reference.collection('comments').orderBy('createdAt', descending: true).snapshots().listen((event) {
+        for (var j = 0; j < commentSnapshot.docs.length; j++) {
+          comments.add(CommentModel.fromMap(commentSnapshot.docs[j].data()));
+          comments[j].replyCommentList = [];
+
+          if(commentSnapshot.docs[j].data()['isReply'] == true) {
+            QuerySnapshot<Map<String, dynamic>> replySnapshot = await commentSnapshot.docs[j].reference.collection('reply').orderBy('createdAt', descending: true).get();
+            for (var k = 0; k < replySnapshot.docs.length; k++) {
+              comments[j].replyCommentList!.add(CommentModel.fromMap(replySnapshot.docs[k].data()));
+              sumReplyCount.value++;
+            }
+          } else {
+            comments[j].replyCommentList = [];
+          }
+
+          _commentArrayList.add(comments);
+          sumReplyCount.value++;
+        }
+
+        _isCommentLoading.value = false;
+
+/*        await feedSnapshot.docs[i].reference.collection('comments').orderBy('createdAt', descending: true).snapshots().listen((event) {
           comments = [];
           for (var j = 0; j < event.docs.length; j++) {
             comments.add(CommentModel.fromMap(event.docs[j].data()));
@@ -552,6 +556,7 @@ class FeedController extends GetxController {
               event.docs[j].reference.collection('reply').orderBy('createdAt', descending: true).get().then((value) {
                 for (var k = 0; k < value.docs.length; k++) {
                   comments[j].replyCommentList!.add(CommentModel.fromMap(value.docs[k].data()));
+                  sumReplyCount.value++;
                 }
               });
             } else {
@@ -560,10 +565,13 @@ class FeedController extends GetxController {
 
             //AppLog.to.d('_commentArrayList: ${comments[j].toString()}');
             _commentArrayList.add(comments);
+            sumReplyCount.value++;
           }
         });
-      }
 
+        _isCommentLoading.value = false;*/
+
+      }
 
     } catch (e) {
       AppLog.to.e('fetchComments error: $e');
@@ -1165,6 +1173,35 @@ class FeedController extends GetxController {
     } catch (e) {
       AppLog.to.e('fetchMentionUser error: $e');
     }
+  }
+
+
+  String totalReplyCount(int index) {
+
+    // // 대댓글이 없을 경우
+    // var replyCnt = 0;
+    //
+    // if(_commentArrayList[currentFeedIndex.value][index].replyCommentList!.isEmpty) {
+    //   replyCnt = 0;
+    // } else {
+    //   replyCnt = _commentArrayList[currentFeedIndex.value][index].replyCommentList!.length;
+    // }
+    //
+    // // 댓글 수 + 대댓글 수
+    // var totalReplyCount = _commentArrayList[currentFeedIndex.value][index].replyCommentList!.length + replyCnt;
+    // AppLog.to.d('totalReplyCount: $totalReplyCount');
+    //
+    // return totalReplyCount.toString();
+
+   //commentArrayList[index].length + commentArrayList[index].fold(0, (previousValue, element) => previousValue + element.replyCommentList!.length);
+
+    if(_commentArrayList[currentFeedIndex.value][index].replyCommentList!.isEmpty) {
+      return _commentArrayList[currentFeedIndex.value][index].replyCommentList!.length.toString();
+    } else {
+      return _commentArrayList[currentFeedIndex.value][index].replyCommentList!.length.toString();
+    }
+
+
   }
 
 
