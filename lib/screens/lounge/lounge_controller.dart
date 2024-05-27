@@ -1,9 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:foreats/screens/map/map_controller.dart';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
 
 import '../../model/feed_model.dart';
+import '../../model/map_model.dart';
 import '../../model/user_model.dart';
 import '../login/user_store.dart';
 
@@ -118,7 +120,7 @@ class LoungeController extends GetxController {
         final user = UserModel.fromJson(query.data() as Map<String, dynamic>);
         supportersList.add(user);
       }
-      _logger.d('fetchSupportersList: $supportersList');
+      //_logger.d('fetchSupportersList: $supportersList');
       _supportersList.value = supportersList;
       return supportersList;
     } catch (e) {
@@ -145,6 +147,13 @@ class LoungeController extends GetxController {
   }
 
   /// 가게 썸네일 가져오기
-
+  Future<RxList<MapModel>> fetchSearchPlace() async {
+    try {
+     return MapController.to.fetchSearchPlace('맛집', page: 1);
+    } catch (e) {
+      _logger.d('fetchLoungeThumbnailList error: $e');
+      return RxList<MapModel>();
+    }
+  }
 
 }

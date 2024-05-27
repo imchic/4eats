@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:googleapis/admob/v1.dart';
 
 import '../../utils/app_routes.dart';
 import '../../utils/colors.dart';
@@ -53,11 +54,14 @@ class LoungeScreen extends GetView<LoungeController> {
                 },
               ),
               FutureBuilder(
-                future: MapController.to.convertLatLngToAddress(MapController.to.currentLocation.value),
+                future: MapController.to.convertLatLngToAddress(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return DialogUtil().buildLoadingDialog();
                   } else {
+
+                    AppLog.to.i('snapshot.data: ${snapshot.data}');
+
                     return _popularThumbnail(context, snapshot.data.toString());
                   }
                 },
@@ -99,7 +103,7 @@ class LoungeScreen extends GetView<LoungeController> {
           Text(
             currentLocation == 'null'
                 ? '인기 있는 가게를 확인해보세요 ??'
-                : '${currentLocation.split(' ')[1]}에서 인기 있는 가게를 확인해보세요 😋',
+                : '$sigungu에서 인기 있는 가게를 확인해보세요 😋',
             style: TextStyleUtils().loungeTitleTextStyle(),
           ),
           /*RichText(
@@ -117,12 +121,25 @@ class LoungeScreen extends GetView<LoungeController> {
             ),
           ),*/
           SizedBox(height: 10.h),
+          // FutureBuilder(
+          //   future: MapController.to.fetchSearchPlace('맛집', page: 1),
+          //   builder: (context, snapshot) {
+          //     if (snapshot.connectionState == ConnectionState.waiting) {
+          //       return DialogUtil().buildLoadingDialog();
+          //     } else {
+          //       AppLog.to.i('snapshot.data: ${snapshot.data}');
+          //       return _feedRecommendList(context, snapshot.data);
+          //     }
+          //   },
+          // ),
+          // 1초 뒤에 검색
           FutureBuilder(
-            future: MapController.to.fetchSearchPlace('중구맛집', page: 1),
+            future: controller.fetchSearchPlace(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return DialogUtil().buildLoadingDialog();
               } else {
+                //AppLog.to.i('snapshot.data: ${snapshot.data}');
                 return _feedRecommendList(context, snapshot.data);
               }
             },
@@ -237,7 +254,7 @@ class LoungeScreen extends GetView<LoungeController> {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return DialogUtil().buildLoadingDialog();
                   } else {
-                    AppLog.to.i('snapshot.data: ${snapshot.data}');
+                    //AppLog.to.i('snapshot.data: ${snapshot.data}');
                     return ListView.separated(
                       shrinkWrap: true,
                       scrollDirection: Axis.horizontal,

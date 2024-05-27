@@ -6,9 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:foreats/model/store_model.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:dio/dio.dart' as dio;
+import 'package:googleapis/admob/v1.dart';
 import 'package:widget_marker_google_map/widget_marker_google_map.dart';
 
 import '../../model/map_marker.dart';
@@ -96,7 +98,7 @@ class MapController extends GetxController {
     isMapLoading = false;
 
     await fetchSearchPlace('맛집', page: 1);
-    await convertLatLngToAddress(currentLocation.value);
+    await convertLatLngToAddress();
 
   }
 
@@ -105,7 +107,7 @@ class MapController extends GetxController {
   }
 
   Future<void> onCameraIdle() async {
-    await convertLatLngToAddress(currentLocation.value);
+    await convertLatLngToAddress();
   }
 
   Future<void> onCameraMoveStarted() async {
@@ -125,14 +127,26 @@ class MapController extends GetxController {
     await fetchSearchPlace(searchPlace.value, page: page.value);
   }
 
+  Future<LatLng> initCurrentLocation() async {
+    // geolocator
+    var location = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+    AppLog.to.d('location: ${location.latitude}, ${location.longitude}');
+
+    currentLocation.value = LatLng(location.latitude, location.longitude);
+    return currentLocation.value;
+  }
+
   /// 현재 위치 값 구하기
   Future<LatLng> getCurrentLocation() async {
 
-    await LocationService.to.getLocation();
-    currentLocation.value = LatLng(LocationService.to.locationData.latitude!, LocationService.to.locationData.longitude!);
+    //await LocationService.to.getLocation();
+
+    await initCurrentLocation();
+
+    currentLocation.value = LatLng(currentLocation.value.latitude, currentLocation.value.longitude);
 
     await addMarker(currentLocation.value, null);
-    await convertLatLngToAddress(currentLocation.value);
+    await convertLatLngToAddress();
 
     isMapLoading = false;
     return currentLocation.value;
@@ -199,7 +213,10 @@ class MapController extends GetxController {
   }
 
   /// 주소 변환 (위경도 -> 주소)
-  Future<String> convertLatLngToAddress(LatLng latLng) async {
+  Future<String> convertLatLngToAddress() async {
+
+    await initCurrentLocation();
+
     var lat = currentLocation.value.latitude.toString();
     var lng = currentLocation.value.longitude.toString();
 
@@ -248,6 +265,7 @@ class MapController extends GetxController {
     containStoreList.clear();
     markers.clear();
 
+
     try {
 
       if(value.isEmpty) {
@@ -259,7 +277,7 @@ class MapController extends GetxController {
       LatLng latLng = currentLocation.value;
 
       var searchPlaceUrl =
-              'https://map.naver.com/p/api/search/allSearch?query=${value}&type=food&searchCoord=${latLng.longitude};${latLng.latitude}&page=$page&displayCount=50&isPlaceRecommendationReplace=true&lang=ko';
+              'https://map.naver.com/p/api/search/allSearch?query=$value&type=food&searchCoord=${latLng.longitude};${latLng.latitude}&page=$page&displayCount=50&isPlaceRecommendationReplace=true&lang=ko';
 
       AppLog.to.d('네이버 플레이스 검색: $searchPlaceUrl');
 
@@ -409,6 +427,7 @@ class MapController extends GetxController {
         }
       }
     }
+
 
     await setMarkers();
 

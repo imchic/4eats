@@ -183,7 +183,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.primary,
-                        fontSize: 18.sp,
+                        fontSize: 16.sp,
                         fontWeight: FontWeight.w700,
                         height: 0,
                         letterSpacing: -0.26,
@@ -199,7 +199,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: gray700,
-                          fontSize: 26.sp,
+                          fontSize: 24.sp,
                           fontWeight: FontWeight.w600,
                           height: 1.25,
                           letterSpacing: -0.46,

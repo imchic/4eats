@@ -139,7 +139,12 @@ class FeedScreen extends GetView<FeedController> {
                               },
                               child: Container(
                                 padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
-                                child: SvgPicture.asset('assets/images/ic_search.svg', color: Colors.white, width: 20.w, height: 20.h),
+                                //child: SvgPicture.asset('assets/images/ic_search.svg', color: Colors.white, width: 20.w, height: 20.h),
+                                child: Icon(
+                                  Icons.search,
+                                  color: Colors.white,
+                                  size: 20.w,
+                                ),
                               ),
                             ),
                             InkWell(
@@ -158,7 +163,12 @@ class FeedScreen extends GetView<FeedController> {
                               },
                               child: Container(
                                 padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
-                                child: SvgPicture.asset('assets/images/ic_map.svg', color: Colors.white, width: 20.w, height: 20.h),
+                                //child: SvgPicture.asset('assets/images/ic_map.svg', color: Colors.white, width: 20.w, height: 20.h),
+                                child: Icon(
+                                  Icons.map,
+                                  color: Colors.white,
+                                  size: 20.w,
+                                ),
                               ),
                             ),
                             InkWell(
@@ -169,16 +179,26 @@ class FeedScreen extends GetView<FeedController> {
                                   padding: EdgeInsets.symmetric(
                                       horizontal: 10.w, vertical: 10.h),
                                   child: Obx(
-                                    () => SvgPicture.asset(
+                                    () =>
+                                  //   SvgPicture.asset(
+                                  //     controller.isMuted
+                                  //         ? 'assets/images/ic_volume_off.svg'
+                                  //         : 'assets/images/ic_volume_up.svg',
+                                  //     width: 20.w,
+                                  //     height: 20.h,
+                                  //     colorFilter:
+                                  //         ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                                  //   ),
+                                  // )
+                                    Icon(
                                       controller.isMuted
-                                          ? 'assets/images/ic_volume_off.svg'
-                                          : 'assets/images/ic_volume_up.svg',
-                                      width: 20.w,
-                                      height: 20.h,
-                                      colorFilter:
-                                          ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                                          ? Icons.volume_off
+                                          : Icons.volume_up,
+                                      color: Colors.white,
+                                      size: 20.w,
                                     ),
-                                  )),
+                                  ),
+                              ),
                             ),
                           ],
                         ),
