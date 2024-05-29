@@ -9,6 +9,7 @@ import 'package:foreats/screens/map/location_service.dart';
 import 'package:foreats/utils/app_routes.dart';
 import 'package:foreats/utils/colors.dart';
 import 'package:foreats/utils/firebase_message.dart';
+import 'package:foreats/utils/logger.dart';
 import 'package:get/get.dart';
 import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart';
 
@@ -25,14 +26,13 @@ Future<void> main() async {
   // firebase store
   await Firebase.initializeApp(name: '4eats', options: DefaultFirebaseOptions.currentPlatform);
 
-  FirebaseMessageApi().initNotifications();
-
   // 가로모드 대응
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
   KakaoSdk.init(nativeAppKey: '1ea71cd66f79092d09fca8a3008c615d');
 
   Get.put(UserStore());
+  Get.put(AppLog());
   Get.put(LocationService());
 
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: [
@@ -63,19 +63,19 @@ class MyApp extends StatelessWidget {
       designSize: const Size(360, 690),
       child: GetMaterialApp(
         debugShowCheckedModeBanner: false,
-        title: 'Flutter Demo',
+        title: '포잇',
         theme: ThemeData(
           colorScheme: lightColorScheme,
-          fontFamily: 'GmarketSans',
+          fontFamily: 'Pretendard',
           useMaterial3: false,
         ),
         darkTheme: ThemeData(
           colorScheme: darkColorScheme,
-          fontFamily: 'GmarketSans',
+          fontFamily: 'Pretendard',
           useMaterial3: false,
         ),
         themeMode: ThemeMode.system,
-        initialRoute: AppRoutes.landing,
+        initialRoute: AppRoutes.splash,
         getPages: AppRoutes.routes,
         //defaultTransition: Transition.fadeIn,
       ),

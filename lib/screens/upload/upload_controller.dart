@@ -6,6 +6,7 @@ import 'package:cached_video_player_plus/cached_video_player_plus.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:foreats/utils/global_toast_controller.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as googlemap;
 import 'package:image_picker/image_picker.dart';
@@ -221,6 +222,8 @@ class UploadController extends GetxController {
 
       if (video != null) {
         _logger.i('video.path: ${video.path}');
+        uploadFiles.add(File(video.path));
+        Get.toNamed(AppRoutes.uploadRegister);
       }
     } catch (e) {
       _logger.e('pickVideoFromCamera error: $e');
@@ -310,11 +313,11 @@ class UploadController extends GetxController {
         thumbnailUrls: thumbnailDownloadUrls,
         description: storeDescription,
         hashTags: selectedHashtagStringList,
-        userProfilePhoto: UserStore.to.userProfile.photoUrl,
-        userid: UserStore.to.userProfile.id,
-        userNickname: UserStore.to.userProfile.nickname,
-        userFcmToken: UserStore.to.userProfile.fcmToken,
-        uid: UserStore.to.userProfile.uid,
+        userProfilePhoto: UserStore.to.user.value.profileImage,
+        userid: UserStore.to.user.value.id,
+        userNickname: UserStore.to.user.value.nickname,
+        userFcmToken: UserStore.to.user.value.fcmToken,
+        uid: UserStore.to.user.value.uid,
         createdAt: DateTime.now().toString(),
         likeCount: 0,
         bookmarkCount: 0,
@@ -357,9 +360,9 @@ class UploadController extends GetxController {
           'thumbnailUrls': originThumbnailUrls,
           'description': storeDescription,
           'hashTags': selectedHashtagStringList,
-          'profilePhoto': UserStore.to.userProfile.photoUrl,
-          'user': UserStore.to.userProfile.id,
-          'uid': UserStore.to.userProfile.uid,
+          'profilePhoto': UserStore.to.user.value.profileImage,
+          'user': UserStore.to.user.value.id,
+          'uid': UserStore.to.user.value.uid,
           'createdAt': DateTime.now().toString(),
           'likeCount': 0,
           'bookmarkCount': 0,
@@ -381,9 +384,9 @@ class UploadController extends GetxController {
           'thumbnailUrls': thumbnailDownloadUrls,
           'description': storeDescription,
           'hashTags': selectedHashtagStringList,
-          'profilePhoto': UserStore.to.userProfile.photoUrl,
-          'user': UserStore.to.userProfile.id,
-          'uid': UserStore.to.userProfile.uid,
+          'profilePhoto': UserStore.to.user.value.profileImage,
+          'user': UserStore.to.user.value.id,
+          'uid': UserStore.to.user.value.uid,
           'createdAt': DateTime.now().toString(),
           'likeCount': 0,
           'bookmarkCount': 0,
@@ -397,7 +400,9 @@ class UploadController extends GetxController {
 
     } catch (e) {
       _logger.e('uploadVideo error: $e');
+      GlobalToastController.to.showToast('동영상 업로드에 실패했습니다.');
       isUploadLoading.value = false;
+      Get.back();
     }
   }
 

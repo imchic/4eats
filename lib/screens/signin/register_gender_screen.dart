@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:foreats/utils/logger.dart';
 import 'package:get/get.dart';
+import 'package:googleapis/admob/v1.dart';
 import 'package:logger/logger.dart';
 import '../../home/home_controller.dart';
 import '../../utils/app_routes.dart';
@@ -19,17 +21,6 @@ class RegisterGenderScreen extends StatefulWidget {
 }
 
 class _RegisterGenderScreen extends State<RegisterGenderScreen> {
-
-  final _logger = Logger(
-    printer: PrettyPrinter(
-        methodCount: 2, // Number of method calls to be displayed
-        errorMethodCount: 8, // Number of method calls if stacktrace is provided
-        lineLength: 120, // Width of the output
-        colors: true, // Colorful log messages
-        printEmojis: true, // Print an emoji for each log message
-        printTime: false // Should each log print contain a timestamp
-    ),
-  );
 
   final RxString _genderSelected = ''.obs;
 
@@ -129,7 +120,7 @@ class _RegisterGenderScreen extends State<RegisterGenderScreen> {
                                   GestureDetector(
                                     onTap: () {
                                       // 남성 선택
-                                      _logger.d('남성 선택');
+                                      AppLog.to.d('남성 선택');
                                       _genderSelected.value = '남성';
                                     },
                                     child: SizedBox(
@@ -190,7 +181,7 @@ class _RegisterGenderScreen extends State<RegisterGenderScreen> {
                                   GestureDetector(
                                     onTap: () {
                                       // 여성 선택
-                                      _logger.d('여성 선택');
+                                      AppLog.to.d('여성 선택');
                                       _genderSelected.value = '여성';
                                     },
                                     child: SizedBox(
@@ -270,11 +261,9 @@ class _RegisterGenderScreen extends State<RegisterGenderScreen> {
                       genderValue = 'F';
                     }
 
-                    LoginController.to.userModel.value.gender = genderValue;
-                    _logger.t('사용자 정보: ${LoginController.to.userModel.value.toString()}');
-                    UserStore.to.setFirebaseUser(LoginController.to.userModel.value);
-                    Get.offAndToNamed(AppRoutes.home);
-                    HomeController.to.moveToPage(0);
+                    UserStore.to.user.value.gender = genderValue;
+                    AppLog.to.d('성별: ${UserStore.to.user.value.toString()}');
+                    LoginController.to.signIn(UserStore.to.user.value);
                   }
                 },
                 child: Container(
@@ -295,7 +284,7 @@ class _RegisterGenderScreen extends State<RegisterGenderScreen> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Text(
-                        '다음',
+                        '완료',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: Colors.white,
@@ -313,30 +302,6 @@ class _RegisterGenderScreen extends State<RegisterGenderScreen> {
         ),
       ],
     );
-  }
-
-  // 한글만 입력되도록 제한
-  String _validateNickname(String value) {
-    if (value.isEmpty) {
-      return '닉네임을 입력해주세요.';
-    }
-    // 특수문자 제한
-    if (RegExp(r'[!@#<>?":_`~;[\]\\|=+)(*&^%0-9-]').hasMatch(value)) {
-      return '닉네임은 한글만 입력 가능합니다.';
-    }
-    // 공백
-    if (RegExp(r'\s').hasMatch(value)) {
-      return '닉네임에 공백은 사용할 수 없습니다.';
-    }
-    // 3자 이상 입력
-    if (value.length < 3) {
-      return '닉네임은 3자 이상 입력해주세요.';
-    }
-    // 20자 이하 입력
-    if (value.length > 20) {
-      return '닉네임은 20자 이하로 입력해주세요.';
-    }
-    return '';
   }
 
 }

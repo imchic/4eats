@@ -21,12 +21,6 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
   var isSkip = false;
   var isDone = false;
 
-  // List<String> images = [
-  //   'assets/images/ic_poeat_logo.png',
-  //   'assets/images/ic_poeat_logo.png',
-  //   'assets/images/ic_poeat_logo.png',
-  // ];
-
   List<String> images = [
     'assets/lottie/empty_video.json',
     'assets/lottie/gift.json',
@@ -90,7 +84,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
     return GestureDetector(
       onTap: () {
         setState(() {
-          UserStore.to.checkFirstAppOpen();
+          UserStore.to.checkFirstInstall();
         });
       },
       child: Container(
@@ -116,7 +110,9 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
                 color: Colors.white,
                 fontSize: 16.sp,
                 fontWeight: FontWeight.w700,
-                height: 0,
+                height: 1.25,
+                letterSpacing: -0.26,
+                fontFamily: 'Pretendard',
               ),
             ),
           ],

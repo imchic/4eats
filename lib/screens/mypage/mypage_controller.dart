@@ -1,7 +1,9 @@
 import 'package:cached_video_player_plus/cached_video_player_plus.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:foreats/utils/logger.dart';
 import 'package:get/get.dart';
+import 'package:googleapis/admob/v1.dart';
 import 'package:logger/logger.dart';
 
 import '../../model/feed_model.dart';
@@ -29,25 +31,21 @@ class MyPageController extends GetxController with GetSingleTickerProviderStateM
     //tabController = TabController(length: tabs.length, vsync: this);
   }
 
-  Future<void> getMyFeeds() async {
-    myFeeds.clear();
-    await FirebaseFirestore.instance
-        .collection('feeds')
-        .where('uid', isEqualTo: UserStore.to.userProfile.uid)
-        .get()
-        .then((QuerySnapshot querySnapshot) {
-      querySnapshot.docs.forEach((doc) {
-        //final FeedModel feed = FeedModel.fromMap(doc.data() as Map<String, dynamic>);
-        //myFeeds.add(feed);
-      });
-    });
-  }
-
-  convertVideoPlayTime(int playTime) {
-    final int minutes = playTime ~/ 60;
-    final int seconds = playTime % 60;
-    if (seconds < 10) {
-      return '$minutes:0$seconds';
+  Future<RxList<FeedModel>> getMyFeeds() async {
+    try {
+      final feeds = await FirebaseFirestore.instance
+          .collection('feeds')
+          .where('uid', isEqualTo: UserStore.to.user.value.uid)
+          .get();
+      myFeeds.clear();
+      for (final feed in feeds.docs) {
+        myFeeds.add(FeedModel.fromJson(feed.data()));
+      }
+      AppLog.to.d('myFeeds: $myFeeds');
+      return myFeeds;
+    } catch (e) {
+      _logger.e('getMyFeeds error: $e');
+      return myFeeds;
     }
   }
 

@@ -1,13 +1,15 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:foreats/screens/login/user_store.dart';
+import 'package:foreats/utils/logger.dart';
 
 import 'package:get/get.dart';
-import 'package:logger/logger.dart';
+import '../../model/user_model.dart';
 import '../../utils/app_routes.dart';
 import '../../utils/colors.dart';
 import '../../utils/global_toast_controller.dart';
 import '../../widget/base_appbar.dart';
-import '../login/login_controller.dart';
 
 class RegisterNicknameScreen extends StatefulWidget {
   const RegisterNicknameScreen({super.key});
@@ -21,27 +23,31 @@ class _RegisterNicknameScreen extends State<RegisterNicknameScreen> {
   late final TextEditingController _nickNameController = TextEditingController();
   final _nickName = ''.obs;
 
-  final _logger = Logger(
-    printer: PrettyPrinter(
-        methodCount: 2, // Number of method calls to be displayed
-        errorMethodCount: 8, // Number of method calls if stacktrace is provided
-        lineLength: 120, // Width of the output
-        colors: true, // Colorful log messages
-        printEmojis: true, // Print an emoji for each log message
-        printTime: false // Should each log print contain a timestamp
-    ),
-  );
+  @override
+  void initState() {
+    super.initState();
+
+    Get.put(GlobalToastController());
+
+    var args = Get.arguments;
+    if (args != null) {
+      UserStore.to.user.value = args;
+    }
+
+  }
 
   @override
   Widget build(BuildContext context) {
-
-    Get.put(GlobalToastController());
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.background,
       appBar: BaseAppBar(
         title: '회원가입',
         leading: true,
+        callback: () {
+          UserStore.to.user.value = UserModel();
+          Get.back();
+        },
       ),
       body: _buildBody(),
     );
@@ -168,8 +174,8 @@ class _RegisterNicknameScreen extends State<RegisterNicknameScreen> {
                     GlobalToastController.to.showToast('닉네임은 한글만 입력 가능합니다.');
                   }
                   else {
-                    LoginController.to.userModel.value.nickname = _nickNameController.text;
-                    _logger.t('사용자 정보: ${LoginController.to.userModel.value.toString()}');
+                    UserStore.to.user.value.nickname = _nickNameController.text;
+                    AppLog.to.i('nickname: ${UserStore.to.user.value.nickname}');
                     Get.toNamed(AppRoutes.registerId);
                   }
                 },

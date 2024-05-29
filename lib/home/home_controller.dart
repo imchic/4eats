@@ -11,6 +11,7 @@ import '../screens/login/user_store.dart';
 import '../screens/lounge/lounge_screen.dart';
 import '../screens/mypage/mypage_screen.dart';
 import '../screens/upload/upload_screen.dart';
+import '../utils/firebase_message.dart';
 import '../widget/login_bottom_sheet.dart';
 
 class HomeController extends GetxController {
@@ -26,7 +27,7 @@ class HomeController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    UserStore.to.getUserProfile();
+    FirebaseMessageApi().initNotifications();
   }
 
   final List<Widget> _screens = [
@@ -53,7 +54,7 @@ class HomeController extends GetxController {
     }
 
     if (index == 2 || index == 3) {
-      if(UserStore.to.isLoggedIn) {
+      if(UserStore.to.isLoginCheck.value) {
         _currentIndex.value = index;
       } else {
         Get.bottomSheet(

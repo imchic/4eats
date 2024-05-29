@@ -1,14 +1,15 @@
-import 'dart:io';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:foreats/utils/dialog_util.dart';
+import 'package:foreats/utils/text_style.dart';
 import 'package:get/get.dart';
 
 import '../../utils/app_routes.dart';
 import '../../utils/colors.dart';
 import '../../widget/base_appbar.dart';
+import '../../widget/point_card.dart';
 import '../biz/biz_controller.dart';
 import '../feed/feed_controller.dart';
 import '../login/login_controller.dart';
@@ -22,32 +23,26 @@ class MyPageScreen extends GetView<MyPageController> {
   Widget build(BuildContext context) {
     Get.put(LoginController());
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
+      backgroundColor: Theme
+          .of(context)
+          .colorScheme
+          .background,
       appBar: BaseAppBar(
         title: '마이페이지',
       ),
-      body: Column(
-        children: [
-          Obx(() {
-            if (UserStore.to.isLoggedIn) {
-              return _buildMyProfileInfo(context);
-            } else {
-              return Container();
-            }
-          }),
-          Expanded(
-            child: Obx(() {
-              if (UserStore.to.isLoggedIn) {
-                return _buildMyFeedContainer(context);
-              } else {
-                return Container();
-              }
-            }),
-          ),
-        ],
-      ),
+      body: Obx(() {
+        if (UserStore.to.isLoginCheck == false) {
+          return DialogUtil().buildLoadingDialog();
+        } else {
+          return Column(
+            children: [
+              _buildMyProfileInfo(context),
+              _buildMyFeedContainer(context),
+            ],
+          );
+        }
+      }),
     );
-
   }
 
   // 내 정보
@@ -65,59 +60,46 @@ class MyPageScreen extends GetView<MyPageController> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Obx(() {
-                if (UserStore.to.userProfile.photoUrl != null) {
-                  return ClipRRect(
-                    borderRadius: BorderRadius.circular(50.r),
-                    child: CachedNetworkImage(
-                      imageUrl: UserStore.to.userProfile.photoUrl ?? '',
-                      imageBuilder: (context, imageProvider) => Container(
-                        width: 50.w,
-                        height: 50.h,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          image: DecorationImage(
-                            image: imageProvider,
-                            fit: BoxFit.cover,
+                return ClipRRect(
+                  borderRadius: BorderRadius.circular(50.r),
+                  child: CachedNetworkImage(
+                    imageUrl: UserStore.to.user.value.profileImage ?? '',
+                    imageBuilder: (context, imageProvider) =>
+                        Container(
+                          width: 50.w,
+                          height: 50.h,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            image: DecorationImage(
+                              image: imageProvider,
+                              fit: BoxFit.cover,
+                            ),
                           ),
                         ),
-                      ),
-                      placeholder: (context, url) => Container(
-                        width: 40.w,
-                        height: 40.h,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.grey[200],
+                    placeholder: (context, url) =>
+                        Container(
+                          width: 40.w,
+                          height: 40.h,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.grey[200],
+                          ),
                         ),
-                      ),
-                      errorWidget: (context, url, error) => Container(
-                        width: 44.w,
-                        height: 44.h,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.grey[200],
+                    errorWidget: (context, url, error) =>
+                        Container(
+                          width: 44.w,
+                          height: 44.h,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.grey[200],
+                          ),
+                          child: Icon(
+                            Icons.error,
+                            color: Colors.red,
+                          ),
                         ),
-                        child: Icon(
-                          Icons.error,
-                          color: Colors.red,
-                        ),
-                      ),
-                    ),
-                  );
-                } else {
-                  return ClipRRect(
-                    borderRadius: BorderRadius.circular(50.r),
-                    child: Container(
-                      width: 50.w,
-                      height: 50.h,
-                      color: gray200,
-                      child: Icon(
-                        Icons.person,
-                        color: gray500,
-                        size: 30.sp,
-                      ),
-                    ),
-                  );
-                }
+                  ),
+                );
               }),
               SizedBox(width: 10.w),
               Expanded(
@@ -134,9 +116,12 @@ class MyPageScreen extends GetView<MyPageController> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              UserStore.to.userProfile.nickname ?? '',
+                              UserStore.to.user.value.nickname ?? '',
                               style: TextStyle(
-                                color: Theme.of(context).colorScheme.onBackground,
+                                color: Theme
+                                    .of(context)
+                                    .colorScheme
+                                    .onBackground,
                                 fontSize: 14.sp,
                                 fontWeight: FontWeight.w700,
                                 height: 0,
@@ -144,7 +129,7 @@ class MyPageScreen extends GetView<MyPageController> {
                             ),
                             SizedBox(height: 2.h),
                             Text(
-                              '@${UserStore.to.userProfile.id ?? ''}',
+                              '@${UserStore.to.user.value.id ?? ''}',
                               style: TextStyle(
                                 color: gray500,
                                 fontSize: 12.sp,
@@ -185,185 +170,138 @@ class MyPageScreen extends GetView<MyPageController> {
             ],
           ),
           SizedBox(height: 16.h),
-          Container(
-            width: 0.9.sw,
-            height: 50.h,
-            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  // Theme.of(context).colorScheme.primary,
-                  // Theme.of(context).colorScheme.secondary,
-                  // Theme.of(context).colorScheme.secondary,
-                  Color(0xff536DFE),
-                  Color(0xff6A3DE8),
-                ],
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-              ),
-              borderRadius: BorderRadius.circular(5.r),
-              shape: BoxShape.rectangle,
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        SvgPicture.asset(
-                          'assets/images/ic_payment_card.svg',
-                          width: 20.w,
-                          height: 20.h,
-                          colorFilter: ColorFilter.mode(
-                            Theme.of(context).colorScheme.onPrimary,
-                            BlendMode.srcIn,
-                          ),
-                        ),
-                        SizedBox(width: 5.w),
-                        Text('누적포인트',
-                            style: TextStyle(
-                                color: Theme.of(context).colorScheme.onPrimary,
-                                fontWeight: FontWeight.w800)),
-                      ],
-                    ),
-                    Text(
-                        '${BizController.to.numberFormat(int.parse(UserStore.to.userProfile.point ?? '0'))}P',
-                        style: TextStyle(
-                            color: Theme.of(context).colorScheme.onPrimary,
-                            fontWeight: FontWeight.w700)),
-                  ],
-                ),
-                // 누적 사용내역
-                Container(
-                  width: double.infinity,
-                  alignment: Alignment.center,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text('적립 / 사용내역',
-                          style: TextStyle(
-                              color: Theme.of(context).colorScheme.onPrimary,
-                              fontSize: 10.sp,
-                              // underscore
-                              decoration: TextDecoration.underline,
-                              fontWeight: FontWeight.w700)),
-                      SizedBox(width: 10.w),
-                      Icon(
-                        Icons.arrow_forward_ios,
-                        color: Theme.of(context).colorScheme.onPrimary,
-                        size: 10.sp,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-
-          ),
+          PointCard().buildPointCard(context),
         ],
       ),
     );
   }
 
+  /// 내가 올린 피드
   Widget _buildMyFeedContainer(BuildContext context) {
     return Obx(() {
-      if (FeedController.to.thumbnailList.isNotEmpty) {
-        return GridView.builder(
-          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              childAspectRatio: 0.6.w / 0.88.h
-          ),
-          itemCount: FeedController.to.thumbnailList.length,
-          itemBuilder: (context, index) {
-            return InkWell(onTap: () {
-              Get.toNamed(AppRoutes.feedDetail, arguments: {
-                'detailFeed': FeedController.to.feedList[index],
-              });
-            }, child: _myFeedItem(index));
-          },
-        );
-      } else {
-        return Container();
-      }
-    });
-  }
-
-  Widget _myFeedItem(index) {
-    return Column(
-      children: [
-        Stack(
-          children: [
-            // round corner
-            Container(
-              width: 100.w,
-              height: 150.h,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(6.r),
-                color: gray200,
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(6.r),
-                child: CachedNetworkImage(
-                  imageUrl: FeedController.to.thumbnailList[index],
-                  fit: BoxFit.cover,
-                  placeholder: (context, url) => Container(
-                    color: gray200,
-                  ),
-                  errorWidget: (context, url, error) => Container(
-                    color: gray200,
-                    child: Icon(
-                      Icons.error,
-                      color: Colors.red,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            // 재생시간
-            Positioned(
-              top: 5.h,
-              right: 5.w,
-              child: Container(
-                padding: EdgeInsets.all(5),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.favorite,
-                      color: Colors.red,
-                      size: 12.sp,
-                    ),
-                    SizedBox(width: 3.w),
-                    Text(
-                      FeedController.to.feedList[index].likeCount.toString(),
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 10.sp,
-                        fontWeight: FontWeight.w600,
-                        height: 0,
+        return Expanded(
+          child: FutureBuilder(future: controller.getMyFeeds(),
+              builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return DialogUtil().buildLoadingDialog();
+                } else {
+                  return Container(
+                    padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
+                    margin: EdgeInsets.symmetric(vertical: 10.h),
+                    child: GridView.builder(
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 3,
+                        crossAxisSpacing: 10.w,
+                        mainAxisSpacing: 10.h,
+                        mainAxisExtent: 150.h,
+                        // childAspectRatio: 2,
                       ),
+                      itemCount: snapshot.data.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        return Column(
+                          children: [
+                            // scrollview
+                            Expanded(
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(6.r),
+                                child: Stack(
+                                  children: [
+                                    CachedNetworkImage(
+                                      imageUrl: snapshot.data[index].thumbnailUrls[0] ?? '',
+                                      fit: BoxFit.cover,
+                                      placeholder: (context, url) => Container(color: gray200,),
+                                      errorWidget: (context, url, error) => Container(color: gray200, child: Icon(Icons.error, color: Colors.red,),),
+                                    ),
+                                    // 좋아요
+                                    Positioned(
+                                      right: 0.w,
+                                      child: IconButton(
+                                        icon: Icon(Icons.favorite_border, color: Colors.white, size: 16.sp),
+                                        onPressed: () {
+                                          // 좋아요 추가
+                                        },
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
                     ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
+                  );
+                }
+              }),
+        );
+      });
   }
 
-  // 동영상 길이 텍스트 변환
-  _convertDuration(int duration) {
-    final int minutes = (duration / 60).truncate();
-    final int seconds = duration % 60;
-    if (seconds < 10) {
-      return '$minutes:0$seconds';
-    }
-    return '$minutes:$seconds';
-  }
+  /// 내가 올린 피드 아이템
+  // Widget _myFeedItem(index) {
+  //   return Column(
+  //     children: [
+  //       Stack(
+  //         children: [
+  //           // round corner
+  //           Container(
+  //             width: 100.w,
+  //             height: 150.h,
+  //             decoration: BoxDecoration(
+  //               borderRadius: BorderRadius.circular(6.r),
+  //               color: gray200,
+  //             ),
+  //             child: ClipRRect(
+  //               borderRadius: BorderRadius.circular(6.r),
+  //               child: CachedNetworkImage(
+  //                 imageUrl: FeedController.to.thumbnailList[index],
+  //                 fit: BoxFit.cover,
+  //                 placeholder: (context, url) =>
+  //                     Container(
+  //                       color: gray200,
+  //                     ),
+  //                 errorWidget: (context, url, error) =>
+  //                     Container(
+  //                       color: gray200,
+  //                       child: Icon(
+  //                         Icons.error,
+  //                         color: Colors.red,
+  //                       ),
+  //                     ),
+  //               ),
+  //             ),
+  //           ),
+  //           // 재생시간
+  //           Positioned(
+  //             top: 5.h,
+  //             right: 5.w,
+  //             child: Container(
+  //               padding: EdgeInsets.all(5),
+  //               child: Row(
+  //                 children: [
+  //                   Icon(
+  //                     Icons.favorite,
+  //                     color: Colors.red,
+  //                     size: 12.sp,
+  //                   ),
+  //                   SizedBox(width: 3.w),
+  //                   Text(
+  //                     FeedController.to.feedList[index].likeCount.toString(),
+  //                     style: TextStyle(
+  //                       color: Colors.white,
+  //                       fontSize: 10.sp,
+  //                       fontWeight: FontWeight.w600,
+  //                       height: 0,
+  //                     ),
+  //                   ),
+  //                 ],
+  //               ),
+  //             ),
+  //           ),
+  //         ],
+  //       ),
+  //     ],
+  //   );
+  // }
 
 }

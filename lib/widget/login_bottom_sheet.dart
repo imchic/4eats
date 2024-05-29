@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:foreats/utils/text_style.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_state_manager/get_state_manager.dart';
 
 import '../screens/login/login_controller.dart';
@@ -12,45 +15,38 @@ class LoginBottomSheet extends GetWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
+      height: Get.height * 0.5,
+      decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(20),
-          topRight: Radius.circular(20),
+          topLeft: Radius.circular(30.r),
+          topRight: Radius.circular(30.r),
         ),
       ),
       child: Column(
         children: [
           SizedBox(height: 20.h),
           Image.asset(
-            'assets/images/ic_poeat_logo.png',
-            width: 150.w,
-            height: 80.h,
+            'assets/images/ic_foreat_new_logo.png',
+            width: 100.w,
+            height: 60.h,
           ),
-          Text(
-            '로그인이 필요한 서비스입니다',
-            style: TextStyle(
-              fontSize: 14.sp,
-              color: gray600,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          SizedBox(height: 10.h),
+          SizedBox(height: 20.h),
           Text(
             'SNS 계정으로 간편하게 로그인하세요',
-            style: TextStyle(
-              fontSize: 12.sp,
-              color: gray500,
-              fontWeight: FontWeight.w600,
+            style: TextStyleUtils().bodyTextStyle(
+              fontSize: 10.sp,
+              color: gray600,
+              fontWeight: FontWeight.w400,
             ),
           ),
           SizedBox(height: 10.h),
           Text(
             '⚡️ 3초만에 가입하기',
-            style: TextStyle(
+            style: TextStyleUtils().bodyTextStyle(
               fontSize: 10.sp,
               color: Theme.of(context).colorScheme.primary,
-              fontWeight: FontWeight.w500,
+              fontWeight: FontWeight.w700,
             ),
           ),
           SizedBox(height: 20.h),
@@ -78,12 +74,11 @@ class LoginBottomSheet extends GetWidget {
                     width: 20.w,
                     height: 20.h,
                   ),
-                  const SizedBox(width: 10),
+                  SizedBox(height: 10.h),
                   Text(
                     '구글로 시작하기',
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      color: Colors.black,
+                    style: TextStyleUtils().bodyTextStyle(
+                      fontSize: 12.sp,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -119,8 +114,8 @@ class LoginBottomSheet extends GetWidget {
                   const SizedBox(width: 10),
                   Text(
                     '카카오로 시작하기',
-                    style: TextStyle(
-                      fontSize: 14.sp,
+                    style: TextStyleUtils().bodyTextStyle(
+                      fontSize: 12.sp,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -157,8 +152,8 @@ class LoginBottomSheet extends GetWidget {
                   const SizedBox(width: 10),
                   Text(
                     '애플로 시작하기',
-                    style: TextStyle(
-                      fontSize: 14.sp,
+                    style: TextStyleUtils().bodyTextStyle(
+                      fontSize: 12.sp,
                       color: Colors.white,
                       fontWeight: FontWeight.w500,
                     ),

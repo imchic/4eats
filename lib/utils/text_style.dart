@@ -7,6 +7,19 @@ import 'colors.dart';
 
 class TextStyleUtils {
 
+  TextStyle feedAddressTitle({
+    Color color = Colors.white,
+    double fontSize = 26,
+    FontWeight fontWeight = FontWeight.w700,
+  }) {
+    return TextStyle(
+      color: color,
+      fontSize: fontSize.sp,
+      fontWeight: fontWeight,
+      fontFamily: 'Godob'
+    );
+  }
+
   /// 제목
   TextStyle titleTextStyle({
     Color color = Colors.black,
@@ -45,6 +58,7 @@ class TextStyleUtils {
       fontSize: fontSize.sp,
       fontWeight: fontWeight,
       height: height.sp,
+      fontFamily: 'Pretendard',
     );
   }
 

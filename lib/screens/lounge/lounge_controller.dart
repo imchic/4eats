@@ -146,7 +146,19 @@ class LoungeController extends GetxController {
     }
   }
 
-  /// 가게 썸네일 가져오기
+  /// 현재 지역구 좌표값 주소 변환
+  Future<String> fetchCurrentLocation() async {
+    try {
+      await MapController.to.initCurrentLocation();
+      var result = await MapController.to.convertLatLngToAddress();
+      return result;
+    } catch (e) {
+      _logger.d('fetchCurrentLocation error: $e');
+      return '';
+    }
+  }
+
+  /// 주변 지역구 리스트 가져오기
   Future<RxList<MapModel>> fetchSearchPlace() async {
     try {
      return MapController.to.fetchSearchPlace('맛집', page: 1);

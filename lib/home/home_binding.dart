@@ -1,3 +1,4 @@
+import 'package:foreats/screens/notification/notifications_controller.dart';
 import 'package:foreats/utils/logger.dart';
 import 'package:get/get.dart';
 
@@ -32,5 +33,6 @@ class HomeBinding extends Bindings {
     Get.lazyPut<LocationService>(() => LocationService());
     Get.lazyPut<GlobalToastController>(() => GlobalToastController());
     Get.lazyPut<BizController>(() => BizController());
+    Get.lazyPut<NotificationsController>(() => NotificationsController());
   }
 }

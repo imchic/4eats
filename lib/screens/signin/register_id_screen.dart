@@ -9,8 +9,10 @@ import 'package:logger/logger.dart';
 import '../../utils/app_routes.dart';
 import '../../utils/colors.dart';
 import '../../utils/global_toast_controller.dart';
+import '../../utils/logger.dart';
 import '../../widget/base_appbar.dart';
 import '../login/login_controller.dart';
+import '../login/user_store.dart';
 
 class RegisterIdScreen extends StatefulWidget {
   const RegisterIdScreen({super.key});
@@ -185,8 +187,8 @@ class _RegisterIdScreen extends State<RegisterIdScreen> {
                       GlobalToastController.to.showToast('이미 사용중인 아이디입니다.');
                       return;
                     }
-                    LoginController.to.userModel.value.id = _idController.text;
-                    _logger.t('사용자 정보: ${LoginController.to.userModel.value.toString()}');
+                    UserStore.to.user.value.id = _idController.text;
+                    AppLog.to.i('id: ${UserStore.to.user.value.id}');
                     Get.toNamed(AppRoutes.registerBirth);
 
                   } else {

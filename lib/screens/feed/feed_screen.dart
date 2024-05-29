@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:foreats/utils/dialog_util.dart';
 import 'package:foreats/utils/global_toast_controller.dart';
 import 'package:foreats/utils/text_style.dart';
 import 'package:get/get.dart';
@@ -23,55 +24,22 @@ import 'feed_controller.dart';
 class FeedScreen extends GetView<FeedController> {
   FeedScreen({super.key});
 
-  final _logger = Logger();
-
   @override
   Widget build(BuildContext context) {
-
     Get.put(AppLog());
 
-    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.light,
-      statusBarBrightness: Brightness.dark,
-      systemNavigationBarColor: Colors.black,
-      systemNavigationBarIconBrightness: Brightness.light,
-    ));
-
     return Scaffold(
-      body: Obx(() {
-        if (controller.isLoading) {
-          return const Center(child: CircularProgressIndicator());
-        } else {
-          if (controller.feedList.isEmpty) {
-            return SizedBox(
-              width: 1.sw,
-              height: 1.sh,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Lottie.asset(
-                    'assets/lottie/empty_video.json',
-                    width: 250.w,
-                    height: 250.h,
-                  ),
-                  Text(
-                    '게시물이 존재하지 않아요 😢',
-                    style: TextStyle(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            );
+      body: FutureBuilder(
+        future: controller.fetchFeeds(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return DialogUtil().buildLoadingDialog();
           } else {
             return PageView.builder(
               controller: controller.pageController,
-              scrollDirection: Axis.vertical,
               itemCount: controller.feedList.length,
-              onPageChanged: (index) async {
+              scrollDirection: Axis.vertical,
+              onPageChanged: (index) {
                 controller.currentFeedIndex.value = index;
                 controller.allPause();
                 controller.allMute();
@@ -81,11 +49,14 @@ class FeedScreen extends GetView<FeedController> {
                 controller.fetchBookmarks(controller.feedList[index].seq ?? '');
               },
               itemBuilder: (context, index) {
-                return Obx(
-                  () => Stack(
+                return Obx(() =>
+                  Stack(
                     children: [
+                      // 동영상
                       CachedVideoPlayerPlus(controller.videoControllerList[controller.currentFeedIndex.value][controller.currentVideoUrlIndex.value]),
+                      // 상단 메뉴
                       _topMenu(context, index),
+                      // 게시물 정보
                       _feedInfo(context, index),
                     ],
                   ),
@@ -93,8 +64,8 @@ class FeedScreen extends GetView<FeedController> {
               },
             );
           }
-        }
-      }),
+        },
+      ),
     );
   }
 
@@ -105,138 +76,59 @@ class FeedScreen extends GetView<FeedController> {
           //controller.showMore(index);
         },
         child: Container(
-          margin: EdgeInsets.only(top: 24.h, left: 10.w),
+          width: 1.sw,
+          margin: EdgeInsets.only(top: 20.h, left: 10.w),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 시군구
               Container(
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Container(
-                          width: 0.5.sw,
-                          margin: EdgeInsets.only(top: 34.h),
-                          padding: EdgeInsets.symmetric(horizontal: 10.w),
-                          child: Text(
-                            // 시군구 표현
-                            controller.feedList[index].storeAddress!.split(' ')[0] + ' ' + controller.feedList[index].storeAddress!.split(' ')[1],
-                            style: TextStyleUtils().whiteTextStyle(
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                        ),
-                        // 검색, 지도, 음소거
-                        Row(
-                          children: [
-                            InkWell(
-                              onTap: () {
-                                Get.toNamed(AppRoutes.search);
-                              },
-                              child: Container(
-                                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
-                                //child: SvgPicture.asset('assets/images/ic_search.svg', color: Colors.white, width: 20.w, height: 20.h),
-                                child: Icon(
-                                  Icons.search,
-                                  color: Colors.white,
-                                  size: 20.w,
-                                ),
-                              ),
-                            ),
-                            InkWell(
-                              onTap: () {
-                                Get.toNamed(AppRoutes.map, arguments: {
-                                  'storeName': controller.feedList[index].storeName,
-                                  'storeAddress': controller.feedList[index].storeAddress,
-                                  'storeType': controller.feedList[index].storeType,
-                                  'lonlat': [
-                                    double.parse(controller.feedList[index].storeLngLat!
-                                        .split(',')[0]),
-                                    double.parse(controller.feedList[index].storeLngLat!
-                                        .split(',')[1])
-                                  ]
-                                });
-                              },
-                              child: Container(
-                                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
-                                //child: SvgPicture.asset('assets/images/ic_map.svg', color: Colors.white, width: 20.w, height: 20.h),
-                                child: Icon(
-                                  Icons.map,
-                                  color: Colors.white,
-                                  size: 20.w,
-                                ),
-                              ),
-                            ),
-                            InkWell(
-                              onTap: () {
-                                controller.changeMute(index);
-                              },
-                              child: Container(
-                                  padding: EdgeInsets.symmetric(
-                                      horizontal: 10.w, vertical: 10.h),
-                                  child: Obx(
-                                    () =>
-                                  //   SvgPicture.asset(
-                                  //     controller.isMuted
-                                  //         ? 'assets/images/ic_volume_off.svg'
-                                  //         : 'assets/images/ic_volume_up.svg',
-                                  //     width: 20.w,
-                                  //     height: 20.h,
-                                  //     colorFilter:
-                                  //         ColorFilter.mode(Colors.white, BlendMode.srcIn),
-                                  //   ),
-                                  // )
-                                    Icon(
-                                      controller.isMuted
-                                          ? Icons.volume_off
-                                          : Icons.volume_up,
-                                      color: Colors.white,
-                                      size: 20.w,
-                                    ),
-                                  ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    Divider(
-                      height: 0.h,
-                      color: Colors.white,
-                      thickness: 0.5,
-                      indent: 10.w,
-                      endIndent: 10.w,
-                    ),
-                  ],
+                margin: EdgeInsets.only(top: 24.h),
+                padding: EdgeInsets.symmetric(horizontal: 10.w),
+                child: Row(
+                    children: [
+                      Text(
+                        // 시군구 표현
+                        controller.feedList[index].storeAddress == 'null' || controller.feedList[index].storeAddress == ''
+                            ? ''
+                            : controller.feedList[index].storeAddress!.split(' ')[1],
+                        style: TextStyleUtils().feedAddressTitle(),
+                      ),
+                    ]
                 ),
               ),
-              SizedBox(height: 10.h),
+              // 구분자
+              Divider(
+                height: 14.h,
+                color: Colors.white,
+                thickness: 1,
+                indent: 10.w,
+                endIndent: 10.w,
+              ),
               // 가게상호명
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 10.w),
-                child:
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      controller.feedList[index].storeName ?? '',
-                      style: TextStyleUtils().whiteTextStyle(
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    Text(
-                      '  ${controller.feedList[index].storeType ?? ''}',
-                      style: TextStyleUtils().whiteTextStyle(
-                        fontSize: 10.sp,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
+              InkWell(
+                onTap: () {
+                  // 가게 상세 페이지로 이동
+                  Get.toNamed(AppRoutes.store, arguments: {
+                    'storeName': controller.feedList[index].storeName ?? '',
+                    'storeAddress': controller.feedList[index].storeAddress ?? '',
+                    'storeType': controller.feedList[index].storeType ?? '',
+                    'storeMenu': controller.feedList[index].storeMenuInfo ?? '',
+                    'storeContext': controller.feedList[index].storeContext ?? '',
+                    'lonlat': [
+                      double.parse(controller.feedList[index].storeLngLat!.split(',')[0]),
+                      double.parse(controller.feedList[index].storeLngLat!.split(',')[1])
+                    ]
+                  });
+                },
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 10.w),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(controller.feedList[index].storeName ?? '', style: TextStyleUtils().feedAddressTitle(fontSize: 10.sp)),
+                      SizedBox(width: 10.w),
+                      Text(controller.feedList[index].storeType ?? '', style: TextStyleUtils().feedAddressTitle(fontSize: 8.sp, color: gray300)),
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -254,24 +146,19 @@ class FeedScreen extends GetView<FeedController> {
         onTap: () {
           //controller.showMore(index);
           controller.isFeedMore = !controller.isFeedMore;
-          _logger.d('isFeedMore: ${controller.isFeedMore}');
+          //_logger.d('isFeedMore: ${controller.isFeedMore}');
         },
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Container(
-                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
-                // decoration: BoxDecoration(
-                //   color: Colors.black.withOpacity(0.25),
-                //   borderRadius: BorderRadius.circular(10.r),
-                // ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _feedRegisterUserInfo(context, index),
                     _feedDescriptionText(context, index),
-                    _feedStoreInfo(context, index),
+                    // _feedStoreInfo(context, index),
                     _feedHashtags(context, index),
                     _feedComments(context, index),
                   ],
@@ -306,7 +193,8 @@ class FeedScreen extends GetView<FeedController> {
                       ),
                       child: Obx(
                         () => CachedNetworkImage(
-                          imageUrl: controller.feedList[index].userProfilePhoto ?? '',
+                          imageUrl:
+                              controller.feedList[index].userProfilePhoto ?? '',
                           imageBuilder: (context, imageProvider) => Container(
                             width: 50.w,
                             height: 50.h,
@@ -351,7 +239,7 @@ class FeedScreen extends GetView<FeedController> {
                         Text(
                           controller.feedList[index].userNickname ?? '',
                           style: TextStyleUtils().whiteTextStyle(
-                            fontSize: 12.sp,
+                            fontSize: 10.sp,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
@@ -359,10 +247,18 @@ class FeedScreen extends GetView<FeedController> {
                         Container(
                           alignment: Alignment.center,
                           height: 0.028.sh,
-                          padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 8.w, vertical: 4.h),
                           decoration: BoxDecoration(
-                            color: Color(0xff52A98D),
                             borderRadius: BorderRadius.circular(50.r),
+                            gradient: LinearGradient(
+                              colors: [
+                                Color(0xffFF512F),
+                                Color(0xffF09819),
+                              ],
+                              begin: Alignment.centerRight,
+                              end: Alignment.centerLeft,
+                            ),
                           ),
                           child: Text(
                             '포잇터',
@@ -434,7 +330,8 @@ class FeedScreen extends GetView<FeedController> {
               InkWell(
                 onTap: () {
                   // 공유
-                  controller.shareFeed(FeedController.to.feedList[index].seq ?? '');
+                  controller
+                      .shareFeed(FeedController.to.feedList[index].seq ?? '');
                 },
                 child: Container(
                   padding: EdgeInsets.only(top: 4.h),
@@ -455,12 +352,14 @@ class FeedScreen extends GetView<FeedController> {
   /// 게시물 설명
   _feedDescriptionText(BuildContext context, int index) {
     return SizedBox(
-      width: Get.width * 0.85,
+      width: Get.width,
       child: Obx(
-        () => DescriptionText(
-          text: controller.feedList[index].description ?? '',
-          fontSize: 12.sp,
-          fontWeight: FontWeight.w500,
+        () => Container(
+          child: DescriptionText(
+            text: controller.feedList[index].description ?? '',
+            fontSize: 11.sp,
+            fontWeight: FontWeight.w400,
+          ),
         ),
       ),
     );
@@ -477,53 +376,6 @@ class FeedScreen extends GetView<FeedController> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // InkWell(
-              //   onTap: () {
-              //     Get.toNamed(AppRoutes.store, arguments: {
-              //       'storeName': controller.feedList[index].storeName,
-              //       'storeAddress': controller.feedList[index].storeAddress,
-              //       'storeType': controller.feedList[index].storeType,
-              //       'lonlat': [
-              //         double.parse(controller.feedList[index].storeLngLat!.split(',')[0]),
-              //         double.parse(controller.feedList[index].storeLngLat!.split(',')[1])
-              //       ]
-              //     });
-              //   },
-              //   child:
-              //   Row(
-              //     // 밑줄에 맞춤
-              //     crossAxisAlignment: CrossAxisAlignment.end,
-              //     children: [
-              //       Text(
-              //         controller.feedList[index].storeName ?? '',
-              //         style: TextStyle(
-              //           color: Colors.cyan[500],
-              //           fontSize: 14.sp,
-              //           fontWeight: FontWeight.w800,
-              //         ),
-              //       ),
-              //       SizedBox(width: 5.w),
-              //       Text(
-              //         controller.feedList[index].storeType ?? '',
-              //         style: TextStyle(
-              //           color: Colors.white,
-              //           fontSize: 10.sp,
-              //           fontWeight: FontWeight.w600,
-              //           height: 2.0,
-              //         ),
-              //       ),
-              //     ],
-              //   ),
-              // ),
-              // SizedBox(height: 2.h),
-              // Text(
-              //   controller.feedList[index].storeAddress ?? '',
-              //   style: TextStyle(
-              //     color: Colors.white,
-              //     fontSize: 11.sp,
-              //     fontWeight: FontWeight.w400,
-              //   ),
-              // ),
               // 확장이 되었을 경우
               controller.isFeedMore
                   ? Container(
@@ -549,7 +401,9 @@ class FeedScreen extends GetView<FeedController> {
                             ),
                             child: SingleChildScrollView(
                               child: Text(
-                                controller.convertMenuList(controller.feedList[index].storeMenuInfo ?? ''),
+                                controller.convertMenuList(
+                                    controller.feedList[index].storeMenuInfo ??
+                                        ''),
                                 style: TextStyle(
                                   fontSize: 11.sp,
                                   color: Colors.white,
@@ -559,7 +413,10 @@ class FeedScreen extends GetView<FeedController> {
                             ),
                           ),
                           SizedBox(height: 10.h),
-                          controller.convertNaverPlaceContext(controller.feedList[index].storeContext ?? '') != ''
+                          controller.convertNaverPlaceContext(
+                                      controller.feedList[index].storeContext ??
+                                          '') !=
+                                  ''
                               ? Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
@@ -602,7 +459,8 @@ class FeedScreen extends GetView<FeedController> {
   ///해시태그
   _feedHashtags(BuildContext context, int index) {
     return Container(
-      height: 24.h,
+      margin: EdgeInsets.symmetric(horizontal: 10.w),
+      height: 26.h,
       child: SizedBox(
         child: ListView.builder(
           shrinkWrap: true,
@@ -611,7 +469,7 @@ class FeedScreen extends GetView<FeedController> {
             return Container(
               alignment: Alignment.center,
               margin: EdgeInsets.only(right: 5.w),
-              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
+              padding: EdgeInsets.symmetric(horizontal: 10.w),
               decoration: BoxDecoration(
                 color: Colors.white.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(4.r),
@@ -620,8 +478,8 @@ class FeedScreen extends GetView<FeedController> {
                 controller.feedList[index].hashTags?[idx] ?? '',
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 12.sp,
-                  fontWeight: FontWeight.w600,
+                  fontSize: 10.sp,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             );
@@ -635,37 +493,39 @@ class FeedScreen extends GetView<FeedController> {
   /// 댓글
   _feedComments(BuildContext context, int index) {
     return Container(
-        width: 1.sw,
-        margin: EdgeInsets.only(top: 10.h, left: 4.w),
-        child: InkWell(
-          onTap: () async {
-            // 댓글 시트
-            //controller.commentController.clear();
-            Get.bottomSheet(
-              _commentSheet(context, index),
-              backgroundColor: Colors.transparent,
-              isScrollControlled: true,
-            );
-          },
-          child: Container(
-            width: 0.2.w,
-            margin: EdgeInsets.only(top: 4.h, left: 4.w),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text(
-                  '댓글 ${controller.sumReplyCount ?? 0}개',
-                  style: TextStyleUtils().whiteTextStyle(
-                    fontSize: 10.sp,
-                    fontWeight: FontWeight.w500,
-                  ),
+      padding: EdgeInsets.symmetric(horizontal: 10.w),
+      width: 1.sw,
+      margin: EdgeInsets.only(top: 10.h, left: 4.w),
+      child: InkWell(
+        onTap: () async {
+          // 댓글 시트
+          //controller.commentController.clear();
+          Get.bottomSheet(
+            _commentSheet(context, index),
+            backgroundColor: Colors.transparent,
+            isScrollControlled: true,
+          );
+        },
+        child: Container(
+          width: 0.2.w,
+          margin: EdgeInsets.only(top: 4.h, left: 4.w),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                '댓글 ${controller.sumReplyCount ?? 0}개',
+                //'',
+                style: TextStyleUtils().whiteTextStyle(
+                  fontSize: 9.sp,
+                  //fontWeight: FontWeight.w600,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
+      ),
     );
   }
 
@@ -702,7 +562,7 @@ class FeedScreen extends GetView<FeedController> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       // 댓글 리스트
-                      controller.commentArrayList.isEmpty
+                      controller.commentArray.isEmpty
                           ? SizedBox(
                               width: Get.width,
                               height: 0.3.sh,
@@ -714,9 +574,8 @@ class FeedScreen extends GetView<FeedController> {
                                     fontSize: 11.sp,
                                     fontWeight: FontWeight.w500,
                                   ),
-                              ),
-                            )
-                          )
+                                ),
+                              ))
                           // 댓글 리스트
                           : Column(
                               mainAxisSize: MainAxisSize.min,
@@ -725,9 +584,7 @@ class FeedScreen extends GetView<FeedController> {
                               children: [
                                 SizedBox(
                                   width: Get.width,
-                                  height: controller.sumReplyCount > 10
-                                      ? 0.4.sh
-                                      : 0.3.sh,
+                                  height: 0.3.sh,
                                   child: Obx(
                                     () => RefreshIndicator(
                                       onRefresh: () async {
@@ -756,23 +613,26 @@ class FeedScreen extends GetView<FeedController> {
                               child: TextField(
                                 controller: controller.commentController,
                                 onTap: () {
-                                  if (UserStore.to.isLoggedIn) {
-                                    if (controller.commentController.text.contains('@')) {
+                                  if (UserStore.to.isLoginCheck.value == true) {
+                                    if (controller.commentController.text
+                                        .contains('@')) {
                                       controller.isMentionLoading = true;
-                                      controller.fetchMentionUser(controller.commentController.text);
+                                      controller.fetchMentionUser(
+                                          controller.commentController.text);
                                     } else {
                                       controller.isMentionLoading = false;
                                     }
                                   } else {
                                     Get.bottomSheet(const LoginBottomSheet());
                                   }
-
                                 },
                                 onChanged: (value) {
-                                  if (UserStore.to.isLoggedIn) {
-                                    if (controller.commentController.text.contains('@')) {
+                                  if (UserStore.to.isLoginCheck.value == true) {
+                                    if (controller.commentController.text
+                                        .contains('@')) {
                                       controller.isMentionLoading = true;
-                                      controller.fetchMentionUser(controller.commentController.text);
+                                      controller.fetchMentionUser(
+                                          controller.commentController.text);
                                     } else {
                                       controller.isMentionLoading = false;
                                     }
@@ -793,35 +653,29 @@ class FeedScreen extends GetView<FeedController> {
                             ),
                             InkWell(
                               onTap: () {
-                                if (UserStore.to.isLoggedIn) {
-
-                                  FeedController.to.comment = FeedController.to.commentController.text;
+                                if (UserStore.to.isLoginCheck.value == true) {
+                                  FeedController.to.comment =
+                                      FeedController.to.commentController.text;
 
                                   // 멘션 기능 추가
-                                  if (FeedController.to.commentController.text.contains('@')) {
+                                  if (FeedController.to.commentController.text
+                                      .contains('@')) {
                                     // 사용자 검색
                                     FeedController.to.fetchMentionUser(FeedController.to.commentController.text);
                                   }
-
                                 } else {
                                   Get.bottomSheet(const LoginBottomSheet());
                                 }
                               },
                               child: InkWell(
                                 onTap: () async {
-                                  if (UserStore.to.isLoggedIn) {
-                                    if (controller.commentController.text.isNotEmpty) {
+                                  if (UserStore.to.isLoginCheck.value == true) {
+                                    if (controller
+                                        .commentController.text.isNotEmpty) {
                                       if (controller.isReply) {
-                                        await FeedController.to.addReplyComment(
-                                          feedIndex,
-                                          FeedController.to.commentController.text,
-                                          FeedController.to.feedList[feedIndex].seq ?? '',
-                                        );
+                                        await FeedController.to.addReplyComment(feedIndex, FeedController.to.commentController.text, FeedController.to.feedList[feedIndex].seq ?? '',);
                                       } else {
-                                        await FeedController.to.addComment(
-                                          FeedController.to.feedList[feedIndex].seq ?? '',
-                                          FeedController.to.commentController.text,
-                                        );
+                                        await FeedController.to.addComment(FeedController.to.feedList[feedIndex].seq ?? '', FeedController.to.commentController.text,);
                                       }
                                     } else {
                                       GlobalToastController.to.showToast(
@@ -863,9 +717,8 @@ class FeedScreen extends GetView<FeedController> {
   Widget buildComment(int feedIndex) {
     return ListView.separated(
       shrinkWrap: true,
-      itemCount: controller.commentArrayList[feedIndex].isEmpty
-          ? 0
-          : controller.commentArrayList[feedIndex].length,
+      itemCount:
+          controller.commentArray.isEmpty ? 0 : controller.commentArray.length,
       itemBuilder: (context, commentIndex) {
         return SizedBox(
           child: Column(
@@ -877,12 +730,16 @@ class FeedScreen extends GetView<FeedController> {
                 children: [
                   // 댓글 작성자 프로필
                   CachedNetworkImage(
-                    imageUrl: controller.commentArrayList[feedIndex].isEmpty
+                    imageUrl: controller.commentArray.isEmpty
                         ? ''
-                        : controller.commentArrayList[feedIndex][commentIndex].userPhotoUrl ?? '',
+                        : controller.commentArray.isEmpty
+                            ? ''
+                            : controller
+                                    .commentArray[commentIndex].userPhotoUrl ??
+                                '',
                     imageBuilder: (context, imageProvider) => Container(
-                      width: 30.w,
-                      height: 30.h,
+                      width: 20.w,
+                      height: 20.h,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         image: DecorationImage(
@@ -891,14 +748,17 @@ class FeedScreen extends GetView<FeedController> {
                         ),
                       ),
                     ),
-                    placeholder: (context, url) => Center(
-                      child: CircularProgressIndicator(
-                        color: Colors.grey[100],
+                    placeholder: (context, url) => Container(
+                      width: 20.w,
+                      height: 20.h,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.grey[200],
                       ),
                     ),
                     errorWidget: (context, url, error) => Container(
-                      width: 30.w,
-                      height: 30.h,
+                      width: 20.w,
+                      height: 20.h,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: Colors.grey[200],
@@ -917,10 +777,16 @@ class FeedScreen extends GetView<FeedController> {
                       Row(
                         children: [
                           Text(
-                            controller.commentArrayList[feedIndex].isEmpty
+                            controller.commentArray.isEmpty
                                 ? ''
-                                : controller.commentArrayList[feedIndex][commentIndex].userNickname ?? '',
-                            style: TextStyleUtils().commentTitleTextStyle(),
+                                : controller.commentArray[commentIndex]
+                                        .userNickname ??
+                                    '',
+                            style: TextStyleUtils().bodyTextStyle(
+                              color: Colors.black,
+                              fontSize: 10.sp,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
                           SizedBox(width: 4.w),
                           // 작성자 표시
@@ -941,16 +807,18 @@ class FeedScreen extends GetView<FeedController> {
                       ),
                       SizedBox(height: 4.h),
                       Text(
-                        controller.commentArrayList[feedIndex].isEmpty
-                            ? ''
-                            : HomeController.to.timeAgo(/* string을 date로 변환 */
-                                DateTime.parse(
-                                controller
-                                    .commentArrayList[feedIndex][commentIndex]
-                                    .createdAt
-                                    .toString(),
-                              )),
-                        style: TextStyleUtils().commentContentTextStyle(),
+                        // timeago
+                        HomeController.to.timeAgo(
+                          DateTime.parse(
+                            controller.commentArray[commentIndex].createdAt
+                                .toString(),
+                          ),
+                        ),
+                        style: TextStyleUtils().bodyTextStyle(
+                          color: Colors.grey,
+                          fontSize: 9.sp,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ],
                   ),
@@ -978,13 +846,20 @@ class FeedScreen extends GetView<FeedController> {
           child: Row(
             children: [
               Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   // 댓글 내용
                   Text(
-                    controller.commentArrayList[feedIndex].isEmpty
+                    controller.commentArray.isEmpty
                         ? ''
-                        : controller.commentArrayList[feedIndex][commentIndex].comment ?? '',
-                    style: TextStyleUtils().commentContentTextStyle(),
+                        : controller.commentArray[commentIndex].comment ?? '',
+                    style: TextStyleUtils().bodyTextStyle(
+                      color: gray700,
+                      fontSize: 10.sp,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                   SizedBox(width: 10.w),
                   // 답글 버튼
@@ -992,14 +867,14 @@ class FeedScreen extends GetView<FeedController> {
                     onTap: () {
                       controller.isReply = true;
                       controller.commentController.text =
-                          '@${controller.commentArrayList[feedIndex][commentIndex].userNickname} ';
+                          '@${controller.commentArray[commentIndex].userNickname} ';
                     },
                     child: Text(
                       '답글',
-                      style: TextStyle(
-                        color: Colors.grey[400],
-                        fontSize: 10.sp,
-                        fontWeight: FontWeight.w600,
+                      style: TextStyleUtils().bodyTextStyle(
+                        color: Colors.grey,
+                        fontSize: 9.sp,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ),
@@ -1031,8 +906,7 @@ class FeedScreen extends GetView<FeedController> {
                     Container(
                       width: 1.sw,
                       height: 0.2.sh,
-                      padding: EdgeInsets.symmetric(
-                          horizontal: 10.w),
+                      padding: EdgeInsets.symmetric(horizontal: 10.w),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.only(
@@ -1049,8 +923,12 @@ class FeedScreen extends GetView<FeedController> {
                               // 댓글 삭제
                               //_logger.d('feedIndex: $feedIndex');
                               await FeedController.to.deleteComment(
-                                FeedController.to.commentArrayList[feedIndex][commentIndex].feedId ?? '',
-                                FeedController.to.commentArrayList[feedIndex][commentIndex].commentId ?? '',
+                                FeedController
+                                        .to.commentArray[commentIndex].feedId ??
+                                    '',
+                                FeedController.to.commentArray[commentIndex]
+                                        .commentId ??
+                                    '',
                                 feedIndex,
                               );
                             },
@@ -1107,9 +985,9 @@ class FeedScreen extends GetView<FeedController> {
                   );
                 },
                 child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
-                  child:
-                  Row(
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
+                  child: Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       InkWell(
@@ -1117,8 +995,12 @@ class FeedScreen extends GetView<FeedController> {
                           //_logger.d('feedIndex: $feedIndex');
                           // 댓글 좋아요
                           FeedController.to.addCommentLike(
-                              FeedController.to.commentArrayList[feedIndex][commentIndex].feedId ?? '',
-                              FeedController.to.commentArrayList[feedIndex][commentIndex].commentId ?? '',
+                              FeedController
+                                      .to.commentArray[commentIndex].feedId ??
+                                  '',
+                              FeedController.to.commentArray[commentIndex]
+                                      .commentId ??
+                                  '',
                               feedIndex);
                         },
                         child: Icon(
@@ -1129,11 +1011,10 @@ class FeedScreen extends GetView<FeedController> {
                       ),
                       SizedBox(width: 2.w),
                       Text(
-                        FeedController.to.commentArrayList[feedIndex].isEmpty
-                            ? ''
-                            : FeedController.to.commentArrayList[feedIndex][commentIndex].likeCount.toString() ?? '',
-                        style: TextStyle(
-                          color: gray500,
+                        controller.commentArray[commentIndex].likeCount
+                            .toString(),
+                        style: TextStyleUtils().bodyTextStyle(
+                          color: Colors.grey,
                           fontSize: 10.sp,
                           fontWeight: FontWeight.w500,
                         ),
@@ -1151,10 +1032,25 @@ class FeedScreen extends GetView<FeedController> {
             ],
           ),
         ),
-        // 대댓글
-        controller.commentArrayList[feedIndex][commentIndex].replyCommentList?.isEmpty == true
+
+        // 대댓글 작성 창
+        // Text(
+        //   controller.commentArray.isEmpty
+        //       ? ''
+        //       : controller.commentArray[commentIndex].replyCommentList?.isEmpty ?? true
+        //           ? ''
+        //           : controller.commentArray[commentIndex].replyCommentList![0].comment ?? '',
+        //   style: TextStyleUtils().commentContentTextStyle(),
+        // )
+
+        // 대댓글 리스트
+        //buildReplies(feedIndex, commentIndex),
+        controller.commentArray.isEmpty
             ? Container()
-            : buildReplies(feedIndex, commentIndex),
+            : controller.commentArray[commentIndex].replyCommentList?.isEmpty ??
+                    true
+                ? Container()
+                : buildReplies(feedIndex, commentIndex),
       ],
     );
   }
@@ -1163,12 +1059,18 @@ class FeedScreen extends GetView<FeedController> {
   Widget buildReplies(int feedIndex, int commentIndex) {
     return ListView.builder(
       shrinkWrap: true,
-      itemCount: controller.commentArrayList[feedIndex][commentIndex].replyCommentList!.isEmpty
+      itemCount: controller.commentArray.isEmpty
           ? 0
-          : controller.commentArrayList[feedIndex][commentIndex].replyCommentList!.length,
+          : controller.commentArray[commentIndex].replyCommentList?.isEmpty ??
+                  true
+              ? 0
+              : controller.commentArray[commentIndex].replyCommentList!.length,
       itemBuilder: (context, replyIndex) {
         return Container(
-          margin: EdgeInsets.only(left: 20.w, top: 4.h,),
+          margin: EdgeInsets.only(
+            left: 20.w,
+            top: 4.h,
+          ),
           child: Container(
             margin: EdgeInsets.only(top: 4.h, left: 4.w),
             child: Column(
@@ -1179,9 +1081,17 @@ class FeedScreen extends GetView<FeedController> {
                     Row(
                       children: [
                         CachedNetworkImage(
-                          imageUrl: controller.commentArrayList[feedIndex][commentIndex]
-                              .replyCommentList![0].userPhotoUrl ??
-                              '',
+                          imageUrl: controller.commentArray.isEmpty
+                              ? ''
+                              : controller.commentArray[commentIndex]
+                                          .replyCommentList?.isEmpty ??
+                                      true
+                                  ? ''
+                                  : controller
+                                          .commentArray[commentIndex]
+                                          .replyCommentList![replyIndex]
+                                          .userPhotoUrl ??
+                                      '',
                           imageBuilder: (context, imageProvider) => Container(
                             width: 20.w,
                             height: 20.h,
@@ -1213,8 +1123,22 @@ class FeedScreen extends GetView<FeedController> {
                         ),
                         SizedBox(width: 10.w),
                         Text(
-                          controller.commentArrayList[feedIndex][commentIndex].replyCommentList![replyIndex].userNickname!,
-                          style: TextStyleUtils().commentTitleTextStyle(),
+                          controller.commentArray.isEmpty
+                              ? ''
+                              : controller.commentArray[commentIndex]
+                                          .replyCommentList?.isEmpty ??
+                                      true
+                                  ? ''
+                                  : controller
+                                          .commentArray[commentIndex]
+                                          .replyCommentList![replyIndex]
+                                          .userNickname ??
+                                      '',
+                          style: TextStyleUtils().bodyTextStyle(
+                            color: Colors.black,
+                            fontSize: 10.sp,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                       ],
                     ),
@@ -1228,46 +1152,61 @@ class FeedScreen extends GetView<FeedController> {
                             // timeago
                             HomeController.to.timeAgo(
                               DateTime.parse(
-                                controller.commentArrayList[feedIndex][commentIndex]
+                                controller.commentArray[commentIndex]
                                     .replyCommentList![replyIndex].createdAt
                                     .toString(),
                               ),
                             ),
-                            style: TextStyleUtils().commentContentTextStyle(),
+                            style: TextStyleUtils().bodyTextStyle(
+                              color: Colors.grey[400]!,
+                              fontSize: 9.sp,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
                           SizedBox(height: 10.h),
                           RichText(
-                            text: controller.commentArrayList[feedIndex][commentIndex].replyCommentList?.isEmpty == true
+                            text: controller.commentArray.isEmpty
                                 ? TextSpan()
                                 : TextSpan(children: [
                                     TextSpan(
                                       text: controller
-                                              .commentArrayList[feedIndex][commentIndex]
+                                              .commentArray[commentIndex]
                                               .replyCommentList![replyIndex]
                                               .comment!
                                               .startsWith('@')
-                                          ? '${controller.commentArrayList[feedIndex][commentIndex].replyCommentList![replyIndex].comment!.split(' ')[0]} '
+                                          ? '${controller.commentArray[commentIndex].replyCommentList![replyIndex].comment!.split(' ')[0]} '
                                           : '',
-                                      style: TextStyleUtils().commentContentSetColorTextStyle(),
+                                      style: TextStyleUtils().bodyTextStyle(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .secondary,
+                                        fontSize: 10.sp,
+                                        fontWeight: FontWeight.w500,
+                                      ),
                                     ),
                                     TextSpan(
                                       text: // 골뱅이 제외 다 보여줌
-                                          controller.commentArrayList[feedIndex][commentIndex]
+                                          controller
+                                                  .commentArray[commentIndex]
                                                   .replyCommentList![replyIndex]
                                                   .comment!
                                                   .startsWith('@')
                                               ? controller
-                                                  .commentArrayList[feedIndex][commentIndex]
+                                                  .commentArray[commentIndex]
                                                   .replyCommentList![replyIndex]
                                                   .comment!
                                                   .split(' ')
                                                   .sublist(1)
                                                   .join(' ')
                                               : controller
-                                                  .commentArrayList[feedIndex][commentIndex]
+                                                  .commentArray[commentIndex]
                                                   .replyCommentList![replyIndex]
                                                   .comment!,
-                                      style: TextStyleUtils().commentContentTextStyle(),
+                                      style: TextStyleUtils().bodyTextStyle(
+                                        color: gray700,
+                                        fontSize: 10.sp,
+                                        fontWeight: FontWeight.w500,
+                                      ),
                                     ),
                                   ]),
                           ),
@@ -1296,8 +1235,11 @@ class FeedScreen extends GetView<FeedController> {
         itemBuilder: (context, idx) {
           return InkWell(
             onTap: () {
-              controller.commentController.text = controller.commentController.text.replaceAll('@${controller.mentionUserList[idx].nickname}', '');
-              controller.commentController.text = '@${controller.mentionUserList[idx].nickname} ';
+              controller.commentController.text =
+                  controller.commentController.text.replaceAll(
+                      '@${controller.mentionUserList[idx].nickname}', '');
+              controller.commentController.text =
+                  '@${controller.mentionUserList[idx].nickname} ';
               controller.mentionUserList.clear();
               controller.isMentionLoading = false;
             },
@@ -1317,5 +1259,4 @@ class FeedScreen extends GetView<FeedController> {
       ),
     );
   }
-
 }

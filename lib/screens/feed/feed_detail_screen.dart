@@ -4,20 +4,19 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:foreats/screens/feed/feed_controller.dart';
-import 'package:foreats/screens/feed/feed_detail_controller.dart';
-import 'package:foreats/utils/logger.dart';
 import 'package:get/get.dart';
 
 import '../../home/home_controller.dart';
 import '../../model/feed_model.dart';
 import '../../utils/colors.dart';
+import '../../utils/logger.dart';
 import '../../widget/description_text.dart';
 import '../../widget/login_bottom_sheet.dart';
 import '../login/user_store.dart';
+import 'feed_controller.dart';
 
 class FeedDetailScreen extends StatefulWidget {
-  FeedDetailScreen({super.key});
+  const FeedDetailScreen({super.key});
 
   @override
   State<FeedDetailScreen> createState() => _FeedDetailScreenState();
@@ -29,12 +28,28 @@ class _FeedDetailScreenState extends State<FeedDetailScreen> {
   int _currentVideoIndex = 0;
   List<String> _videoUrls = [];
 
-  final FeedModel feedDetail = Get.arguments['detailFeed'];
+  //final FeedModel feedDetail = Get.arguments['detailFeed'];
+  final FeedModel feedDetail = FeedModel();
 
   @override
   void initState() {
     super.initState();
     // args
+
+    var args = Get.arguments;
+    AppLog.to.d('args: ${args['feed']}');
+
+    // if (args != null) {
+    //   feedDetail = args['feed'];
+    // } else {
+    //   feedDetail = FeedModel();
+    // }
+    // if (args != null) {
+    //   feedDetail = args['detailFeed'];
+    // } else {
+    //   feedDetail = FeedModel();
+    // }
+
     _videoUrls = feedDetail.videoUrls!;
     _initializeVideoPlayer();
   }
@@ -837,14 +852,14 @@ class _FeedDetailScreenState extends State<FeedDetailScreen> {
                     child: TextField(
                       controller: FeedController.to.commentController,
                       onTap: () {
-                        UserStore.to.isLoggedIn
+                        UserStore.to.isLogin == true
                             ? FeedController.to.commentController.text = ''
                             : Get.bottomSheet(
                           const LoginBottomSheet(),
                         );
                       },
                       onChanged: (value) {
-                        if(UserStore.to.isLoggedIn) {
+                        if(UserStore.to.isLogin == true) {
                           FeedController.to.comment = FeedController.to.commentController.text;
 
                           // 멘션 기능 추가
@@ -870,7 +885,7 @@ class _FeedDetailScreenState extends State<FeedDetailScreen> {
                   ),
                   InkWell(
                     onTap: () {
-                      if(UserStore.to.isLoggedIn) {
+                      if(UserStore.to.isLogin == true) {
                         // 댓글 등록
                         // FeedController.to.addComment(
                         //     FeedController.to.feedList[feedIndex].seq ?? '',

@@ -6,8 +6,10 @@ import 'package:logger/logger.dart';
 import '../../utils/app_routes.dart';
 import '../../utils/colors.dart';
 import '../../utils/global_toast_controller.dart';
+import '../../utils/logger.dart';
 import '../../widget/base_appbar.dart';
 import '../login/login_controller.dart';
+import '../login/user_store.dart';
 
 class RegisterBirthScreen extends StatefulWidget {
   const RegisterBirthScreen({super.key});
@@ -19,16 +21,6 @@ class RegisterBirthScreen extends StatefulWidget {
 class _RegisterBirthScreen extends State<RegisterBirthScreen> {
 
   late final TextEditingController _birthController = TextEditingController();
-  final _logger = Logger(
-    printer: PrettyPrinter(
-        methodCount: 2, // Number of method calls to be displayed
-        errorMethodCount: 8, // Number of method calls if stacktrace is provided
-        lineLength: 120, // Width of the output
-        colors: true, // Colorful log messages
-        printEmojis: true, // Print an emoji for each log message
-        printTime: false // Should each log print contain a timestamp
-    ),
-  );
 
   final RxBool _isBirthDuplicated = false.obs;
   final RxString _calculateAgeString = ''.obs;
@@ -198,11 +190,17 @@ class _RegisterBirthScreen extends State<RegisterBirthScreen> {
                 onTap: () async {
                   if (_isBirthDuplicated.value) {
                     // 생년월일 저장
-                    LoginController.to.userModel.value.birthdate = _birthController.text;
+                    // LoginController.to.userModel.value.birthdate = _birthController.text;
                     // 만나이 저장
-                    LoginController.to.userModel.value.calculateBirthdate = _calculateAgeString.value;
-                    _logger.d('생년월일: ${LoginController.to.userModel.toString()}');
+                    // LoginController.to.userModel.value.calculateBirthdate = _calculateAgeString.value;
+                    // _logger.d('생년월일: ${LoginController.to.userModel.toString()}');
+                    // Get.toNamed(AppRoutes.registerGender);
+
+                    UserStore.to.user.value.birthdate = _birthController.text;
+                    UserStore.to.user.value.calculateBirthdate = _calculateAgeString.value;
+                    AppLog.to.d('생년월일: ${UserStore.to.user.value.birthdate}');
                     Get.toNamed(AppRoutes.registerGender);
+
                   } else {
                     GlobalToastController.to.showToast('생년월일을 입력해주세요.(숫자만 입력 가능)');
                   }
@@ -270,7 +268,7 @@ class _RegisterBirthScreen extends State<RegisterBirthScreen> {
     if (now.month < month || (now.month == month && now.day < day)) {
       age--;
     }
-    _logger.d('만 나이: $age');
+    AppLog.to.d('만 나이: $age');
     return age;
   }
 

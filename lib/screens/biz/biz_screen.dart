@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:foreats/widget/point_card.dart';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
 
@@ -14,7 +15,6 @@ import '../login/user_store.dart';
 import 'biz_controller.dart';
 
 class BizScreen extends GetView<BizController> {
-
   BizScreen({super.key});
 
   final _logger = Logger();
@@ -25,15 +25,16 @@ class BizScreen extends GetView<BizController> {
         backgroundColor: Theme.of(context).colorScheme.background,
         appBar: BaseAppBar(
           title: '포인트몰',
+          notification: true,
         ),
         body: Container(
           padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
           child: Column(
             children: [
               Obx(
-                () => UserStore.to.userProfile.id == null
+                () => UserStore.to.isLoginCheck == false
                     ? Center(
-                      child: Text(
+                        child: Text(
                           '로그인이 필요한 서비스입니다',
                           style: TextStyle(
                             fontSize: 14.sp,
@@ -41,139 +42,55 @@ class BizScreen extends GetView<BizController> {
                             fontWeight: FontWeight.w700,
                           ),
                         ),
-                    )
+                      )
                     : Container(
                         width: 1.sw,
                         padding: EdgeInsets.symmetric(
                             horizontal: 10.w, vertical: 5.h),
-                        child: RichText(
-                          text: TextSpan(
-                            text: '안녕하세요, ',
-                            style: TextStyleUtils().bodyTextStyle(
-                              color: Theme.of(context).colorScheme.onBackground,
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.w700,
-                              height: 0,
-                            ),
-                            children: [
-                              TextSpan(
-                                text: UserStore.to.userProfile.nickname ?? '',
-                                style: TextStyleUtils().bodyTextStyle(
-                                  color: Theme.of(context).colorScheme.primary,
-                                  fontSize: 14.sp,
-                                  fontWeight: FontWeight.w700,
-                                  height: 0,
-                                ),
-                              ),
-                              TextSpan(
-                                text: '님',
-                                style: TextStyleUtils().bodyTextStyle(
-                                  color: Theme.of(context).colorScheme.onBackground,
-                                  fontSize: 14.sp,
-                                  fontWeight: FontWeight.w700,
-                                  height: 0,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                ),
-              ),
-              SizedBox(height: 10.h),
-              // card
-              Container(
-                width: 0.9.sw,
-                height: 50.h,
-                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      // Theme.of(context).colorScheme.primary,
-                      // Theme.of(context).colorScheme.secondary,
-                      // Theme.of(context).colorScheme.secondary,
-                      Color(0xff536DFE),
-                      Color(0xff6A3DE8),
-                    ],
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                  ),
-                  borderRadius: BorderRadius.circular(5.r),
-                  shape: BoxShape.rectangle,
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
+                        child: Row(
                           children: [
-                            SvgPicture.asset(
-                              'assets/images/ic_payment_card.svg',
-                              width: 20.w,
-                              height: 20.h,
-                              colorFilter: ColorFilter.mode(
-                                Theme.of(context).colorScheme.onPrimary,
-                                BlendMode.srcIn,
+                            Text(
+                              '안녕하세요,',
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.onBackground,
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w700,
                               ),
                             ),
                             SizedBox(width: 5.w),
-                            Text('누적포인트',
-                                style: TextStyle(
-                                    color: Theme.of(context).colorScheme.onPrimary,
-                                    fontWeight: FontWeight.w800)),
+                            Text(
+                              UserStore.to.user.value.nickname ?? '',
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.primary,
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            Text(
+                              '님',
+                              style: TextStyle(
+                                color:
+                                    Theme.of(context).colorScheme.onBackground,
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
                           ],
                         ),
-                        Text(
-                            '${controller.numberFormat(int.parse(UserStore.to.userProfile.point ?? '0'))}P',
-                            style: TextStyle(
-                                color: Theme.of(context).colorScheme.onPrimary,
-                                fontWeight: FontWeight.w700)),
-                      ],
-                    ),
-                    // 누적 사용내역
-                    Container(
-                      width: double.infinity,
-                      alignment: Alignment.center,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          InkWell(
-                            onTap: () {
-                              _logger.d('적립 / 사용내역');
-                              Get.toNamed(AppRoutes.bizHistory);
-                            },
-                            child: Text('적립 / 사용내역',
-                                style: TextStyle(
-                                    color: Theme.of(context).colorScheme.onPrimary,
-                                    fontSize: 10.sp,
-                                    // underscore
-                                    decoration: TextDecoration.underline,
-                                    fontWeight: FontWeight.w700)),
-                          ),
-                          SizedBox(width: 10.w),
-                          Icon(
-                            Icons.arrow_forward_ios,
-                            color: Theme.of(context).colorScheme.onPrimary,
-                            size: 10.sp,
-                          ),
-                        ],
                       ),
-                    ),
-                  ],
-                ),
-
               ),
+              SizedBox(height: 10.h),
+              // card
+              PointCard().buildPointCard(context),
               SizedBox(height: 10.h),
               Obx(
                 () => controller.bizList.isEmpty &&
                         controller.brandNameList.isNotEmpty
                     ? Center(
-                      child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(gray300),
-                      ),
-                    )
+                        child: CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(gray300),
+                        ),
+                      )
                     : _buildBizListCategoryList(context),
               ),
               SizedBox(height: 10.h),
@@ -181,10 +98,10 @@ class BizScreen extends GetView<BizController> {
                 () => controller.bizList.isEmpty &&
                         controller.brandNameList.isNotEmpty
                     ? Center(
-                      child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(gray300),
-                      ),
-                    )
+                        child: CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(gray300),
+                        ),
+                      )
                     : _buildBizListApiList(context),
               ),
             ],
@@ -274,31 +191,35 @@ class BizScreen extends GetView<BizController> {
               await controller.fetchGoodsTypeSelectList(
                   controller.goodTypeList[index], index);
             },
-            child: Obx(() =>
-                Container(
-                  alignment: Alignment.center,
-                  margin: EdgeInsets.only(right: 5.w),
-                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.background,
-                    borderRadius: BorderRadius.circular(20.r),
-                    shape: BoxShape.rectangle,
-                    border: Border.all(
-                      color: controller.isGoodTypeSelectIndex.value == index
-                          ? Theme.of(context).colorScheme.primary
-                          : gray300,
-                      width: 1.w,
-                    ),
-                  ),
-                  child: Text(
-                    controller.goodTypeList[index],
-                    style: TextStyle(
-                      fontSize: 11.sp,
-                      fontWeight: FontWeight.w500,
-                      color: Theme.of(context).colorScheme.onBackground,
-                    ),
+            child: Obx(
+              () => Container(
+                alignment: Alignment.center,
+                margin: EdgeInsets.only(right: 5.w),
+                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
+                decoration: BoxDecoration(
+                  color: controller.isGoodTypeSelectIndex.value == index
+                      ? Theme.of(context).colorScheme.background
+                      : gray50,
+                  borderRadius: BorderRadius.circular(20.r),
+                  shape: BoxShape.rectangle,
+                  border: Border.all(
+                    color: controller.isGoodTypeSelectIndex.value == index
+                        ? Theme.of(context).colorScheme.secondary
+                        : gray300,
+                    width: 1.w,
                   ),
                 ),
+                child: Text(
+                  controller.goodTypeList[index],
+                  style: TextStyle(
+                    fontSize: 11.sp,
+                    fontWeight: FontWeight.w400,
+                    color: controller.isGoodTypeSelectIndex.value == index
+                        ? Theme.of(context).colorScheme.secondary
+                        : gray700,
+                  ),
+                ),
+              ),
             ),
           );
         },
@@ -321,7 +242,8 @@ class BizScreen extends GetView<BizController> {
           itemBuilder: (context, index) {
             return controller.isAll.value
                 ? _buildBizListApiItem(context, controller.bizList[index])
-                : _buildBizListApiItem(context, controller.bizSelectList[index]);
+                : _buildBizListApiItem(
+                    context, controller.bizSelectList[index]);
           },
         ),
       ),
@@ -392,7 +314,9 @@ class BizScreen extends GetView<BizController> {
           ),
         ),
         SizedBox(height: 5.h),
-        Text(bizModel.brandName ?? '', style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w500, color: gray600)),
+        Text(bizModel.brandName ?? '',
+            style: TextStyle(
+                fontSize: 10.sp, fontWeight: FontWeight.w500, color: gray600)),
         SizedBox(height: 2.5.h),
         Container(
           alignment: Alignment.center,
@@ -431,7 +355,7 @@ class BizScreen extends GetView<BizController> {
     );
   }
 
-  /*_pageNumber(BuildContext context) {
+/*_pageNumber(BuildContext context) {
     return Obx(
       () => Container(
         // width: 200.w,

@@ -63,6 +63,12 @@ class FeedController extends GetxController {
   final _commentReplyArrayList =<List<CommentModel>>[].obs;
   List<List<CommentModel>> get commentReplyArrayList => _commentReplyArrayList;
 
+  final _commentArray = <CommentModel>[].obs;
+  List<CommentModel> get commentArray => _commentArray;
+
+  final _commentReplyArray = <CommentModel>[].obs;
+  List<CommentModel> get commentReplyArray => _commentReplyArray;
+
   final _thumbnailList = <String>[].obs;
   List<String> get thumbnailList => _thumbnailList;
 
@@ -114,7 +120,7 @@ class FeedController extends GetxController {
   Future<void> onInit() async {
     super.onInit();
     await pageInit();
-    await fetchFeeds();
+    //await fetchFeeds();
   }
 
   @override
@@ -153,7 +159,7 @@ class FeedController extends GetxController {
         // 썸네일
         for (var i = 0; i < _feedList.length; i++) {
           _thumbnailList.add(_feedList[i].thumbnailUrls![0]);
-          await fetchComments(feedList[i].seq ?? '', i);
+          //await fetchComments(feedList[i].seq ?? '', i);
         }
 
         // 북마크, 좋아요 갯수
@@ -255,19 +261,22 @@ class FeedController extends GetxController {
   }
 
   /// 비디오 플레이어 초기화
-  Future<void> initializeVideoPlayer(List<List<CachedVideoPlayerPlusController>> videoControllerList) async {
+  Future<CachedVideoPlayerPlusController?> initializeVideoPlayer(List<List<CachedVideoPlayerPlusController>> videoControllerList) async {
     try {
+
       videoControllerList[currentFeedIndex.value][currentVideoUrlIndex.value].initialize().then((_) {
-        initializeVideoPlayerFuture =
-            videoControllerList[currentFeedIndex.value][currentVideoUrlIndex.value].play();
+        initializeVideoPlayerFuture = videoControllerList[currentFeedIndex.value][currentVideoUrlIndex.value].play();
         // mute
         if (videoControllerList[currentFeedIndex.value].length == 1) {
           videoControllerList[currentFeedIndex.value][currentVideoUrlIndex.value].setLooping(true);
+          videoControllerList[currentFeedIndex.value][currentVideoUrlIndex.value].setVolume(0);
         }
         videoControllerList[currentFeedIndex.value][currentVideoUrlIndex.value].addListener(_onVideoPlayerStateChanged);
+        return videoControllerList[currentFeedIndex.value][currentVideoUrlIndex.value];
       });
     } catch (e) {
       AppLog.to.e('_initializeVideoPlayer error: $e');
+      return null;
     }
   }
 
@@ -275,7 +284,7 @@ class FeedController extends GetxController {
   _onVideoPlayerStateChanged() {
     try {
       if (videoControllerList[currentFeedIndex.value][currentVideoUrlIndex.value].value.isCompleted) {
-        AppLog.to.e('isCompleted');
+        AppLog.to.d('isCompleted');
 
         if (currentVideoUrlIndex.value < videoControllerList[currentFeedIndex.value].length - 1) {
           currentVideoUrlIndex.value++;
@@ -320,8 +329,7 @@ class FeedController extends GetxController {
   // 최근 영상 재생
   Future<void> recentPlay() async {
     try {
-      videoControllerList[currentFeedIndex.value][currentVideoUrlIndex.value]
-          .play();
+      videoControllerList[currentFeedIndex.value][currentVideoUrlIndex.value].play();
     } catch (e) {
       AppLog.to.e('recentPlay error: $e');
     }
@@ -334,8 +342,7 @@ class FeedController extends GetxController {
   /// isAllPause가 true인 경우 모든 영상 정지
   /// isAllPause가 false인 경우 현재 영상만 정지
 
-  Future<void> currentPause(
-      int feedIndex, int videoIndex, bool isAllPause) async {
+  Future<void> currentPause(int feedIndex, int videoIndex, bool isAllPause) async {
     try {
       if (isAllPause) {
         for (var videoController in videoControllerList) {
@@ -410,10 +417,10 @@ class FeedController extends GetxController {
             'comment': comment,
             'createdAt': Timestamp.now(),
             'uid': '',
-            'userId': UserStore.to.userProfile.id,
-            'userName': UserStore.to.userProfile.displayName,
-            'userNickname': UserStore.to.userProfile.nickname,
-            'userPhotoUrl': UserStore.to.userProfile.photoUrl,
+            'userId': UserStore.to.user.value.id,
+            'userName': UserStore.to.user.value.displayName,
+            'userNickname': UserStore.to.user.value.nickname,
+            'userPhotoUrl': UserStore.to.user.value.profileImage,
             'feedId': feedId,
             'commentId': commentId,
             'likeCount': 0,
@@ -442,47 +449,47 @@ class FeedController extends GetxController {
 
     try {
 
-      var commentId = _commentArrayList[currentFeedIndex.value][index].commentId;
-      AppLog.to.d('commentId: $commentId');
-
-      QuerySnapshot<Map<String, dynamic>> feedSnapshot = await _firestore
-          .collection('feeds')
-          .where('seq', isEqualTo: feedId)
-          .get();
-
-      for (var i = 0; i < feedSnapshot.docs.length; i++) {
-        feedSnapshot.docs[i].reference.collection('comments').where('commentId', isEqualTo: commentId).get().then((value) {
-
-          // isReply가 true업데이트
-          value.docs[i].reference.update({
-            'isReply': true,
-          });
-
-          for (var j = 0; j < value.docs.length; j++) {
-            value.docs[j].reference.collection('reply').add({
-              'comment': comment,
-              'createdAt': Timestamp.now(),
-              'uid': '',
-              'userId': UserStore.to.userProfile.id,
-              'userName': UserStore.to.userProfile.displayName,
-              'userNickname': UserStore.to.userProfile.nickname,
-              'userPhotoUrl': UserStore.to.userProfile.photoUrl,
-              'feedId': feedId,
-              'commentId': commentId,
-              'likeCount': 0,
-              'likeUserIds': [],
-              'isReply': true,
-              'replyCommentId': commentId,
-              'replyCommentList': [],
-            });
-          }
-        });
-      }
-
-      await refreshComments(feedId, currentFeedIndex.value);
-
-      // fcm 발송
-      await sendFcm(feedId, comment, '대댓글');
+      // var commentId = _commentArrayList[currentFeedIndex.value][index].commentId;
+      // AppLog.to.d('commentId: $commentId');
+      //
+      // QuerySnapshot<Map<String, dynamic>> feedSnapshot = await _firestore
+      //     .collection('feeds')
+      //     .where('seq', isEqualTo: feedId)
+      //     .get();
+      //
+      // for (var i = 0; i < feedSnapshot.docs.length; i++) {
+      //   feedSnapshot.docs[i].reference.collection('comments').where('commentId', isEqualTo: commentId).get().then((value) {
+      //
+      //     // isReply가 true업데이트
+      //     value.docs[i].reference.update({
+      //       'isReply': true,
+      //     });
+      //
+      //     for (var j = 0; j < value.docs.length; j++) {
+      //       value.docs[j].reference.collection('reply').add({
+      //         'comment': comment,
+      //         'createdAt': Timestamp.now(),
+      //         'uid': '',
+      //         'userId': UserStore.to.user.value.id,
+      //         'userName': UserStore.to.user.value.displayName,
+      //         'userNickname': UserStore.to.user.value.nickname,
+      //         'userPhotoUrl': UserStore.to.user.value.photoUrl,
+      //         'feedId': feedId,
+      //         'commentId': commentId,
+      //         'likeCount': 0,
+      //         'likeUserIds': [],
+      //         'isReply': true,
+      //         'replyCommentId': commentId,
+      //         'replyCommentList': [],
+      //       });
+      //     }
+      //   });
+      // }
+      //
+      // await refreshComments(feedId, currentFeedIndex.value);
+      //
+      // // fcm 발송
+      // await sendFcm(feedId, comment, '대댓글');
 
     } catch (e) {
       AppLog.to.e('addReplyComment error: $e');
@@ -511,65 +518,44 @@ class FeedController extends GetxController {
 
   /// [FirebaseFirestore] Feed 댓글 조회
   Future<void> fetchComments(String feedId, int feedIndex) async {
+
     try {
 
       sumReplyCount.value = 0;
+      _commentArray.clear();
+      _commentReplyArray.clear();
 
-      QuerySnapshot feedSnapshot = await _firestore
+      var feedSnapshot = await _firestore
           .collection('feeds')
           .where('seq', isEqualTo: feedId)
           .get();
 
-      List<CommentModel> comments = [];
+      var commentList = <CommentModel>[];
 
       for (var i = 0; i < feedSnapshot.docs.length; i++) {
 
-        QuerySnapshot<Map<String, dynamic>> commentSnapshot = await feedSnapshot.docs[i].reference.collection('comments').orderBy('createdAt', descending: true).get();
+        var commentSnapshot = await feedSnapshot.docs[i].reference.collection('comments').orderBy('createdAt', descending: false).get();
 
         for (var j = 0; j < commentSnapshot.docs.length; j++) {
-          comments.add(CommentModel.fromMap(commentSnapshot.docs[j].data()));
-          comments[j].replyCommentList = [];
 
-          if(commentSnapshot.docs[j].data()['isReply'] == true) {
-            QuerySnapshot<Map<String, dynamic>> replySnapshot = await commentSnapshot.docs[j].reference.collection('reply').orderBy('createdAt', descending: true).get();
-            for (var k = 0; k < replySnapshot.docs.length; k++) {
-              comments[j].replyCommentList!.add(CommentModel.fromMap(replySnapshot.docs[k].data()));
-              sumReplyCount.value++;
-            }
-          } else {
-            comments[j].replyCommentList = [];
+          var comment = CommentModel.fromJson(commentSnapshot.docs[j].data());
+          sumReplyCount.value = commentSnapshot.docs.length;
+
+          // 대댓글 조회
+          var replyCommentSnapshot = await commentSnapshot.docs[j].reference.collection('reply').orderBy('createdAt', descending: false).get();
+
+          for (var k = 0; k < replyCommentSnapshot.docs.length; k++) {
+            var replyComment = CommentModel.fromJson(replyCommentSnapshot.docs[k].data());
+            comment.replyCommentList!.add(replyComment);
           }
 
-          _commentArrayList.add(comments);
-          sumReplyCount.value++;
+          sumReplyCount.value += comment.replyCommentList!.length;
+          commentList.add(comment);
         }
 
-        _isCommentLoading.value = false;
+        _commentArray.addAll(commentList);
 
-/*        await feedSnapshot.docs[i].reference.collection('comments').orderBy('createdAt', descending: true).snapshots().listen((event) {
-          comments = [];
-          for (var j = 0; j < event.docs.length; j++) {
-            comments.add(CommentModel.fromMap(event.docs[j].data()));
-            comments[j].replyCommentList = [];
 
-            if(event.docs[j].data()['isReply'] == true) {
-              event.docs[j].reference.collection('reply').orderBy('createdAt', descending: true).get().then((value) {
-                for (var k = 0; k < value.docs.length; k++) {
-                  comments[j].replyCommentList!.add(CommentModel.fromMap(value.docs[k].data()));
-                  sumReplyCount.value++;
-                }
-              });
-            } else {
-              comments[j].replyCommentList = [];
-            }
-
-            //AppLog.to.d('_commentArrayList: ${comments[j].toString()}');
-            _commentArrayList.add(comments);
-            sumReplyCount.value++;
-          }
-        });
-
-        _isCommentLoading.value = false;*/
 
       }
 
@@ -597,7 +583,6 @@ class FeedController extends GetxController {
       for (var i = 0; i < feedSnapshot.docs.length; i++) {
         feedSnapshot.docs[i].reference.collection('comments').where('commentId', isEqualTo: commentId).get().then((value) {
           for (var j = 0; j < value.docs.length; j++) {
-            // AppLog.to.d('value.docs[j].data(): ${value.docs[j].data()}');
             value.docs[j].reference.delete();
           }
         });
@@ -612,42 +597,41 @@ class FeedController extends GetxController {
   }
 
   /// 댓글 좋아요
-  Future<void> addCommentLike(
-      String feedId, String commentId, int feedIndex) async {
+  Future<void> addCommentLike(String feedId, String commentId, int feedIndex) async {
+
     try {
-      // 자신이 올린 게시물 제외
-      if (UserStore.to.userProfile.id ==
-          _commentArrayList[feedIndex]
-              .firstWhere((element) => element.commentId == commentId).userId) {
-        GlobalToastController.to.showToast('자신이 작성한 댓글은 좋아요를 누를 수 없습니다.');
-        return;
-      }
 
-      // 이미 좋아요를 누른 경우
-      if (_commentArrayList[feedIndex]
-          .firstWhere((element) => element.commentId == commentId)
-          .likeUserIds!
-          .contains(UserStore.to.userProfile.id)) {
-        GlobalToastController.to.showToast('이미 좋아요를 누르셨습니다.');
-        return;
-      }
-
-      await _firestore
+      QuerySnapshot<Map<String, dynamic>> feedSnapshot = await _firestore
           .collection('feeds')
-          .doc(feedId)
-          .collection('comments')
-          .where('commentId', isEqualTo: commentId)
-          .get()
-          .then((value) async {
-        for (var i = 0; i < value.docs.length; i++) {
-          value.docs[i].reference.update({
-            'likeCount': FieldValue.increment(1),
-            'likeUserIds': FieldValue.arrayUnion([UserStore.to.userProfile.id]),
-          });
-        }
+          .where('seq', isEqualTo: feedId)
+          .get();
 
-        await refreshComments(feedId, feedIndex);
-      });
+      for (var i = 0; i < feedSnapshot.docs.length; i++) {
+        feedSnapshot.docs[i].reference.collection('comments').where('commentId', isEqualTo: commentId).get().then((value) {
+          for (var j = 0; j < value.docs.length; j++) {
+
+            // 이미 좋아요를 누른 경우
+            if (value.docs[j].data()['likeUserIds'].contains(UserStore.to.user.value.id)) {
+              GlobalToastController.to.showToast('이미 좋아요를 누르셨습니다.');
+              return;
+            }
+
+            // 자신이 올린 게시물 제외
+            if (UserStore.to.user.value.id == value.docs[j].data()['userId']) {
+              GlobalToastController.to.showToast('자신이 작성한 게시물은 좋아요를 누를 수 없습니다.');
+              return;
+            }
+
+            value.docs[j].reference.update({
+              'likeCount': FieldValue.increment(1),
+              'likeUserIds': FieldValue.arrayUnion([UserStore.to.user.value.id]),
+            });
+          }
+        });
+      }
+
+      await refreshComments(feedId, feedIndex);
+
     } catch (e) {
       AppLog.to.e('likeComment error: $e');
     }
@@ -670,7 +654,7 @@ class FeedController extends GetxController {
         for (var i = 0; i < value.docs.length; i++) {
           value.docs[i].reference.update({
             'likeCount': FieldValue.increment(-1),
-            'likeUserIds': FieldValue.arrayRemove([UserStore.to.userProfile.id]),
+            'likeUserIds': FieldValue.arrayRemove([UserStore.to.user.value.id]),
           });
         }
         await refreshComments(feedId, feedIndex);
@@ -711,7 +695,7 @@ class FeedController extends GetxController {
     try {
       await _firestore
           .collection('users')
-          .doc(UserStore.to.userProfile.id)
+          .doc(UserStore.to.user.value.id)
           .collection('bookmarks')
           .where('feedId', isEqualTo: feedId)
           .get()
@@ -738,7 +722,7 @@ class FeedController extends GetxController {
       var target = _feedList.indexWhere((element) => element.seq == feedId);
 
       // 자신이 올린 게시물 제외
-      if (UserStore.to.userProfile.id == feed.userid) {
+      if (UserStore.to.user.value.id == feed.userid) {
         GlobalToastController.to.showToast('자신이 작성한 게시물은 북마크를 누를 수 없습니다.');
         return;
       }
@@ -746,7 +730,7 @@ class FeedController extends GetxController {
       // 유저 북마크 추가
       await _firestore
           .collection('users')
-          .doc(UserStore.to.userProfile.id)
+          .doc(UserStore.to.user.value.id)
           .collection('bookmarks')
           .doc(feedId)
           .set({
@@ -783,7 +767,7 @@ class FeedController extends GetxController {
     try {
       await _firestore
           .collection('users')
-          .doc(UserStore.to.userProfile.id)
+          .doc(UserStore.to.user.value.id)
           .collection('bookmarks')
           .where('feedId', isEqualTo: feedId)
           .get()
@@ -825,7 +809,7 @@ class FeedController extends GetxController {
     try {
       await _firestore
           .collection('users')
-          .doc(UserStore.to.userProfile.id)
+          .doc(UserStore.to.user.value.id)
           .collection('likes')
           .where('feedId', isEqualTo: feedId)
           .get()
@@ -852,14 +836,14 @@ class FeedController extends GetxController {
       var target = _feedList.indexWhere((element) => element.seq == feedId);
 
       // 자신이 올린 게시물 제외
-      if (UserStore.to.userProfile.id == feed.userid) {
+      if (UserStore.to.user.value.id == feed.userid) {
         GlobalToastController.to.showToast('자신이 작성한 게시물은 좋아요를 누를 수 없습니다.');
         return;
       }
 
       await _firestore
           .collection('users')
-          .doc(UserStore.to.userProfile.id)
+          .doc(UserStore.to.user.value.id)
           .collection('likes')
           .doc(feedId)
           .set({
@@ -895,7 +879,7 @@ class FeedController extends GetxController {
     try {
       await _firestore
           .collection('users')
-          .doc(UserStore.to.userProfile.id)
+          .doc(UserStore.to.user.value.id)
           .collection('likes')
           .where('feedId', isEqualTo: feedId)
           .get()
@@ -1002,7 +986,7 @@ class FeedController extends GetxController {
     try {
       var feed = _feedList.firstWhere((element) => element.seq == feedId);
 
-      var userLoginType = UserStore.to.userProfile.loginType;
+      var userLoginType = UserStore.to.user.value.loginType;
       AppLog.to.i('userLoginType: $userLoginType');
 
       if (userLoginType == 'kakao') {
@@ -1023,18 +1007,28 @@ class FeedController extends GetxController {
             .then((value) async {
           // SharedPreferences prefs = await SharedPreferences.getInstance();
           // var fcmToken = prefs.getString('fcmToken') ?? '';
-          //var fcmToken = UserStore.to.userProfile.fcmToken ?? '';
+          //var fcmToken = UserStore.to.user.value.fcmToken ?? '';
           var fcmToken = value.docs.first.data()['fcmToken'];
           var nickname = value.docs.first.data()['nickname'];
           AppLog.to.i('fcmToken: $fcmToken , nickname: $nickname');
-          // fcm 발송
+
+          // datetime to timestamp
+          var timestamp = Timestamp.fromDate(DateTime.now());
 
           // add notification
           await _firestore.collection('notifications').add({
-            'createdAt': Timestamp.now(),
-            'fcmToken': fcmToken,
-            'title': type,
-            'body': comment,
+            'title': '포잇',
+            'body': '${UserStore.to.user.value.nickname}님이 회원님의 게시글에 $type을 남겼어요',
+            'createdAt': timestamp,
+            'uid': UserStore.to.user.value.uid,
+            'userId': UserStore.to.user.value.id,
+            'userName': UserStore.to.user.value.displayName,
+            'userNickname': UserStore.to.user.value.nickname,
+            'userPhotoUrl': UserStore.to.user.value.profileImage,
+            'feedId': feedId,
+            'comment': comment,
+            'type': type,
+            'isRead': false,
           });
 
           if(type == '댓글'){
@@ -1095,8 +1089,7 @@ class FeedController extends GetxController {
       final message = {
         // 토큰 값 사용
         'message' : {
-          'token': 'fLDzYBDWRBuSdMssaPpWxp:APA91bHJB-9EqiPm02vio0BaDRBwF94B7fvpqIzsFiDj1RU9bYBAD0Xgv3F26YMGd4BSBgSSDifOsbSkdA3t_Zhof1sSWIV1UetuWoeeF-j0YGpHq6yo9Pwu5t8VnJbRBA8QGcD0zI-x',
-          //'token': fcmToken,
+          'token': fcmToken,
           'notification': {
             'title': title,
             'body': comment,
@@ -1175,34 +1168,6 @@ class FeedController extends GetxController {
     }
   }
 
-
-  String totalReplyCount(int index) {
-
-    // // 대댓글이 없을 경우
-    // var replyCnt = 0;
-    //
-    // if(_commentArrayList[currentFeedIndex.value][index].replyCommentList!.isEmpty) {
-    //   replyCnt = 0;
-    // } else {
-    //   replyCnt = _commentArrayList[currentFeedIndex.value][index].replyCommentList!.length;
-    // }
-    //
-    // // 댓글 수 + 대댓글 수
-    // var totalReplyCount = _commentArrayList[currentFeedIndex.value][index].replyCommentList!.length + replyCnt;
-    // AppLog.to.d('totalReplyCount: $totalReplyCount');
-    //
-    // return totalReplyCount.toString();
-
-   //commentArrayList[index].length + commentArrayList[index].fold(0, (previousValue, element) => previousValue + element.replyCommentList!.length);
-
-    if(_commentArrayList[currentFeedIndex.value][index].replyCommentList!.isEmpty) {
-      return _commentArrayList[currentFeedIndex.value][index].replyCommentList!.length.toString();
-    } else {
-      return _commentArrayList[currentFeedIndex.value][index].replyCommentList!.length.toString();
-    }
-
-
-  }
 
 
 }

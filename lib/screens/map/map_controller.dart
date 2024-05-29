@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:foreats/model/store_model.dart';
+import 'package:foreats/utils/global_toast_controller.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -92,6 +93,7 @@ class MapController extends GetxController {
 
   /// 지도 생성
   Future<void> onMapCreated(GoogleMapController controller) async {
+
     AppLog.to.d('onMapCreated');
     mapController = controller;
     customInfoWindowController.googleMapController = controller;
@@ -124,22 +126,29 @@ class MapController extends GetxController {
     AppLog.to.d('onSearchPlace: ${searchController.text}');
     searchPlace.value = searchController.text;
     page.value = 1;
-    await fetchSearchPlace(searchPlace.value, page: page.value);
+    //await fetchSearchPlace(searchPlace.value, page: page.value);
   }
 
   Future<LatLng> initCurrentLocation() async {
-    // geolocator
-    var location = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
-    AppLog.to.d('location: ${location.latitude}, ${location.longitude}');
 
-    currentLocation.value = LatLng(location.latitude, location.longitude);
-    return currentLocation.value;
+    // geolocator
+    LocationPermission permission = await Geolocator.requestPermission(); //오류 해결 코드
+    if (permission == LocationPermission.denied) {
+      AppLog.to.d('위치 권한이 없습니다.');
+      return currentLocation.value;
+    } else {
+      Position location = await Geolocator.
+      getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+
+      currentLocation.value = LatLng(location.latitude, location.longitude);
+      return currentLocation.value;
+    }
+
   }
+
 
   /// 현재 위치 값 구하기
   Future<LatLng> getCurrentLocation() async {
-
-    //await LocationService.to.getLocation();
 
     await initCurrentLocation();
 
@@ -150,6 +159,7 @@ class MapController extends GetxController {
 
     isMapLoading = false;
     return currentLocation.value;
+
   }
 
   /// 현재 위치로 이동
@@ -265,7 +275,6 @@ class MapController extends GetxController {
     containStoreList.clear();
     markers.clear();
 
-
     try {
 
       if(value.isEmpty) {
@@ -373,6 +382,7 @@ class MapController extends GetxController {
 
       if(storeList.isEmpty) {
         AppLog.to.d('검색 결과가 없습니다.');
+        GlobalToastController.to.showToast('검색 결과가 없습니다');
         isSearchLoading.value = false;
         return storeList;
       }

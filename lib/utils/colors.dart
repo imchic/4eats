@@ -17,15 +17,15 @@ const menuUnselected = Color(0xFF949494);
 
 const lightColorScheme = ColorScheme(
   brightness: Brightness.light,
-  primary: Color(0xFF8a59f2),
+  primary: Color(0xfff12711),
   onPrimary: Color(0xFFFFFFFF),
   primaryContainer: Color(0xFF82F8CA),
   onPrimaryContainer: Color(0xFF002115),
-  secondary: Color(0xFFa986f4),
+  secondary: Color(0xFFFF5C00),
   onSecondary: Color(0xFFFFFFFF),
   secondaryContainer: Color(0xFFCFE9DA),
   onSecondaryContainer: Color(0xFF092017),
-  tertiary: Color(0xFFb99df5),
+  tertiary: Color(0xFFF09819),
   onTertiary: Color(0xFFFFFFFF),
   tertiaryContainer: Color(0xFFC2E8FC),
   onTertiaryContainer: Color(0xFF001F2A),

@@ -27,6 +27,7 @@ class FeedModel {
   List<List<CommentModel>>? comments;
   bool isLike = false;
   bool isBookmark = false;
+  int? commentCount;
 
   FeedModel({
     this.seq,
@@ -53,6 +54,7 @@ class FeedModel {
     this.comments,
     this.isBookmark = false,
     this.isLike = false,
+    this.commentCount = 0,
   });
 
   factory FeedModel.fromJson(Map<String, dynamic> json) => FeedModel(
@@ -80,6 +82,7 @@ class FeedModel {
         isBookmark: json["isBookmark"],
         isLike: json["isLike"],
         comments: List<List<CommentModel>>.from(json["comments"].map((x) => List<CommentModel>.from(x.map((x) => CommentModel.fromJson(x))))),
+        commentCount: json["commentCount"],
       );
 
   Map<String, dynamic> toJson() => {
@@ -107,6 +110,7 @@ class FeedModel {
         "isBookmark": isBookmark,
         "isLike": isLike,
         "comments": List<dynamic>.from(comments!.map((x) => List<dynamic>.from(x.map((x) => x.toJson())))),
+        "commentCount": commentCount,
       };
 
   // tostring

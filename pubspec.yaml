@@ -142,3 +142,11 @@ flutter:
           weight: 700
         - asset: assets/fonts/gmarket/GmarketSansTTFBold.ttf
           weight: 800
+
+    - family: Godob
+      fonts:
+        - asset: assets/fonts/godo/GodoM.ttf
+          weight: 500
+        - asset: assets/fonts/godo/GodoB.ttf
+          weight: 700
+

@@ -14,7 +14,7 @@ class UserModel {
   String? accessToken;
   String? refreshToken;
   String? fcmToken;
-  String? photoUrl;
+  String? profileImage;
   String? loginType;
   DateTime? createdAt;
   DateTime? updatedAt;
@@ -32,7 +32,7 @@ class UserModel {
     this.accessToken,
     this.refreshToken,
     this.fcmToken,
-    this.photoUrl,
+    this.profileImage,
     this.loginType,
     this.createdAt,
     this.updatedAt,
@@ -51,7 +51,7 @@ class UserModel {
     accessToken = json['accessToken'];
     refreshToken = json['refreshToken'];
     fcmToken = json['fcmToken'];
-    photoUrl = json['photoUrl'];
+    profileImage = json['photoUrl'];
     loginType = json['loginType'];
     createdAt = Timestamp.fromDate(json['createdAt'].toDate()).toDate();
     updatedAt = Timestamp.fromDate(json['updatedAt'].toDate()).toDate();
@@ -71,7 +71,7 @@ class UserModel {
     data['accessToken'] = accessToken;
     data['refreshToken'] = refreshToken;
     data['fcmToken'] = fcmToken;
-    data['photoUrl'] = photoUrl;
+    data['photoUrl'] = profileImage;
     data['loginType'] = loginType;
     data['createdAt'] = createdAt;
     data['updatedAt'] = updatedAt;

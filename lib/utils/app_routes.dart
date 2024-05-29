@@ -1,3 +1,4 @@
+import 'package:foreats/screens/notification/notifications_screen.dart';
 import 'package:get/get_navigation/src/routes/get_route.dart';
 
 import '../home/home_binding.dart';
@@ -9,6 +10,7 @@ import '../screens/feed/feed_detail_binding.dart';
 import '../screens/feed/feed_detail_screen.dart';
 import '../screens/feed/feed_screen.dart';
 import '../screens/landing/landing_screen.dart';
+import '../screens/landing/splash_screen.dart';
 import '../screens/login/login_binding.dart';
 import '../screens/login/login_screen.dart';
 import '../screens/signin/register_birthday_screen.dart';
@@ -53,8 +55,6 @@ class AppRoutes {
   static const String my = '/my';
   static const String settings = '/settings';
   static const String map = '/map';
-  static const String auth = '/auth';
-  static const String dropbox = '/dropbox';
   static const String notification = '/notification';
   static const String registerNickname = '/registerNickname';
   static const String registerId = '/registerId';
@@ -73,6 +73,7 @@ class AppRoutes {
   static final routes = [
     GetPage(name: home, page: () => HomeScreen(), binding: HomeBinding()),
     GetPage(name: landing, page: () => LandingScreen()),
+    GetPage(name: splash, page: () => SplashScreen()),
     GetPage(name: onboarding, page: () => OnBoardingScreen(), middlewares: [OnBoardingMiddleware(),]),
     GetPage(name: login, page: () => LoginScreen(), binding: LoginBinding()),
     GetPage(name: registerNickname, page: () => RegisterNicknameScreen()),
@@ -88,6 +89,7 @@ class AppRoutes {
     GetPage(name: uploadDone, page: () => UploadDoneScreen()),
     GetPage(name: settings, page: () => SettingScreen()),
     GetPage(name: map, page: () => MapScreen(), binding: MapBinding()),
+    GetPage(name: notification, page: () => NotificationsScreen()),
     GetPage(name: search, page: () => SearchKeywordScreen(), binding: SearchBinding()),
     GetPage(name: store, page: () => StoreScreen(), binding: StoreBinding()),
     GetPage(name: biz, page: () => BizScreen()),

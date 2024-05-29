@@ -4,6 +4,7 @@ import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../utils/app_routes.dart';
+import '../../utils/logger.dart';
 
 class OnBoardingMiddleware extends GetMiddleware {
 
@@ -11,13 +12,10 @@ class OnBoardingMiddleware extends GetMiddleware {
   RouteSettings? redirect(String? route) {
 
     final Future<SharedPreferences> prefs = SharedPreferences.getInstance();
-    final logger = Logger();
 
     prefs.then((SharedPreferences prefs) {
 
-      logger.i('OnBoardingMiddleware redirect prefs: ${prefs.getBool('isFirstAppOpen')}');
-
-      var isFirstAppOpen = prefs.getBool('isFirstAppOpen');
+      var isFirstAppOpen = prefs.getBool('isFirstInstall');
       if (isFirstAppOpen == null) {
         //
       } else {

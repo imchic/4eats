@@ -96,7 +96,7 @@ class SettingScreen extends GetView<SettingController> {
           ),
           // 앱 로고
           Container(
-            width: 390.w,
+            width: 1.sw,
             height: Get.height * 0.3,
             padding: EdgeInsets.symmetric(vertical: 10.h),
             child: Column(
@@ -105,9 +105,9 @@ class SettingScreen extends GetView<SettingController> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Image.asset(
-                  'assets/images/ic_poeat_logo.png',
-                  width: 60.w,
-                  height: 60.h,
+                  'assets/images/ic_foreat_logo.png',
+                  width: 40.w,
+                  height: 40.h,
                 ),
               ],
             ),
@@ -128,7 +128,7 @@ class SettingScreen extends GetView<SettingController> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           CachedNetworkImage(
-            imageUrl: UserStore.to.userProfile.photoUrl ?? '',
+            imageUrl: UserStore.to.user.value.profileImage ?? '',
             imageBuilder: (context, imageProvider) => Container(
               width: 40.w,
               height: 40.h,
@@ -169,7 +169,7 @@ class SettingScreen extends GetView<SettingController> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  UserStore.to.userProfile.id ?? '',
+                  UserStore.to.user.value.nickname ?? '',
                   style: TextStyle(
                     color: Theme.of(context).colorScheme.onBackground,
                     fontSize: 14.sp,
@@ -179,7 +179,7 @@ class SettingScreen extends GetView<SettingController> {
                 ),
                 SizedBox(height: 2.h),
                 Text(
-                  UserStore.to.userProfile.displayName ?? '',
+                  '@${UserStore.to.user.value.id}',
                   style: TextStyle(
                     color: textUnselected,
                     fontSize: 12.sp,
@@ -220,7 +220,7 @@ class SettingScreen extends GetView<SettingController> {
       padding: EdgeInsets.symmetric(horizontal: 16.w),
       decoration: BoxDecoration(
         border: Border(
-          bottom: BorderSide(width: 0.5, color: gray300),
+          bottom: BorderSide(width: 0.3, color: gray300),
         ),
       ),
       child: Column(
@@ -301,7 +301,7 @@ class SettingScreen extends GetView<SettingController> {
                       TextButton(
                         onPressed: () {
                           LoginController.to.logout();
-                          Get.back();
+                          //Get.back();
                         },
                         child: Text('확인'),
                       ),
@@ -340,7 +340,7 @@ class SettingScreen extends GetView<SettingController> {
               onPressed: () {
                 //_logger.d('회원탈퇴');
                 //Get.toNamed(AppRoutes.deleteAccount);
-                LoginController.to.withdrawal();
+                //LoginController.to.withdrawal();
               },
               child: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -378,7 +378,7 @@ class SettingScreen extends GetView<SettingController> {
       padding: EdgeInsets.symmetric(horizontal: 16.w),
       decoration: BoxDecoration(
         border: Border(
-          bottom: BorderSide(width: 1, color: gray300),
+          bottom: BorderSide(width: 0.3, color: gray300),
         ),
       ),
       child: Column(
@@ -585,7 +585,7 @@ class SettingScreen extends GetView<SettingController> {
               onPressed: () async {
                 //_logger.d('앱 설정');
                 // 언어 변경 bottom sheet
-                Get.bottomSheet(
+                /*Get.bottomSheet(
                   Container(
                     height: 120.h,
                     decoration: BoxDecoration(
@@ -674,7 +674,7 @@ class SettingScreen extends GetView<SettingController> {
                       ],
                     ),
                   ),
-                );
+                );*/
               },
               child: Row(
                 mainAxisSize: MainAxisSize.min,

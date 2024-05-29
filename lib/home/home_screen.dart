@@ -27,8 +27,7 @@ class HomeScreen extends GetView<HomeController> {
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () {
-
-            if(UserStore.to.isLoggedIn == false){
+            if (UserStore.to.isLoginCheck.value == false) {
               Get.bottomSheet(
                 const LoginBottomSheet(),
               ).whenComplete(() {
@@ -41,108 +40,68 @@ class HomeScreen extends GetView<HomeController> {
               Get.toNamed(AppRoutes.upload);
             }
           },
-          child: const Icon(Icons.add),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          child: Image.asset(
+            'assets/images/ic_feed_upload.png',
+          ),
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
         bottomNavigationBar: Obx(() => BottomNavigationBar(
-            currentIndex: HomeController.to.currentIndex,
-            onTap: (value) => {HomeController.to.moveToPage(value)},
-            type: BottomNavigationBarType.fixed,
-            backgroundColor: theme.colorScheme.background,
-            selectedItemColor: theme.colorScheme.primary,
-            unselectedItemColor: theme.colorScheme.onBackground.withOpacity(0.5),
-            selectedLabelStyle: TextStyle(
-              fontSize: 10.sp,
-              fontWeight: FontWeight.w500,
-              height: 1.5.h,
-            ),
-            items: [
-              BottomNavigationBarItem(
-                icon: SvgPicture.asset(
-                  'assets/images/ic_home.svg',
-                  colorFilter: ColorFilter.mode(
-                    selectedVectorColor(0),
-                    BlendMode.srcIn,
-                  ),
-                ),
-                label: '피드',
-              ),
-              BottomNavigationBarItem(
-                icon: SvgPicture.asset(
-                  'assets/images/ic_dashboard.svg',
-                  colorFilter: ColorFilter.mode(
-                    selectedVectorColor(1),
-                    BlendMode.srcIn,
-                  ),
-                ),
-                label: '라운지',
-              ),
-              // BottomNavigationBarItem(
-              //   backgroundColor: theme.colorScheme.primary,
-              //   icon: SvgPicture.asset(
-              //     'assets/images/ic_dollar_coins.svg',
-              //     width: 32.w,
-              //     height: 32.h,
-              //     colorFilter: ColorFilter.mode(
-              //       selectedVectorColor('upload', 2),
-              //       BlendMode.srcIn,
-              //     ),
-              //   ),
-              //   label: '업로드',
-              // ),
-              BottomNavigationBarItem(
-                icon: SvgPicture.asset(
-                  'assets/images/ic_shopping_cart.svg',
-                  colorFilter: ColorFilter.mode(
-                    selectedVectorColor(2),
-                    BlendMode.srcIn,
-                  ),
-                ),
-                label: '포인트몰',
-              ),
-              BottomNavigationBarItem(
-                icon: SvgPicture.asset(
-                  'assets/images/ic_users.svg',
-                  colorFilter: ColorFilter.mode(
-                    selectedVectorColor(3),
-                    BlendMode.srcIn,
-                  ),
-                ),
-                label: '마이페이지',
-              ),
-            ],
-          ))
-        );
-        /*bottomNavigationBar: Obx(
-          () => Container(
-            child: BottomBarInspiredInside(
+              currentIndex: HomeController.to.currentIndex,
+              onTap: (value) => {HomeController.to.moveToPage(value)},
+              type: BottomNavigationBarType.fixed,
               backgroundColor: theme.colorScheme.background,
-              //backgroundSelected: theme.colorScheme.background,
-              color: theme.colorScheme.onBackground.withOpacity(0.5),
-              colorSelected: theme.colorScheme.primary,
-              indexSelected: HomeController.to.currentIndex,
-              // highlightStyle: HighlightStyle(
-              //   sizeLarge: true,
-              //   background: theme.colorScheme.background,
-              //   color: theme.colorScheme.primary,
-              //   elevation: 10,
-              // ),
-              animated: true,
-              itemStyle: ItemStyle.circle,
-              chipStyle:const ChipStyle(drawHexagon: false, notchSmoothness: NotchSmoothness.defaultEdge),
-              onTap: (value) => {
-                HomeController.to.moveToPage(value),
-              },
+              selectedItemColor: theme.colorScheme.primary,
+              unselectedItemColor: theme.colorScheme.onBackground.withOpacity(0.5),
+              selectedLabelStyle: TextStyle(
+                fontSize: 10.sp,
+                fontWeight: FontWeight.w300,
+                height: 1.25.h,
+              ),
               items: [
-                TabItem(icon: Icons.smart_display_outlined, title: ''),
-                TabItem(icon: Icons.segment_outlined, title: ''),
-                TabItem(icon: Icons.cloud_upload, title: ''),
-                TabItem(icon: Icons.shopping_cart_outlined, title: ''),
-                TabItem(icon: Icons.person_outline, title: ''),
+                BottomNavigationBarItem(
+                  icon: SvgPicture.asset(
+                    'assets/images/ic_video.svg',
+                    colorFilter: ColorFilter.mode(
+                      selectedVectorColor(0),
+                      BlendMode.srcIn,
+                    ),
+                  ),
+                  label: '피드',
+                ),
+                BottomNavigationBarItem(
+                  icon: SvgPicture.asset(
+                    'assets/images/ic_square.svg',
+                    colorFilter: ColorFilter.mode(
+                      selectedVectorColor(1),
+                      BlendMode.srcIn,
+                    ),
+                  ),
+                  label: '라운지',
+                ),
+                BottomNavigationBarItem(
+                  icon: SvgPicture.asset(
+                    'assets/images/ic_cart.svg',
+                    colorFilter: ColorFilter.mode(
+                      selectedVectorColor(2),
+                      BlendMode.srcIn,
+                    ),
+                  ),
+                  label: '포인트몰',
+                ),
+                BottomNavigationBarItem(
+                  icon: SvgPicture.asset(
+                    'assets/images/ic_user.svg',
+                    colorFilter: ColorFilter.mode(
+                      selectedVectorColor(3),
+                      BlendMode.srcIn,
+                    ),
+                  ),
+                  label: '마이페이지',
+                ),
               ],
-            ),
-          ),
-        ));*/
+            )));
   }
 
   Color selectedVectorColor(int index) {
