@@ -9,8 +9,6 @@ import 'package:foreats/utils/dialog_util.dart';
 import 'package:foreats/utils/global_toast_controller.dart';
 import 'package:foreats/utils/text_style.dart';
 import 'package:get/get.dart';
-import 'package:logger/logger.dart';
-import 'package:lottie/lottie.dart';
 
 import '../../home/home_controller.dart';
 import '../../utils/app_routes.dart';
@@ -23,6 +21,11 @@ import 'feed_controller.dart';
 
 class FeedScreen extends GetView<FeedController> {
   FeedScreen({super.key});
+
+  @override
+  initState() {
+    AppLog.to.d('FeedScreen');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,25 +44,62 @@ class FeedScreen extends GetView<FeedController> {
               scrollDirection: Axis.vertical,
               onPageChanged: (index) {
                 controller.currentFeedIndex.value = index;
+                controller.initializeVideoPlayer(controller.videoControllerList);
                 controller.allPause();
                 controller.allMute();
-                controller.initializeVideoPlayer(controller.videoControllerList);
                 controller.fetchComments(controller.feedList[index].seq ?? '', index);
                 controller.fetchLikes(controller.feedList[index].seq ?? '');
                 controller.fetchBookmarks(controller.feedList[index].seq ?? '');
               },
               itemBuilder: (context, index) {
                 return Obx(() =>
-                  Stack(
-                    children: [
-                      // 동영상
-                      CachedVideoPlayerPlus(controller.videoControllerList[controller.currentFeedIndex.value][controller.currentVideoUrlIndex.value]),
-                      // 상단 메뉴
-                      _topMenu(context, index),
-                      // 게시물 정보
-                      _feedInfo(context, index),
-                    ],
-                  ),
+                    Stack(
+                      children: [
+                        // 동영상
+                        //CachedVideoPlayerPlus(controller.videoControllerList[controller.currentFeedIndex.value][controller.currentVideoUrlIndex.value]),
+                        Container(
+                          width: 1.sw,
+                          alignment: Alignment.bottomCenter,
+                          decoration: BoxDecoration(
+                            //color: Colors.black,
+                            borderRadius: BorderRadius.circular(30.r),
+                            shape: BoxShape.rectangle,
+                          ),
+                          child: ClipRRect(
+                              borderRadius: BorderRadius.circular(30.r),
+                              child: CachedVideoPlayerPlus(
+                                  controller.videoControllerList[controller.currentFeedIndex.value][controller.currentVideoUrlIndex.value])),
+                        ),
+                        // 배경 그라디언트 이미지
+                        Container(
+                          width: 1.sw,
+                          height: 1.sh,
+                          child: ClipRRect(
+                              borderRadius: BorderRadius.circular(30.r),
+                              child: Opacity(
+                                opacity: 0.2,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    image: DecorationImage(
+                                      image: Image.asset(
+                                        "assets/images/bg_gradient.png",
+                                      ).image,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                  /*child: Image.asset(
+                                  "assets/images/bg_gradient.png",
+                                ),*/
+                                ),
+                              )
+                          ),
+                        ),
+                        // 상단 메뉴
+                        _topMenu(context, index),
+                        // 게시물 정보
+                        _feedInfo(context, index),
+                      ],
+                    ),
                 );
               },
             );
@@ -79,11 +119,24 @@ class FeedScreen extends GetView<FeedController> {
           width: 1.sw,
           margin: EdgeInsets.only(top: 20.h, left: 10.w),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Get.arguments == null
+                  ? Container()
+                  : Container(
+                padding: EdgeInsets.only(left: 10.w),
+                child: IconButton(
+                  icon: Icon(Icons.arrow_back_ios, color: Colors.white, size: 14.sp),
+                  onPressed: () {
+                    Get.back();
+                  },
+                ),
+              ),
               Container(
                 margin: EdgeInsets.only(top: 24.h),
                 padding: EdgeInsets.symmetric(horizontal: 10.w),
                 child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
                         // 시군구 표현
@@ -91,6 +144,57 @@ class FeedScreen extends GetView<FeedController> {
                             ? ''
                             : controller.feedList[index].storeAddress!.split(' ')[1],
                         style: TextStyleUtils().feedAddressTitle(),
+                      ),
+                      Row(
+                        children: [
+                          InkWell(
+                            onTap: () {
+                              // 검색
+                              Get.toNamed(AppRoutes.search);
+                            },
+                            child: Icon(
+                              Icons.search,
+                              color: gray300,
+                              size: 24.w,
+                            ),
+                          ),
+                          SizedBox(width: 10.w),
+                          InkWell(
+                            onTap: () {
+                              // 지도
+                              Get.toNamed(AppRoutes.map, arguments: {
+                                'storeName': controller.feedList[index].storeName,
+                                'storeAddress': controller.feedList[index].storeAddress,
+                                'storeType': controller.feedList[index].storeType,
+                                'lonlat': [
+                                  double.parse(controller.feedList[index].storeLngLat!
+                                      .split(',')[0]),
+                                  double.parse(controller.feedList[index].storeLngLat!
+                                      .split(',')[1])
+                                ]
+                              });
+                            },
+                            child: Icon(
+                              Icons.map_outlined,
+                              color: gray300,
+                              size: 24.w,
+                            ),
+                          ),
+                          SizedBox(width: 10.w),
+                          InkWell(
+                            onTap: () {
+                              // 소리
+                              controller.changeMute(index);
+                            },
+                            child: Icon(
+                              controller.isMuted
+                                  ? Icons.volume_off
+                                  : Icons.volume_up,
+                              color: gray300,
+                              size: 24.w,
+                            ),
+                          ),
+                        ],
                       ),
                     ]
                 ),
@@ -158,7 +262,7 @@ class FeedScreen extends GetView<FeedController> {
                   children: [
                     _feedRegisterUserInfo(context, index),
                     _feedDescriptionText(context, index),
-                    // _feedStoreInfo(context, index),
+                    _feedStoreInfo(context, index),
                     _feedHashtags(context, index),
                     _feedComments(context, index),
                   ],

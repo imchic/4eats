@@ -41,7 +41,7 @@ class MyPageController extends GetxController with GetSingleTickerProviderStateM
       for (final feed in feeds.docs) {
         myFeeds.add(FeedModel.fromJson(feed.data()));
       }
-      AppLog.to.d('myFeeds: $myFeeds');
+      //AppLog.to.d('myFeeds: $myFeeds');
       return myFeeds;
     } catch (e) {
       _logger.e('getMyFeeds error: $e');

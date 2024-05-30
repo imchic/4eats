@@ -38,6 +38,7 @@ class FeedController extends GetxController {
 
   List<List<CachedVideoPlayerPlusController>> videoControllerList = <List<CachedVideoPlayerPlusController>>[].obs;
   late CachedVideoPlayerPlusController videoController;
+  late CachedVideoPlayerPlusController detailController;
   late List<CachedVideoPlayerPlusController> videoControllers;
   late CachedVideoPlayerPlusController videoDetailController;
   late PageController pageController;
@@ -56,6 +57,10 @@ class FeedController extends GetxController {
 
   final _feedList = <FeedModel>[].obs;
   List<FeedModel> get feedList => _feedList;
+
+  final _detailFeed = FeedModel().obs;
+  FeedModel get detailFeed => _detailFeed.value;
+  set detailFeed(FeedModel value) => _detailFeed.value = value;
 
   final _commentArrayList = <List<CommentModel>>[].obs;
   List<List<CommentModel>> get commentArrayList => _commentArrayList;
@@ -120,7 +125,9 @@ class FeedController extends GetxController {
   Future<void> onInit() async {
     super.onInit();
     await pageInit();
-    //await fetchFeeds();
+
+    detailController = CachedVideoPlayerPlusController.networkUrl(Uri.parse('https://flutter.github.io/assets-for-api-docs/assets/videos/butterfly.mp4'));
+
   }
 
   @override
@@ -175,6 +182,31 @@ class FeedController extends GetxController {
       isVideoLoading.value = false;
     }
 
+  }
+
+  Future<void> initDetailVideoPlayer() async {
+    try {
+      detailController = CachedVideoPlayerPlusController.networkUrl(
+          Uri.parse(_detailFeed.value.videoUrls![0]));
+
+      detailController.initialize().then((_) {
+        detailController.play();
+        detailController.setLooping(true);
+        detailController.addListener(_onVideoPlayerStateChanged);
+      });
+    } catch (e) {
+      AppLog.to.e('initVideoPlayer error: $e');
+    }
+  }
+
+  Future<void> fetchDetailFeed() async {
+    try {
+      _detailFeed.value = Get.arguments['detailFeed'];
+      await initDetailVideoPlayer();
+
+    } catch (e) {
+      AppLog.to.e('fetchDetailFeed error: $e');
+    }
   }
 
   /// 메뉴 리스트 스트링으로 변환
@@ -319,8 +351,7 @@ class FeedController extends GetxController {
   Future<void> changeMute(int index) async {
     try {
       isMuted = !isMuted;
-      videoControllerList[currentFeedIndex.value][currentVideoUrlIndex.value]
-          .setVolume(isMuted ? 0 : 1);
+      videoControllerList[currentFeedIndex.value][currentVideoUrlIndex.value].setVolume(isMuted ? 0 : 1);
     } catch (e) {
       AppLog.to.e('changeMute error: $e');
     }

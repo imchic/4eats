@@ -8,9 +8,10 @@ import '../feed/feed_controller.dart';
 class SearchKeywordController extends GetxController {
   final TextEditingController searchController = TextEditingController();
 
+  final _firebase = FirebaseFirestore.instance;
+
   RxList searchBestKeywords = [
-    '한식',
-    '부모님'
+
   ].obs;
 
   RxList searchKeywords = [].obs;
@@ -20,12 +21,13 @@ class SearchKeywordController extends GetxController {
   @override
   Future<void> onInit() async {
     super.onInit();
-    await FirebaseFirestore.instance
+    await _firebase
         .collection('feeds')
         .get()
         .then((value) {
       value.docs.forEach((element) {
         searchKeywords.add(element['storeName']);
+        // searchKeywords.add(element['storeType']);
       });
     });
     getRecentKeywords();
@@ -41,10 +43,8 @@ class SearchKeywordController extends GetxController {
   void search(String keyword) {
     print('검색어: $keyword');
     searchResults.clear();
-    searchResults.addAll(searchKeywords
-        .where((element) => element.contains(keyword))
-        .toList());
-    print('검색결과: $searchResults');
+    //searchResults.addAll(searchKeywords.where((element) => element.contains(keyword)).toList());//print('검색결과: $searchResults');
+    searchResults.addAll(searchKeywords.where((element) => element.toString().toLowerCase().contains(keyword.toLowerCase())).toList());
   }
 
   void clearSearchResults() {
@@ -65,8 +65,7 @@ class SearchKeywordController extends GetxController {
 
     // 최근 검색어 로컬에 저장
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<String> recentKeywords =
-        searchRecentKeywords.map((e) => e.toString()).toList();
+    List<String> recentKeywords = searchRecentKeywords.map((e) => e.toString()).toList();
     prefs.setStringList('recentKeywords', recentKeywords);
   }
 
@@ -84,4 +83,60 @@ class SearchKeywordController extends GetxController {
     SharedPreferences.getInstance()
         .then((prefs) => prefs.remove('recentKeywords'));
   }
+
+  // 서버 내 인기검색어 불러오기
+  Future<void> getBestKeywords() async {
+    await _firebase
+        .collection('search_keywords')
+        .orderBy('count', descending: true)
+        .limit(10)
+        .snapshots().listen((event) {
+      searchBestKeywords.clear();
+      event.docs.forEach((element) {
+        searchBestKeywords.add(element['keyword']);
+      });
+    });
+  }
+
+  // 서버 내 인기검색어 저장
+  Future<void> saveBestKeywords(String keyword) async {
+
+    if(keyword.isNotEmpty) {
+
+      if(searchBestKeywords.contains(keyword)) {
+        await _firebase
+            .collection('search_keywords')
+            .where('keyword', isEqualTo: keyword)
+            .get()
+            .then((value) {
+          value.docs.forEach((element) {
+            int count = element['count'] + 1;
+            element.reference.update({'count': count});
+          });
+        });
+      } else {
+        await _firebase.collection('search_keywords').add({
+          'keyword': keyword,
+          'timestamp': FieldValue.serverTimestamp(),
+          'count': 1,
+        });
+      }
+
+      await _firebase
+          .collection('search_keywords')
+          .orderBy('timestamp', descending: true)
+          .limit(5)
+          .get()
+          .then((value) {
+        searchBestKeywords.clear();
+        value.docs.forEach((element) {
+          searchBestKeywords.add(element['keyword']);
+        });
+      });
+
+    }
+
+
+  }
+
 }

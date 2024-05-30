@@ -186,8 +186,7 @@ class MyPageScreen extends GetView<MyPageController> {
                   return DialogUtil().buildLoadingDialog();
                 } else {
                   return Container(
-                    padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
-                    margin: EdgeInsets.symmetric(vertical: 10.h),
+                    padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
                     child: GridView.builder(
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 3,

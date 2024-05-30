@@ -28,6 +28,8 @@ class LoungeController extends GetxController {
   final _loungeThumbnailList = <String>[].obs;
   List<String> get loungeThumbnailList => _loungeThumbnailList;
 
+  final RxString location = ''.obs;
+
   List<String> locationList = [
     '제주',
     '강원',
@@ -150,8 +152,7 @@ class LoungeController extends GetxController {
   Future<String> fetchCurrentLocation() async {
     try {
       await MapController.to.initCurrentLocation();
-      var result = await MapController.to.convertLatLngToAddress();
-      return result;
+      return await MapController.to.convertLatLngToAddress();
     } catch (e) {
       _logger.d('fetchCurrentLocation error: $e');
       return '';

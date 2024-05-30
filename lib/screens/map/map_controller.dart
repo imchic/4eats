@@ -225,7 +225,7 @@ class MapController extends GetxController {
   /// 주소 변환 (위경도 -> 주소)
   Future<String> convertLatLngToAddress() async {
 
-    await initCurrentLocation();
+    await initCurrentLocation().then((value) => currentLocation.value = LatLng(value.latitude, value.longitude));
 
     var lat = currentLocation.value.latitude.toString();
     var lng = currentLocation.value.longitude.toString();
@@ -237,8 +237,6 @@ class MapController extends GetxController {
         '&sourcecrs=epsg:4326'
         '&output=json'
         '&orders=roadaddr');
-
-    //_logger.d('reverseGeocodingUri: $reverseGeocodingUri');
 
     dio.Response response = await dio.Dio().get(
       reverseGeocodingUri.toString(),
@@ -252,6 +250,9 @@ class MapController extends GetxController {
 
     if(response.data['results'].isEmpty) {
       AppLog.to.d('주소가 없습니다.');
+      Position location = await Geolocator.
+      getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+      currentLocation.value = LatLng(location.latitude, location.longitude);
       return '';
     }
 

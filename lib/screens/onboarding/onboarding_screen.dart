@@ -89,7 +89,6 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
       },
       child: Container(
         width: 353.w,
-        height: 50.h,
         padding: EdgeInsets.all(15.r),
         decoration: ShapeDecoration(
           color: Theme.of(context).colorScheme.primary,
