@@ -12,7 +12,7 @@ import '../screens/lounge/lounge_screen.dart';
 import '../screens/mypage/mypage_screen.dart';
 import '../screens/upload/upload_screen.dart';
 import '../utils/firebase_message.dart';
-import '../widget/login_bottom_sheet.dart';
+import '../widget/login_bottomsheet.dart';
 
 class HomeController extends GetxController {
   static HomeController get to => Get.find();

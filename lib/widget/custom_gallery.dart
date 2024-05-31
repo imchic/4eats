@@ -140,10 +140,10 @@ class CustomGallery extends GetView<UploadController> {
                   await controller.setSelectVideoFiles();
                 },
                 child: Container(
-                  width: 18.w,
-                  height: 18.h,
+                  width: 24.w,
+                  height: 24.h,
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.85),
+                    color: Colors.white.withOpacity(0.75),
                     shape: BoxShape.circle,
                   ),
                   child: // 멀티 선택
@@ -152,7 +152,7 @@ class CustomGallery extends GetView<UploadController> {
                           ? Icon(
                               Icons.check,
                               size: 14.w,
-                              color: Colors.red,
+                              color: Theme.of(context).colorScheme.primary,
                             )
                           : Container(),
                 ),

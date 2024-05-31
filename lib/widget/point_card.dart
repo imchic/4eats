@@ -47,7 +47,7 @@ class PointCard {
                   ),
                   SizedBox(width: 5.w),
                   Text('누적포인트',
-                      style: TextStyleUtils().bodyTextStyle(
+                      style: TextStyleUtils.bodyTextStyle(
                           color: Theme.of(context).colorScheme.onPrimary,
                           fontSize: 10.sp,
                           fontWeight: FontWeight.w700)),
@@ -55,7 +55,7 @@ class PointCard {
               ),
               Text(
                   '${BizController.to.numberFormat(int.parse(UserStore.to.user.value.point ?? '0'))}P',
-                  style: TextStyleUtils().bodyTextStyle(
+                  style: TextStyleUtils.bodyTextStyle(
                       color: Theme.of(context).colorScheme.onPrimary,
                       fontSize: 10.sp,
                       fontWeight: FontWeight.w700)),
@@ -69,7 +69,7 @@ class PointCard {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text('적립 / 사용내역',
-                    style: TextStyleUtils().bodyTextStyle(
+                    style: TextStyleUtils.bodyTextStyle(
                         color: Theme.of(context).colorScheme.onPrimary,
                         fontSize: 10.sp,
                         fontWeight: FontWeight.w700)),

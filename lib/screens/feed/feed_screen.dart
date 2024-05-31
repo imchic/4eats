@@ -3,6 +3,7 @@ import 'package:cached_video_player_plus/cached_video_player_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:foreats/utils/dialog_util.dart';
@@ -15,7 +16,7 @@ import '../../utils/app_routes.dart';
 import '../../utils/colors.dart';
 import '../../utils/logger.dart';
 import '../../widget/description_text.dart';
-import '../../widget/login_bottom_sheet.dart';
+import '../../widget/login_bottomsheet.dart';
 import '../login/user_store.dart';
 import 'feed_controller.dart';
 
@@ -143,7 +144,7 @@ class FeedScreen extends GetView<FeedController> {
                         controller.feedList[index].storeAddress == 'null' || controller.feedList[index].storeAddress == ''
                             ? ''
                             : controller.feedList[index].storeAddress!.split(' ')[1],
-                        style: TextStyleUtils().feedAddressTitle(),
+                        style: TextStyleUtils.feedAddressTitle(),
                       ),
                       Row(
                         children: [
@@ -228,9 +229,9 @@ class FeedScreen extends GetView<FeedController> {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      Text(controller.feedList[index].storeName ?? '', style: TextStyleUtils().feedAddressTitle(fontSize: 10.sp)),
+                      Text(controller.feedList[index].storeName ?? '', style: TextStyleUtils.feedAddressTitle(fontSize: 10.sp)),
                       SizedBox(width: 10.w),
-                      Text(controller.feedList[index].storeType ?? '', style: TextStyleUtils().feedAddressTitle(fontSize: 8.sp, color: gray300)),
+                      Text(controller.feedList[index].storeType ?? '', style: TextStyleUtils.feedAddressTitle(fontSize: 8.sp, color: gray300)),
                     ],
                   ),
                 ),
@@ -342,7 +343,7 @@ class FeedScreen extends GetView<FeedController> {
                       children: [
                         Text(
                           controller.feedList[index].userNickname ?? '',
-                          style: TextStyleUtils().whiteTextStyle(
+                          style: TextStyleUtils.whiteTextStyle(
                             fontSize: 10.sp,
                             fontWeight: FontWeight.w700,
                           ),
@@ -367,7 +368,7 @@ class FeedScreen extends GetView<FeedController> {
                           child: Text(
                             '포잇터',
                             textAlign: TextAlign.center,
-                            style: TextStyleUtils().whiteTextStyle(
+                            style: TextStyleUtils.whiteTextStyle(
                               fontSize: 9.sp,
                               fontWeight: FontWeight.w500,
                             ),
@@ -483,72 +484,55 @@ class FeedScreen extends GetView<FeedController> {
               // 확장이 되었을 경우
               controller.isFeedMore
                   ? Container(
-                      width: 0.8.sw,
-                      margin: EdgeInsets.only(top: 10.h),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            '메뉴',
-                            style: TextStyleUtils().whiteTextStyle(
-                              fontSize: 12.sp,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
+                          Text('메뉴', style: TextStyleUtils.whiteTextStyle(fontSize: 12.sp, fontWeight: FontWeight.w600,),),
                           SizedBox(height: 5.h),
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 10.w, vertical: 5.h),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(4.r),
-                            ),
+                          // singleChildScrollView
+                          SizedBox(
+                            height: 0.18.sh,
                             child: SingleChildScrollView(
                               child: Text(
-                                controller.convertMenuList(
-                                    controller.feedList[index].storeMenuInfo ??
-                                        ''),
+                                '${controller.convertMenuList(controller.feedList[index].storeMenuInfo ?? '')}',
                                 style: TextStyle(
-                                  fontSize: 11.sp,
+                                  fontSize: 10.sp,
                                   color: Colors.white,
                                   height: 1.5,
                                 ),
                               ),
                             ),
                           ),
-                          SizedBox(height: 10.h),
-                          controller.convertNaverPlaceContext(
-                                      controller.feedList[index].storeContext ??
-                                          '') !=
-                                  ''
-                              ? Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      '가게 소개',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 12.sp,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                    SizedBox(height: 5.h),
-                                    Text(
-                                      // controller.feedList[index].storeContext ?? '',
-                                      // 스트링을 리스트로
-                                      controller.convertNaverPlaceContext(
-                                          controller.feedList[index]
-                                                  .storeContext ??
-                                              ''),
-                                      style: TextStyle(
-                                        color: CupertinoColors.activeGreen,
-                                        fontSize: 11.sp,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  ],
-                                )
-                              : Container(),
+                          // SizedBox(height: 10.h),
+                          // controller.convertNaverPlaceContext(controller.feedList[index].storeContext ?? '') != ''
+                          //     ? Column(
+                          //         crossAxisAlignment: CrossAxisAlignment.start,
+                          //         children: [
+                          //           Text(
+                          //             '가게 소개',
+                          //             style: TextStyle(
+                          //               color: Colors.white,
+                          //               fontSize: 12.sp,
+                          //               fontWeight: FontWeight.w600,
+                          //             ),
+                          //           ),
+                          //           SizedBox(height: 5.h),
+                          //           Text(
+                          //             // controller.feedList[index].storeContext ?? '',
+                          //             // 스트링을 리스트로
+                          //             controller.convertNaverPlaceContext(
+                          //                 controller.feedList[index]
+                          //                         .storeContext ??
+                          //                     ''),
+                          //             style: TextStyle(
+                          //               color: CupertinoColors.activeGreen,
+                          //               fontSize: 11.sp,
+                          //               fontWeight: FontWeight.w600,
+                          //             ),
+                          //           ),
+                          //         ],
+                          //       )
+                          //     : Container(),
                         ],
                       ),
                     )
@@ -621,7 +605,7 @@ class FeedScreen extends GetView<FeedController> {
               Text(
                 '댓글 ${controller.sumReplyCount ?? 0}개',
                 //'',
-                style: TextStyleUtils().whiteTextStyle(
+                style: TextStyleUtils.whiteTextStyle(
                   fontSize: 9.sp,
                   //fontWeight: FontWeight.w600,
                 ),
@@ -673,7 +657,7 @@ class FeedScreen extends GetView<FeedController> {
                               child: Center(
                                 child: Text(
                                   '댓글이 없어요 😢',
-                                  style: TextStyleUtils().bodyTextStyle(
+                                  style: TextStyleUtils.bodyTextStyle(
                                     color: gray400,
                                     fontSize: 11.sp,
                                     fontWeight: FontWeight.w500,
@@ -886,7 +870,7 @@ class FeedScreen extends GetView<FeedController> {
                                 : controller.commentArray[commentIndex]
                                         .userNickname ??
                                     '',
-                            style: TextStyleUtils().bodyTextStyle(
+                            style: TextStyleUtils.bodyTextStyle(
                               color: Colors.black,
                               fontSize: 10.sp,
                               fontWeight: FontWeight.w500,
@@ -904,7 +888,7 @@ class FeedScreen extends GetView<FeedController> {
                           //     controller.commentArrayList[feedIndex][commentIndex].userNickname.toString() == UserStore.to.nickname.toString()
                           //         ? '작성자'
                           //         : '',
-                          //     style: TextStyleUtils().commentContentTextStyle(),
+                          //     style: TextStyleUtils.commentContentTextStyle(),
                           //   ),
                           // ),
                         ],
@@ -918,7 +902,7 @@ class FeedScreen extends GetView<FeedController> {
                                 .toString(),
                           ),
                         ),
-                        style: TextStyleUtils().bodyTextStyle(
+                        style: TextStyleUtils.bodyTextStyle(
                           color: Colors.grey,
                           fontSize: 9.sp,
                           fontWeight: FontWeight.w500,
@@ -959,7 +943,7 @@ class FeedScreen extends GetView<FeedController> {
                     controller.commentArray.isEmpty
                         ? ''
                         : controller.commentArray[commentIndex].comment ?? '',
-                    style: TextStyleUtils().bodyTextStyle(
+                    style: TextStyleUtils.bodyTextStyle(
                       color: gray700,
                       fontSize: 10.sp,
                       fontWeight: FontWeight.w500,
@@ -975,7 +959,7 @@ class FeedScreen extends GetView<FeedController> {
                     },
                     child: Text(
                       '답글',
-                      style: TextStyleUtils().bodyTextStyle(
+                      style: TextStyleUtils.bodyTextStyle(
                         color: Colors.grey,
                         fontSize: 9.sp,
                         fontWeight: FontWeight.w500,
@@ -1117,7 +1101,7 @@ class FeedScreen extends GetView<FeedController> {
                       Text(
                         controller.commentArray[commentIndex].likeCount
                             .toString(),
-                        style: TextStyleUtils().bodyTextStyle(
+                        style: TextStyleUtils.bodyTextStyle(
                           color: Colors.grey,
                           fontSize: 10.sp,
                           fontWeight: FontWeight.w500,
@@ -1144,7 +1128,7 @@ class FeedScreen extends GetView<FeedController> {
         //       : controller.commentArray[commentIndex].replyCommentList?.isEmpty ?? true
         //           ? ''
         //           : controller.commentArray[commentIndex].replyCommentList![0].comment ?? '',
-        //   style: TextStyleUtils().commentContentTextStyle(),
+        //   style: TextStyleUtils.commentContentTextStyle(),
         // )
 
         // 대댓글 리스트
@@ -1238,7 +1222,7 @@ class FeedScreen extends GetView<FeedController> {
                                           .replyCommentList![replyIndex]
                                           .userNickname ??
                                       '',
-                          style: TextStyleUtils().bodyTextStyle(
+                          style: TextStyleUtils.bodyTextStyle(
                             color: Colors.black,
                             fontSize: 10.sp,
                             fontWeight: FontWeight.w500,
@@ -1261,7 +1245,7 @@ class FeedScreen extends GetView<FeedController> {
                                     .toString(),
                               ),
                             ),
-                            style: TextStyleUtils().bodyTextStyle(
+                            style: TextStyleUtils.bodyTextStyle(
                               color: Colors.grey[400]!,
                               fontSize: 9.sp,
                               fontWeight: FontWeight.w500,
@@ -1280,7 +1264,7 @@ class FeedScreen extends GetView<FeedController> {
                                               .startsWith('@')
                                           ? '${controller.commentArray[commentIndex].replyCommentList![replyIndex].comment!.split(' ')[0]} '
                                           : '',
-                                      style: TextStyleUtils().bodyTextStyle(
+                                      style: TextStyleUtils.bodyTextStyle(
                                         color: Theme.of(context)
                                             .colorScheme
                                             .secondary,
@@ -1306,7 +1290,7 @@ class FeedScreen extends GetView<FeedController> {
                                                   .commentArray[commentIndex]
                                                   .replyCommentList![replyIndex]
                                                   .comment!,
-                                      style: TextStyleUtils().bodyTextStyle(
+                                      style: TextStyleUtils.bodyTextStyle(
                                         color: gray700,
                                         fontSize: 10.sp,
                                         fontWeight: FontWeight.w500,

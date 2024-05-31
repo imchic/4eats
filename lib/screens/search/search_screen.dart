@@ -53,7 +53,7 @@ class SearchKeywordScreen extends GetView<SearchKeywordController> {
       alignment: Alignment.centerLeft,
       child: Text(
           '인기검색',
-          style: TextStyleUtils().bodyTextStyle(
+          style: TextStyleUtils.bodyTextStyle(
             fontSize: 12.sp,
             fontWeight: FontWeight.bold,
           )
@@ -117,7 +117,7 @@ class SearchKeywordScreen extends GetView<SearchKeywordController> {
       alignment: Alignment.centerLeft,
       child: Row(
         children: [
-          Text('최근검색', style: TextStyleUtils().bodyTextStyle(
+          Text('최근검색', style: TextStyleUtils.bodyTextStyle(
             fontSize: 12.sp,
             fontWeight: FontWeight.bold,
           )),
@@ -239,7 +239,7 @@ class SearchKeywordScreen extends GetView<SearchKeywordController> {
       alignment: Alignment.centerLeft,
       child: Text(
           '검색결과',
-          style: TextStyleUtils().bodyTextStyle(
+          style: TextStyleUtils.bodyTextStyle(
             fontSize: 12.sp,
             fontWeight: FontWeight.bold,
           )),

@@ -7,6 +7,7 @@ import 'package:logger/logger.dart';
 import '../../model/feed_model.dart';
 import '../../model/map_model.dart';
 import '../../model/user_model.dart';
+import '../../utils/logger.dart';
 import '../login/user_store.dart';
 
 class LoungeController extends GetxController {
@@ -160,9 +161,10 @@ class LoungeController extends GetxController {
   }
 
   /// 주변 지역구 리스트 가져오기
-  Future<RxList<MapModel>> fetchSearchPlace() async {
+  Future<RxList<MapModel>> fetchSearchPlace(String? keyword) async {
     try {
-     return MapController.to.fetchSearchPlace('맛집', page: 1);
+      AppLog.to.d('fetchSearchPlace: $keyword');
+     return MapController.to.fetchSearchPlace(keyword ?? '맛집', page: 1);
     } catch (e) {
       _logger.d('fetchLoungeThumbnailList error: $e');
       return RxList<MapModel>();

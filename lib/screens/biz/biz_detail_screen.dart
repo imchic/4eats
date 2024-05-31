@@ -1,9 +1,11 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:foreats/widget/biz_tell_bottomsheet.dart';
 import 'package:get/get.dart';
 
 import '../../utils/colors.dart';
+import '../../utils/logger.dart';
 import '../../widget/base_appbar.dart';
 import 'biz_controller.dart';
 
@@ -26,8 +28,7 @@ class BizDetailScreen extends GetView<BizController> {
     return Column(
       children: [
         FutureBuilder(
-          future: BizController.to
-              .fetchBizApiGoodsDetail(Get.arguments['goods_code']),
+          future: BizController.to.fetchBizApiGoodsDetail(Get.arguments['goods_code']),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Center(
@@ -220,6 +221,13 @@ class BizDetailScreen extends GetView<BizController> {
                     ),
                     GestureDetector(
                       onTap: () async {
+
+                        // 파이어베이스 전화번호 연결
+                        Get.bottomSheet(
+                          BizTellBottomSheet()
+                        );
+                        //controller.verifyPhoneNumber('+821081312826');
+
                       },
                       child: Container(
                         width: 350.w,

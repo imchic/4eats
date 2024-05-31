@@ -125,14 +125,13 @@ class FeedController extends GetxController {
   Future<void> onInit() async {
     super.onInit();
     await pageInit();
-
-    detailController = CachedVideoPlayerPlusController.networkUrl(Uri.parse('https://flutter.github.io/assets-for-api-docs/assets/videos/butterfly.mp4'));
-
   }
 
   @override
   void dispose() {
     super.dispose();
+    detailController.dispose();
+    videoControllerList[currentFeedIndex.value][currentVideoUrlIndex.value].dispose();
     allPause();
   }
 
@@ -186,14 +185,22 @@ class FeedController extends GetxController {
 
   Future<void> initDetailVideoPlayer() async {
     try {
-      detailController = CachedVideoPlayerPlusController.networkUrl(
-          Uri.parse(_detailFeed.value.videoUrls![0]));
 
-      detailController.initialize().then((_) {
-        detailController.play();
-        detailController.setLooping(true);
-        detailController.addListener(_onVideoPlayerStateChanged);
+      detailController = CachedVideoPlayerPlusController.networkUrl(Uri.parse(_detailFeed.value.videoUrls![0]));
+
+      final videoPlayerController = detailController;
+      await videoPlayerController.initialize();
+
+      videoPlayerController.addListener(() {
+        if (videoPlayerController.value.isInitialized) {
+          duration.value = videoPlayerController.value.duration!.inMilliseconds;
+        }
       });
+
+      videoPlayerController.setLooping(true);
+      videoPlayerController.setVolume(0);
+      videoPlayerController.play();
+
     } catch (e) {
       AppLog.to.e('initVideoPlayer error: $e');
     }

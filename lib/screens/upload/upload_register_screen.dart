@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:foreats/screens/upload/upload_controller.dart';
 import 'package:foreats/utils/logger.dart';
@@ -26,7 +27,7 @@ class UploadRegisterScreen extends GetView<UploadController> {
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.background,
-      resizeToAvoidBottomInset: false,
+      resizeToAvoidBottomInset: true,
       appBar: BaseAppBar(
         title: '동영상 업로드',
         leading: true,
@@ -36,24 +37,18 @@ class UploadRegisterScreen extends GetView<UploadController> {
   }
 
   Widget _uploadRegisterBody(BuildContext context) {
-    return Column(
-      children: [
-        SizedBox(
-          height: Get.height * 0.75,
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                _storeNameInput(context),
-                _storeAddressInput(context),
-                _storeMap(context),
-                _storeVideoDescriptionInput(context),
-                _storeHashTagHorizontalList(context)
-              ],
-            ),
-          ),
-        ),
-        _uploadRegisterBottom(context),
-      ],
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          _storeNameInput(context),
+          _storeAddressInput(context),
+          _storeMap(context),
+          _storeVideoDescriptionInput(context),
+          _storeHashTagHorizontalList(context),
+          // 가장 최하단
+          _uploadRegisterBottom(context),
+        ],
+      ),
     );
   }
 
@@ -63,10 +58,12 @@ class UploadRegisterScreen extends GetView<UploadController> {
         controller.uploadVideo();
       },
       child: Container(
-        width: 350.w,
-        margin: EdgeInsets.symmetric(horizontal: 20.w),
-        padding:
-            EdgeInsets.only(top: 15.h, bottom: 15.h, left: 15.w, right: 15.w),
+        // width: 350.w,
+        // margin: EdgeInsets.symmetric(horizontal: 20.w),
+        // padding: EdgeInsets.only(top: 15.h, bottom: 15.h, left: 15.w, right: 15.w),
+        width: 0.95.sw,
+        height: 50.h,
+        margin: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
         decoration: ShapeDecoration(
           color: Theme.of(context).colorScheme.primary,
           shape: RoundedRectangleBorder(
@@ -458,8 +455,7 @@ class UploadRegisterScreen extends GetView<UploadController> {
           SizedBox(height: 8.h),
           TextField(
             controller: controller.storeDescriptionController,
-            scrollPadding: EdgeInsets.only(
-                bottom: MediaQuery.of(context).viewInsets.bottom),
+            scrollPadding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
             maxLines: 5,
             decoration: InputDecoration(
               hintText: '동영상 설명을 입력해주세요',
@@ -511,9 +507,14 @@ class UploadRegisterScreen extends GetView<UploadController> {
             ),
             SizedBox(height: 8.h),
             SizedBox(
-              height: 30.h,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
+              height: Get.height * 0.1,
+              child: GridView.builder(
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3,
+                  crossAxisSpacing: 10.w,
+                  mainAxisSpacing: 10.h,
+                  childAspectRatio: 3,
+                ),
                 itemCount: controller.hashtagList.length,
                 itemBuilder: (context, index) {
                   return Obx(
@@ -522,7 +523,6 @@ class UploadRegisterScreen extends GetView<UploadController> {
                         controller.addHashtag(controller.hashtagList[index]);
                       },
                       child: Container(
-                        margin: EdgeInsets.only(right: 10.w),
                         padding: EdgeInsets.symmetric(horizontal: 10.w),
                         decoration: ShapeDecoration(
                           // 선택된 아이템만 색상 변경

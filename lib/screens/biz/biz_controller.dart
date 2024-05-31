@@ -1,16 +1,18 @@
 import 'package:dio/dio.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:foreats/utils/logger.dart';
 import 'package:get/get.dart';
-import 'package:logger/logger.dart';
 
 import '../../model/biz_model.dart';
-import '../login/user_store.dart';
 
 class BizController extends GetxController {
   static BizController get to => Get.find();
 
+  final _auth = FirebaseAuth.instance;
+
   var removeTarget = ['전체', '생활', '음악', '주유상품권', '마트상품권', '용역서비스', '올레', '3사 통합데이터 상품', '기타상품권', '백화점상품권', '생활/가전/디지털', '마트', '외식'];
 
-  final _logger = Logger();
+  final _logger = AppLog.to;
   final Dio _dio = Dio();
 
   RxInt currentPage = 1.obs;
@@ -25,11 +27,16 @@ class BizController extends GetxController {
   RxBool isAll = true.obs;
   RxInt isGoodTypeSelectIndex = 0.obs;
 
+  RxBool isSent = false.obs;
+  RxBool isVerify = false.obs;
+  RxString verificationId = ''.obs;
+
   @override
   onInit() async {
     super.onInit();
     await fetchBizApiGoodsList(currentPage.value);
     await fetchBrandList();
+    isSent.value = false;
   }
 
   // 페이지 변경
@@ -88,7 +95,7 @@ class BizController extends GetxController {
 
       isAll.value = true;
     } catch (e) {
-      _logger.e(e);
+      _logger.e(e.toString());
     }
   }
 
@@ -113,7 +120,7 @@ class BizController extends GetxController {
 
       _logger.d('goodTypeList: $goodTypeList');
     } catch (e) {
-      _logger.e(e);
+      _logger.e(e.toString());
     }
   }
 
@@ -136,7 +143,7 @@ class BizController extends GetxController {
 
       isAll.value = false;
     } catch (e) {
-      _logger.e(e);
+      _logger.e(e.toString());
     }
   }
 
@@ -163,7 +170,7 @@ class BizController extends GetxController {
       isGoodTypeSelectIndex.value = selectIndex;
 
     } catch (e) {
-      _logger.e(e);
+      _logger.e(e.toString());
     }
   }
 
@@ -205,7 +212,7 @@ class BizController extends GetxController {
         bizList.add(model);
       });
     } catch (e) {
-      _logger.e(e);
+      _logger.e(e.toString());
     }
   }
 
@@ -239,7 +246,7 @@ class BizController extends GetxController {
       _logger.i('response: ${response.data['result']}');
 
     } catch (e) {
-      _logger.e(e);
+      _logger.e(e.toString());
     }
   }
 
@@ -248,4 +255,61 @@ class BizController extends GetxController {
     return number.toString().replaceAllMapped(
         RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},');
   }
+
+  /// 전화번호 인증
+  Future<void> verifyPhoneNumber(String tellNum) async {
+    try {
+
+      isSent.value = false;
+      isVerify.value = false;
+
+      var phoneNumber = '+82${tellNum.substring(1)}';
+
+      _auth.verifyPhoneNumber(
+        phoneNumber: phoneNumber,
+        verificationCompleted: (PhoneAuthCredential credential) async {
+          await _auth.signInWithCredential(credential);
+        },
+        verificationFailed: (FirebaseAuthException e) {
+          _logger.e(e.toString());
+        },
+        codeSent: (String verificationId, int? resendToken) {
+          _logger.i('verificationId: $verificationId');
+          _logger.i('resendToken: $resendToken');
+          isVerify.value = true;
+          this.verificationId.value = verificationId;
+        },
+        codeAutoRetrievalTimeout: (String verificationId) {
+          _logger.i('verificationId: $verificationId');
+        },
+      );
+
+      isSent.value = true;
+
+    } catch (e) {
+      _logger.e(e.toString());
+    }
+  }
+
+  // 인증번호 확인
+  Future<void> verifyCode(String code) async {
+    try {
+
+      final credential = PhoneAuthProvider.credential(
+        verificationId: verificationId.value,
+        smsCode: code,
+      );
+
+      if (credential.smsCode != null) {
+        _logger.i('smsCode: ${credential.smsCode}');
+      } else {
+        _logger.i('smsCode: null');
+      }
+
+      await _auth.signInWithCredential(credential);
+    } catch (e) {
+      _logger.e(e.toString());
+    }
+  }
+
 }

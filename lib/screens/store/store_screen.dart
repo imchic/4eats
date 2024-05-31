@@ -38,7 +38,7 @@ class StoreScreen extends GetView<StoreController> {
                   children: [
                     Text(
                         args['storeAddress'],
-                        style: TextStyleUtils().bodyTextStyle(
+                        style: TextStyleUtils.bodyTextStyle(
                           color: gray600,
                           fontWeight: FontWeight.w500,
                         )

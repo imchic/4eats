@@ -8,7 +8,7 @@ import '../screens/feed/feed_controller.dart';
 import '../screens/login/user_store.dart';
 import '../utils/app_routes.dart';
 import '../widget/fade_indexed_stack.dart';
-import '../widget/login_bottom_sheet.dart';
+import '../widget/login_bottomsheet.dart';
 import 'home_controller.dart';
 
 class HomeScreen extends GetView<HomeController> {

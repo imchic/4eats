@@ -7,7 +7,7 @@ import 'colors.dart';
 
 class TextStyleUtils {
 
-  TextStyle feedAddressTitle({
+  static TextStyle feedAddressTitle({
     Color color = Colors.white,
     double fontSize = 26,
     FontWeight fontWeight = FontWeight.w700,
@@ -21,7 +21,7 @@ class TextStyleUtils {
   }
 
   /// 제목
-  TextStyle titleTextStyle({
+  static TextStyle titleTextStyle({
     Color color = Colors.black,
     double fontSize = 16,
     FontWeight fontWeight = FontWeight.bold,
@@ -34,7 +34,7 @@ class TextStyleUtils {
   }
 
   /// 부제목
-  TextStyle subTitleTextStyle({
+  static TextStyle subTitleTextStyle({
     Color color = Colors.black,
     double fontSize = 14,
     FontWeight fontWeight = FontWeight.w600,
@@ -47,7 +47,7 @@ class TextStyleUtils {
   }
 
   /// 본문
-  TextStyle bodyTextStyle({
+  static TextStyle bodyTextStyle({
       Color color = Colors.black,
       double fontSize = 12,
       FontWeight fontWeight = FontWeight.w400,
@@ -63,7 +63,7 @@ class TextStyleUtils {
   }
 
   // 흰색
-  TextStyle whiteTextStyle({
+  static TextStyle whiteTextStyle({
     double fontSize = 12,
     FontWeight fontWeight = FontWeight.w400
   }) {
@@ -76,7 +76,7 @@ class TextStyleUtils {
   }
 
   /// 댓글 작성자
-  TextStyle commentTitleTextStyle({
+  static TextStyle commentTitleTextStyle({
     Color color = Colors.black,
     double fontSize = 12,
     FontWeight fontWeight = FontWeight.bold,
@@ -89,7 +89,7 @@ class TextStyleUtils {
   }
 
   /// 댓글 멘션
-  TextStyle commentMentionTextStyle({
+  static TextStyle commentMentionTextStyle({
     Color color = Colors.black,
     double fontSize = 12,
     FontWeight fontWeight = FontWeight.bold,
@@ -102,7 +102,7 @@ class TextStyleUtils {
   }
 
   // 댓글 내용
-  TextStyle? commentContentTextStyle({
+  static TextStyle? commentContentTextStyle({
     Color color = Colors.black,
     double fontSize = 12,
     FontWeight fontWeight = FontWeight.w400,
@@ -114,7 +114,7 @@ class TextStyleUtils {
     );
   }
 
-  TextStyle? commentContentSetColorTextStyle({
+  static TextStyle? commentContentSetColorTextStyle({
     Color color = Colors.black,
     double fontSize = 12,
     FontWeight fontWeight = FontWeight.w400,
@@ -127,7 +127,7 @@ class TextStyleUtils {
   }
 
   // 라운지 타이틀
-  TextStyle loungeTitleTextStyle({
+  static TextStyle loungeTitleTextStyle({
     Color color = Colors.black,
     double fontSize = 16,
     FontWeight fontWeight = FontWeight.bold,
@@ -140,7 +140,7 @@ class TextStyleUtils {
   }
 
   // 라운지 서브 타이틀
-  TextStyle loungeSubTitleTextStyle({
+  static TextStyle loungeSubTitleTextStyle({
     Color color = Colors.black,
     double fontSize = 14,
     FontWeight fontWeight = FontWeight.w600,

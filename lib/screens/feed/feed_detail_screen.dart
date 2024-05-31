@@ -5,18 +5,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:foreats/utils/dialog_util.dart';
-import 'package:foreats/utils/global_toast_controller.dart';
-import 'package:foreats/utils/text_style.dart';
-import 'package:foreats/widget/base_appbar.dart';
 import 'package:get/get.dart';
 
 import '../../home/home_controller.dart';
 import '../../utils/app_routes.dart';
 import '../../utils/colors.dart';
+import '../../utils/dialog_util.dart';
+import '../../utils/global_toast_controller.dart';
 import '../../utils/logger.dart';
+import '../../utils/text_style.dart';
 import '../../widget/description_text.dart';
-import '../../widget/login_bottom_sheet.dart';
+import '../../widget/login_bottomsheet.dart';
 import '../login/user_store.dart';
 import 'feed_controller.dart';
 
@@ -35,15 +34,7 @@ class FeedDetailScreen extends GetView<FeedController> {
     final logger = AppLog.to;
     logger.d('FeedDetailScreen');
 
-    // 비디오 플레이어 초기화
-    controller.initDetailVideoPlayer();
-
     return Scaffold(
-      // 뒤로가기
-      // appBar: BaseAppBar(
-      //   title: '피드 상세',
-      //   leading: true,
-      // ),
       body: FutureBuilder(
         future: controller.fetchDetailFeed(),
         builder: (context, snapshot) {
@@ -54,7 +45,18 @@ class FeedDetailScreen extends GetView<FeedController> {
                     Stack(
                       children: [
                         // 동영상
-                        CachedVideoPlayerPlus(controller.detailController),
+                        controller.detailController.value.isInitialized ? Positioned(
+                          top: 0.h,
+                          left: 0.w,
+                          child: Container(
+                            width: 1.sw,
+                            height: 1.sh,
+                            child: AspectRatio(
+                              aspectRatio: controller.detailController.value.aspectRatio,
+                              child: CachedVideoPlayerPlus(controller.detailController),
+                            ),
+                          ),
+                        ) : Container(),
                         // 뒤로가기 버튼
                         Positioned(
                           top: 20.h,
@@ -116,7 +118,7 @@ class FeedDetailScreen extends GetView<FeedController> {
                         controller.detailFeed.storeAddress == 'null' || controller.detailFeed.storeAddress == ''
                             ? ''
                             : controller.detailFeed.storeAddress!.split(' ')[1],
-                        style: TextStyleUtils().feedAddressTitle(),
+                        style: TextStyleUtils.feedAddressTitle(),
                       ),
                       /*Row(
                         children: [
@@ -201,9 +203,9 @@ class FeedDetailScreen extends GetView<FeedController> {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      Text(controller.detailFeed.storeName ?? '', style: TextStyleUtils().feedAddressTitle(fontSize: 10.sp)),
+                      Text(controller.detailFeed.storeName ?? '', style: TextStyleUtils.feedAddressTitle(fontSize: 10.sp)),
                       SizedBox(width: 10.w),
-                      Text(controller.detailFeed.storeType ?? '', style: TextStyleUtils().feedAddressTitle(fontSize: 8.sp, color: gray300)),
+                      Text(controller.detailFeed.storeType ?? '', style: TextStyleUtils.feedAddressTitle(fontSize: 8.sp, color: gray300)),
                     ],
                   ),
                 ),
@@ -317,7 +319,7 @@ class FeedDetailScreen extends GetView<FeedController> {
                       children: [
                         Text(
                           controller.detailFeed.userNickname ?? '',
-                          style: TextStyleUtils().whiteTextStyle(
+                          style: TextStyleUtils.whiteTextStyle(
                             fontSize: 10.sp,
                             fontWeight: FontWeight.w700,
                           ),
@@ -342,7 +344,7 @@ class FeedDetailScreen extends GetView<FeedController> {
                           child: Text(
                             '포잇터',
                             textAlign: TextAlign.center,
-                            style: TextStyleUtils().whiteTextStyle(
+                            style: TextStyleUtils.whiteTextStyle(
                               fontSize: 9.sp,
                               fontWeight: FontWeight.w500,
                             ),
@@ -465,7 +467,7 @@ class FeedDetailScreen extends GetView<FeedController> {
                   children: [
                     Text(
                       '메뉴',
-                      style: TextStyleUtils().whiteTextStyle(
+                      style: TextStyleUtils.whiteTextStyle(
                         fontSize: 12.sp,
                         fontWeight: FontWeight.w600,
                       ),
@@ -596,7 +598,7 @@ class FeedDetailScreen extends GetView<FeedController> {
               Text(
                 '댓글 ${controller.sumReplyCount ?? 0}개',
                 //'',
-                style: TextStyleUtils().whiteTextStyle(
+                style: TextStyleUtils.whiteTextStyle(
                   fontSize: 9.sp,
                   //fontWeight: FontWeight.w600,
                 ),
@@ -648,7 +650,7 @@ class FeedDetailScreen extends GetView<FeedController> {
                     child: Center(
                       child: Text(
                         '댓글이 없어요 😢',
-                        style: TextStyleUtils().bodyTextStyle(
+                        style: TextStyleUtils.bodyTextStyle(
                           color: gray400,
                           fontSize: 11.sp,
                           fontWeight: FontWeight.w500,
@@ -861,7 +863,7 @@ class FeedDetailScreen extends GetView<FeedController> {
                                 : controller.commentArray[commentIndex]
                                 .userNickname ??
                                 '',
-                            style: TextStyleUtils().bodyTextStyle(
+                            style: TextStyleUtils.bodyTextStyle(
                               color: Colors.black,
                               fontSize: 10.sp,
                               fontWeight: FontWeight.w500,
@@ -879,7 +881,7 @@ class FeedDetailScreen extends GetView<FeedController> {
                           //     controller.commentArrayList[feedIndex][commentIndex].userNickname.toString() == UserStore.to.nickname.toString()
                           //         ? '작성자'
                           //         : '',
-                          //     style: TextStyleUtils().commentContentTextStyle(),
+                          //     style: TextStyleUtils.commentContentTextStyle(),
                           //   ),
                           // ),
                         ],
@@ -893,7 +895,7 @@ class FeedDetailScreen extends GetView<FeedController> {
                                 .toString(),
                           ),
                         ),
-                        style: TextStyleUtils().bodyTextStyle(
+                        style: TextStyleUtils.bodyTextStyle(
                           color: Colors.grey,
                           fontSize: 9.sp,
                           fontWeight: FontWeight.w500,
@@ -934,7 +936,7 @@ class FeedDetailScreen extends GetView<FeedController> {
                     controller.commentArray.isEmpty
                         ? ''
                         : controller.commentArray[commentIndex].comment ?? '',
-                    style: TextStyleUtils().bodyTextStyle(
+                    style: TextStyleUtils.bodyTextStyle(
                       color: gray700,
                       fontSize: 10.sp,
                       fontWeight: FontWeight.w500,
@@ -950,7 +952,7 @@ class FeedDetailScreen extends GetView<FeedController> {
                     },
                     child: Text(
                       '답글',
-                      style: TextStyleUtils().bodyTextStyle(
+                      style: TextStyleUtils.bodyTextStyle(
                         color: Colors.grey,
                         fontSize: 9.sp,
                         fontWeight: FontWeight.w500,
@@ -1092,7 +1094,7 @@ class FeedDetailScreen extends GetView<FeedController> {
                       Text(
                         controller.commentArray[commentIndex].likeCount
                             .toString(),
-                        style: TextStyleUtils().bodyTextStyle(
+                        style: TextStyleUtils.bodyTextStyle(
                           color: Colors.grey,
                           fontSize: 10.sp,
                           fontWeight: FontWeight.w500,
@@ -1119,7 +1121,7 @@ class FeedDetailScreen extends GetView<FeedController> {
         //       : controller.commentArray[commentIndex].replyCommentList?.isEmpty ?? true
         //           ? ''
         //           : controller.commentArray[commentIndex].replyCommentList![0].comment ?? '',
-        //   style: TextStyleUtils().commentContentTextStyle(),
+        //   style: TextStyleUtils.commentContentTextStyle(),
         // )
 
         // 대댓글 리스트
@@ -1213,7 +1215,7 @@ class FeedDetailScreen extends GetView<FeedController> {
                               .replyCommentList![replyIndex]
                               .userNickname ??
                               '',
-                          style: TextStyleUtils().bodyTextStyle(
+                          style: TextStyleUtils.bodyTextStyle(
                             color: Colors.black,
                             fontSize: 10.sp,
                             fontWeight: FontWeight.w500,
@@ -1236,7 +1238,7 @@ class FeedDetailScreen extends GetView<FeedController> {
                                     .toString(),
                               ),
                             ),
-                            style: TextStyleUtils().bodyTextStyle(
+                            style: TextStyleUtils.bodyTextStyle(
                               color: Colors.grey[400]!,
                               fontSize: 9.sp,
                               fontWeight: FontWeight.w500,
@@ -1255,7 +1257,7 @@ class FeedDetailScreen extends GetView<FeedController> {
                                     .startsWith('@')
                                     ? '${controller.commentArray[commentIndex].replyCommentList![replyIndex].comment!.split(' ')[0]} '
                                     : '',
-                                style: TextStyleUtils().bodyTextStyle(
+                                style: TextStyleUtils.bodyTextStyle(
                                   color: Theme.of(context)
                                       .colorScheme
                                       .secondary,
@@ -1281,7 +1283,7 @@ class FeedDetailScreen extends GetView<FeedController> {
                                     .commentArray[commentIndex]
                                     .replyCommentList![replyIndex]
                                     .comment!,
-                                style: TextStyleUtils().bodyTextStyle(
+                                style: TextStyleUtils.bodyTextStyle(
                                   color: gray700,
                                   fontSize: 10.sp,
                                   fontWeight: FontWeight.w500,
