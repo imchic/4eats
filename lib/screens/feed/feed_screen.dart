@@ -45,7 +45,13 @@ class FeedScreen extends GetView<FeedController> {
               scrollDirection: Axis.vertical,
               onPageChanged: (index) {
                 controller.currentFeedIndex.value = index;
-                controller.initializeVideoPlayer(controller.videoControllerList);
+                controller.videoControllerList[controller.currentFeedIndex.value][controller.currentVideoUrlIndex.value].dispose();
+                controller.videoControllerList[controller.currentFeedIndex.value][controller.currentVideoUrlIndex.value] = CachedVideoPlayerPlusController.networkUrl(Uri.parse(controller.feedList[index].videoUrls![controller.currentVideoUrlIndex.value]))..initialize().then((_) {
+                    controller.videoControllerList[controller.currentFeedIndex.value][controller.currentVideoUrlIndex.value].play();
+                    controller.videoControllerList[controller.currentFeedIndex.value][controller.currentVideoUrlIndex.value].setLooping(true);
+                    controller.videoControllerList[controller.currentFeedIndex.value][controller.currentVideoUrlIndex.value].setVolume(0.0);
+                  });
+
                 controller.allPause();
                 controller.allMute();
                 controller.fetchComments(controller.feedList[index].seq ?? '', index);

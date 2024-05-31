@@ -300,22 +300,29 @@ class FeedController extends GetxController {
   }
 
   /// 비디오 플레이어 초기화
-  Future<CachedVideoPlayerPlusController?> initializeVideoPlayer(List<List<CachedVideoPlayerPlusController>> videoControllerList) async {
+  Future<void> initializeVideoPlayer(List<List<CachedVideoPlayerPlusController>> videoControllerList) async {
     try {
 
+      // videoControllerList[currentFeedIndex.value][currentVideoUrlIndex.value].initialize().then((_) {
+      //   initializeVideoPlayerFuture = videoControllerList[currentFeedIndex.value][currentVideoUrlIndex.value].play();
+      //   // mute
+      //   if (videoControllerList[currentFeedIndex.value].length == 1) {
+      //     videoControllerList[currentFeedIndex.value][currentVideoUrlIndex.value].setLooping(true);
+      //     videoControllerList[currentFeedIndex.value][currentVideoUrlIndex.value].setVolume(0);
+      //   }
+      //   //videoControllerList[currentFeedIndex.value][currentVideoUrlIndex.value].addListener(_onVideoPlayerStateChanged);
+      //   return videoControllerList[currentFeedIndex.value][currentVideoUrlIndex.value];
+      // });
+
       videoControllerList[currentFeedIndex.value][currentVideoUrlIndex.value].initialize().then((_) {
-        initializeVideoPlayerFuture = videoControllerList[currentFeedIndex.value][currentVideoUrlIndex.value].play();
-        // mute
-        if (videoControllerList[currentFeedIndex.value].length == 1) {
-          videoControllerList[currentFeedIndex.value][currentVideoUrlIndex.value].setLooping(true);
-          videoControllerList[currentFeedIndex.value][currentVideoUrlIndex.value].setVolume(0);
-        }
+        videoControllerList[currentFeedIndex.value][currentVideoUrlIndex.value].play();
+        videoControllerList[currentFeedIndex.value][currentVideoUrlIndex.value].setLooping(true);
+        videoControllerList[currentFeedIndex.value][currentVideoUrlIndex.value].setVolume(0);
         videoControllerList[currentFeedIndex.value][currentVideoUrlIndex.value].addListener(_onVideoPlayerStateChanged);
-        return videoControllerList[currentFeedIndex.value][currentVideoUrlIndex.value];
       });
+
     } catch (e) {
       AppLog.to.e('_initializeVideoPlayer error: $e');
-      return null;
     }
   }
 
