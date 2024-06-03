@@ -491,7 +491,7 @@ class UploadRegisterScreen extends GetView<UploadController> {
   Widget _storeHashTagHorizontalList(BuildContext context) {
     return Obx(
       () => Container(
-        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
+        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.start,
@@ -505,16 +505,11 @@ class UploadRegisterScreen extends GetView<UploadController> {
                 height: 0.09,
               ),
             ),
-            SizedBox(height: 8.h),
+            SizedBox(height: 5.h),
             SizedBox(
-              height: Get.height * 0.1,
-              child: GridView.builder(
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  crossAxisSpacing: 10.w,
-                  mainAxisSpacing: 10.h,
-                  childAspectRatio: 3,
-                ),
+              height: Get.height * 0.05,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
                 itemCount: controller.hashtagList.length,
                 itemBuilder: (context, index) {
                   return Obx(
@@ -523,7 +518,7 @@ class UploadRegisterScreen extends GetView<UploadController> {
                         controller.addHashtag(controller.hashtagList[index]);
                       },
                       child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 10.w),
+                        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
                         decoration: ShapeDecoration(
                           // 선택된 아이템만 색상 변경
                           color: controller.selectedHashtagStringList

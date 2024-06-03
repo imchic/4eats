@@ -63,7 +63,6 @@ class FeedScreen extends GetView<FeedController> {
                     Stack(
                       children: [
                         // 동영상
-                        //CachedVideoPlayerPlus(controller.videoControllerList[controller.currentFeedIndex.value][controller.currentVideoUrlIndex.value]),
                         Container(
                           width: 1.sw,
                           alignment: Alignment.bottomCenter,
