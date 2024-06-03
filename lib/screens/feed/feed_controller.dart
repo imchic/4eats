@@ -1034,60 +1034,52 @@ class FeedController extends GetxController {
       var userLoginType = UserStore.to.user.value.loginType;
       AppLog.to.i('userLoginType: $userLoginType');
 
-      if (userLoginType == 'kakao') {
-        await _firestore
-            .collection('users')
-            .where('id', isEqualTo: feed.userid)
-            .get()
-            .then((value) {
-          var fcmToken = value.docs.first.data()['fcmToken'];
-          AppLog.to.i('fcmToken: $fcmToken');
-          // fcm 발송
-        });
-      } else if (userLoginType == 'google') {
-        await _firestore
-            .collection('users')
-            .where('id', isEqualTo: feed.userid)
-            .get()
-            .then((value) async {
-          // SharedPreferences prefs = await SharedPreferences.getInstance();
-          // var fcmToken = prefs.getString('fcmToken') ?? '';
-          //var fcmToken = UserStore.to.user.value.fcmToken ?? '';
-          var fcmToken = value.docs.first.data()['fcmToken'];
-          var nickname = value.docs.first.data()['nickname'];
-          AppLog.to.i('fcmToken: $fcmToken , nickname: $nickname');
+      await _firestore
+          .collection('users')
+          .where('id', isEqualTo: feed.userid)
+          .get()
+          .then((value) async {
+        // SharedPreferences prefs = await SharedPreferences.getInstance();
+        // var fcmToken = prefs.getString('fcmToken') ?? '';
+        //var fcmToken = UserStore.to.user.value.fcmToken ?? '';
+        var fcmToken = value.docs.first.data()['fcmToken'];
+        var nickname = value.docs.first.data()['nickname'];
+        AppLog.to.i('fcmToken: $fcmToken , nickname: $nickname');
 
-          // datetime to timestamp
-          var timestamp = Timestamp.fromDate(DateTime.now());
+        // datetime to timestamp
+        var timestamp = Timestamp.fromDate(DateTime.now());
 
-          // add notification
-          await _firestore.collection('notifications').add({
-            'title': '포잇',
-            'body': '${UserStore.to.user.value.nickname}님이 회원님의 게시글에 $type을 남겼어요',
-            'createdAt': timestamp,
-            'uid': UserStore.to.user.value.uid,
-            'userId': UserStore.to.user.value.id,
-            'userName': UserStore.to.user.value.displayName,
-            'userNickname': UserStore.to.user.value.nickname,
-            'userPhotoUrl': UserStore.to.user.value.profileImage,
-            'feedId': feedId,
-            'comment': comment,
-            'type': type,
-            'isRead': false,
-          });
-
-          if(type == '댓글'){
-            sendPushMessage(fcmToken, '포잇', '${value.docs.first.data()['nickname']}님이 회원님의 게시글에 $type을 남겼어요 ${comment}');
-          } else {
-            sendPushMessage(fcmToken, '포잇', '${value.docs.first.data()['nickname']}님이 회원님의 게시글에 $type를 눌렀어요');
-          }
-
+        // add notification
+        await _firestore.collection('notifications').add({
+          'title': '포잇',
+          'body': '${UserStore.to.user.value.nickname}님이 회원님의 게시글에 $type을 남겼어요',
+          'createdAt': timestamp,
+          'uid': UserStore.to.user.value.uid,
+          'userId': UserStore.to.user.value.id,
+          'userName': UserStore.to.user.value.displayName,
+          'userNickname': UserStore.to.user.value.nickname,
+          'userPhotoUrl': UserStore.to.user.value.profileImage,
+          // 수신자
+          'receiverId': feed.userid,
+          // 발신자
+          'senderId': UserStore.to.user.value.id,
+          'feedId': feedId,
+          'comment': comment,
+          'type': type,
+          'isRead': false,
         });
 
-        // 새로고침
-        await refreshComments(feedId, currentFeedIndex.value);
+        if(type == '댓글'){
+          sendPushMessage(fcmToken, '포잇', '${value.docs.first.data()['nickname']}님이 회원님의 게시글에 $type을 남겼어요 ${comment}');
+        } else {
+          sendPushMessage(fcmToken, '포잇', '${value.docs.first.data()['nickname']}님이 회원님의 게시글에 $type를 눌렀어요');
+        }
 
-      }
+      });
+
+      // 새로고침
+      await refreshComments(feedId, currentFeedIndex.value);
+
     } catch (e) {
       AppLog.to.e('sendFcm error: $e');
     }

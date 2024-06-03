@@ -1,20 +1,21 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:googleapis/content/v2_1.dart';
 
 class NotificationModel {
-  final String? title;
-  final String? body;
-  final DateTime? createdAt;
-  final String? uid;
-  final String? userId;
-  final String? userName;
-  final String? userNickname;
-  final String? userPhotoUrl;
-  final String? feedId;
-  final String? comment;
-  final String? type;
-  final String? deepLink;
-  final bool? isRead;
+  String? title;
+  String? body;
+  String? uid;
+  String? userId;
+  String? userName;
+  String? userNickname;
+  String? userPhotoUrl;
+  String? senderId;
+  String? receiverId;
+  String? feedId;
+  String? comment;
+  String? type;
+  String? deepLink;
+  bool? isRead;
+  DateTime? createdAt;
 
   NotificationModel({
     this.title,
@@ -25,6 +26,8 @@ class NotificationModel {
     this.userName,
     this.userNickname,
     this.userPhotoUrl,
+    this.senderId,
+    this.receiverId,
     this.feedId,
     this.comment,
     this.type,
@@ -32,22 +35,22 @@ class NotificationModel {
     this.isRead,
   });
 
-  factory NotificationModel.fromJson(Map<String, dynamic> json) {
-    return NotificationModel(
-      title: json['title'],
-      body: json['body'],
-      createdAt: json['createdAt'],
-      uid: json['uid'],
-      userId: json['userId'],
-      userName: json['userName'],
-      userNickname: json['userNickname'],
-      userPhotoUrl: json['userPhotoUrl'],
-      feedId: json['feedId'],
-      comment: json['comment'],
-      type: json['type'],
-      deepLink: json['deepLink'],
-      isRead: json['isRead'],
-    );
+  NotificationModel.fromJson(Map<String, dynamic> json) {
+    title = json['title'];
+    body = json['body'];
+    createdAt = Timestamp.fromDate(json['createdAt'].toDate()).toDate();
+    uid = json['uid'];
+    userId = json['userId'];
+    userName = json['userName'];
+    userNickname = json['userNickname'];
+    userPhotoUrl = json['userPhotoUrl'];
+    senderId = json['senderId'];
+    receiverId = json['receiverId'];
+    feedId = json['feedId'];
+    comment = json['comment'];
+    type = json['type'];
+    deepLink = json['deepLink'];
+    isRead = json['isRead'];
   }
 
   Map<String, dynamic> toJson() {
@@ -60,6 +63,8 @@ class NotificationModel {
     data['userName'] = userName;
     data['userNickname'] = userNickname;
     data['userPhotoUrl'] = userPhotoUrl;
+    data['senderId'] = senderId;
+    data['receiverId'] = receiverId;
     data['feedId'] = feedId;
     data['comment'] = comment;
     data['type'] = type;
