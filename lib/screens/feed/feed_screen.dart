@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
-import 'package:river_player/river_player.dart';
 
 import '../../home/home_controller.dart';
 import '../../utils/app_routes.dart';
@@ -48,6 +47,7 @@ class FeedScreen extends GetView<FeedController> {
 
                 controller.allPause();
                 controller.allMute();
+                // controller.sumReplyCnt();
 
                 controller.fetchComments(controller.feedList[index].seq ?? '', index);
                 controller.fetchLikes(controller.feedList[index].seq ?? '');
