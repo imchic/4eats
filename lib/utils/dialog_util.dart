@@ -116,7 +116,7 @@ class DialogUtil {
   }) {
     showSnackBar(
       message: message,
-      color: Theme.of(Get.context!).errorColor,
+      color: Theme.of(Get.context!).colorScheme.error,
     );
   }
 

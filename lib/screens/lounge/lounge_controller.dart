@@ -73,7 +73,6 @@ class LoungeController extends GetxController {
   void onInit() {
     super.onInit();
     searchController = TextEditingController();
-    fetchLoungeFeedList();
   }
 
   Future<void> moveToLocation() async {
@@ -133,10 +132,10 @@ class LoungeController extends GetxController {
   }
 
   /// 라운지 피드 가져오기
-  Future<List<FeedModel>> fetchLoungeFeedList() async {
+  Future<List<FeedModel>> fetchLoungeFeedList(String searchKeyword) async {
     try {
       final loungeFeedList = <FeedModel>[];
-      final querySnapshot = await FirebaseFirestore.instance.collection('feeds').get();
+      final querySnapshot = await FirebaseFirestore.instance.collection('feeds').where('storeAddress', isGreaterThanOrEqualTo: searchKeyword).get();
       for (final query in querySnapshot.docs) {
         final feed = FeedModel.fromJson(query.data() as Map<String, dynamic>);
         loungeFeedList.add(feed);
@@ -145,6 +144,23 @@ class LoungeController extends GetxController {
       return loungeFeedList;
     } catch (e) {
       _logger.d('fetchLoungeFeedList error: $e');
+      return [];
+    }
+  }
+
+  /// 라운지 피드 검색 결과 가져오기
+  Future<List<FeedModel>> fetchLoungeFeedSearchResult(String searchKeyword) async {
+    try {
+      final loungeFeedList = <FeedModel>[];
+      final querySnapshot = await FirebaseFirestore.instance.collection('feeds').where('storeAddress', isGreaterThanOrEqualTo: searchKeyword).get();
+      for (final query in querySnapshot.docs) {
+        final feed = FeedModel.fromJson(query.data() as Map<String, dynamic>);
+        loungeFeedList.add(feed);
+      }
+      _loungeFeedList.value = loungeFeedList;
+      return loungeFeedList;
+    } catch (e) {
+      _logger.d('fetchLoungeFeedSearchResult error: $e');
       return [];
     }
   }

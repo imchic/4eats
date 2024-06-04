@@ -77,7 +77,7 @@ class CustomGallery extends GetView<UploadController> {
               width: 256.w,
               height: 256.h,
               decoration: BoxDecoration(
-                color: gray800,
+                color: Colors.black,
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,

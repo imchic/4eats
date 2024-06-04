@@ -5,20 +5,12 @@ import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../model/notification_model.dart';
+import 'logger.dart';
 
 class FirebaseMessageApi {
 
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
-  final _logger = Logger(
-    printer: PrettyPrinter(
-        methodCount: 2, // Number of method calls to be displayed
-        errorMethodCount: 8, // Number of method calls if stacktrace is provided
-        lineLength: 120, // Width of the output
-        colors: true, // Colorful log messages
-        printEmojis: true, // Print an emoji for each log message
-        printTime: false // Should each log print contain a timestamp
-    ),
-  );
+  final _logger = AppLog.to;
 
   Future<void> initNotifications() async {
     _firebaseMessaging.requestPermission(
@@ -33,11 +25,11 @@ class FirebaseMessageApi {
 
     // 플랫폼 별 토큰 가져오기
     String? token = '';
-    if(defaultTargetPlatform == TargetPlatform.iOS) {
-      token = await _firebaseMessaging.getAPNSToken();
-    } else if(defaultTargetPlatform == TargetPlatform.android) {
+    // if(defaultTargetPlatform == TargetPlatform.iOS) {
+    //   token = await _firebaseMessaging.getAPNSToken();
+    // } else if(defaultTargetPlatform == TargetPlatform.android) {
       token = await _firebaseMessaging.getToken();
-    }
+    // }
 
     _logger.i('initNotifications token = $token');
 
@@ -97,8 +89,6 @@ class FirebaseMessageApi {
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
       final notification = NotificationModel.fromJson(message.data);
       // fcm 누르고 화면 이동
-      _logger.i('onMessageOpenedApp notification = $notification');
-
     });
 
     FirebaseMessaging.onBackgroundMessage(onBackgroundHandler);

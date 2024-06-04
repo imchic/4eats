@@ -88,7 +88,7 @@ class FeedController extends GetxController {
 
   final isVideoLoading = true.obs;
   final _isCommentLoading = false.obs;
-  final _isMuted = false.obs;
+  final _isMuted = true.obs;
 
   bool get isLoading => isVideoLoading.value;
   set isLoading(bool value) => isVideoLoading.value = value;
@@ -153,22 +153,16 @@ class FeedController extends GetxController {
         LoungeController.to.loungeFeedList.addAll(value);
       });
 
-      // 북마크 & 좋아요 여부 확인
-      for (var i = 0; i < _feedList.length; i++) {
-        await fetchBookmarks(_feedList[i].seq ?? '');
-        await fetchLikes(_feedList[i].seq ?? '');
-      }
-
       if (_feedList.isNotEmpty) {
         await getFeedVideoList(videoControllerList);
 
         // 썸네일
         for (var i = 0; i < _feedList.length; i++) {
           _thumbnailList.add(_feedList[i].thumbnailUrls![0]);
-          //await fetchComments(feedList[i].seq ?? '', i);
         }
 
         // 북마크, 좋아요 갯수
+        fetchComments(_feedList[currentFeedIndex.value].seq ?? '', currentFeedIndex.value);
         fetchLikes(_feedList[currentFeedIndex.value].seq ?? '');
         fetchBookmarks(_feedList[currentFeedIndex.value].seq ?? '');
 
@@ -362,12 +356,22 @@ class FeedController extends GetxController {
   }
 
   /// 음소거 상태 변경
-  Future<void> changeMute(int index) async {
+  // unmute
+  Future<void> mute() async {
     try {
-      isMuted = !isMuted;
-      videoControllerList[currentFeedIndex.value][currentVideoUrlIndex.value].setVolume(isMuted ? 0 : 1);
+      videoControllerList[currentFeedIndex.value][currentVideoUrlIndex.value].setVolume(0);
+      isMuted = true;
     } catch (e) {
-      AppLog.to.e('changeMute error: $e');
+      AppLog.to.e('mute error: $e');
+    }
+  }
+
+  Future<void> unMute() async {
+    try {
+      videoControllerList[currentFeedIndex.value][currentVideoUrlIndex.value].setVolume(1);
+      isMuted = false;
+    } catch (e) {
+      AppLog.to.e('unmute error: $e');
     }
   }
 
@@ -421,10 +425,10 @@ class FeedController extends GetxController {
     try {
       for (var videoController in videoControllerList) {
         for (var element in videoController) {
-          element.setVolume(isMuted ? 0 : 1);
+          element.setVolume(0);
         }
       }
-      isMuted = !isMuted;
+      isMuted = true;
     } catch (e) {
       AppLog.to.e('allMute error: $e');
     }
@@ -599,8 +603,6 @@ class FeedController extends GetxController {
         }
 
         _commentArray.addAll(commentList);
-
-
 
       }
 
@@ -1039,11 +1041,10 @@ class FeedController extends GetxController {
           .where('id', isEqualTo: feed.userid)
           .get()
           .then((value) async {
-        // SharedPreferences prefs = await SharedPreferences.getInstance();
-        // var fcmToken = prefs.getString('fcmToken') ?? '';
-        //var fcmToken = UserStore.to.user.value.fcmToken ?? '';
+
         var fcmToken = value.docs.first.data()['fcmToken'];
-        var nickname = value.docs.first.data()['nickname'];
+        var nickname = UserStore.to.user.value.nickname;
+
         AppLog.to.i('fcmToken: $fcmToken , nickname: $nickname');
 
         // datetime to timestamp
@@ -1052,7 +1053,7 @@ class FeedController extends GetxController {
         // add notification
         await _firestore.collection('notifications').add({
           'title': '포잇',
-          'body': '${UserStore.to.user.value.nickname}님이 회원님의 게시글에 $type을 남겼어요',
+          'body': type == '댓글' ? '$nickname님이 회원님의 게시글에 $type을 남겼어요' : '$nickname님이 회원님의 게시글에 $type를 눌렀어요',
           'createdAt': timestamp,
           'uid': UserStore.to.user.value.uid,
           'userId': UserStore.to.user.value.id,
@@ -1070,9 +1071,9 @@ class FeedController extends GetxController {
         });
 
         if(type == '댓글'){
-          sendPushMessage(fcmToken, '포잇', '${value.docs.first.data()['nickname']}님이 회원님의 게시글에 $type을 남겼어요 ${comment}');
+          sendPushMessage(fcmToken, '포잇', '${UserStore.to.user.value.nickname}님이 회원님의 게시글에 $type을 남겼어요 $comment');
         } else {
-          sendPushMessage(fcmToken, '포잇', '${value.docs.first.data()['nickname']}님이 회원님의 게시글에 $type를 눌렀어요');
+          sendPushMessage(fcmToken, '포잇', '${UserStore.to.user.value.nickname}님이 회원님의 게시글에 $type를 눌렀어요');
         }
 
       });
