@@ -554,7 +554,7 @@ class FeedController extends GetxController {
       _commentArrayList.clear();
       _commentReplyArrayList.clear();
 
-      await fetchComments(feedId, feedIndex);
+      //await fetchComments(feedId, feedIndex);
 
       _isCommentLoading.value = false;
       commentController.clear();
@@ -571,40 +571,32 @@ class FeedController extends GetxController {
     try {
 
       sumReplyCount.value = 0;
-      _commentArray.clear();
-      _commentReplyArray.clear();
 
-      var feedSnapshot = await _firestore
+      // 실시간 댓글
+      _firestore
           .collection('feeds')
           .where('seq', isEqualTo: feedId)
-          .get();
-
-      var commentList = <CommentModel>[];
-
-      for (var i = 0; i < feedSnapshot.docs.length; i++) {
-
-        var commentSnapshot = await feedSnapshot.docs[i].reference.collection('comments').orderBy('createdAt', descending: false).get();
-
-        for (var j = 0; j < commentSnapshot.docs.length; j++) {
-
-          var comment = CommentModel.fromJson(commentSnapshot.docs[j].data());
-          sumReplyCount.value = commentSnapshot.docs.length;
-
-          // 대댓글 조회
-          var replyCommentSnapshot = await commentSnapshot.docs[j].reference.collection('reply').orderBy('createdAt', descending: false).get();
-
-          for (var k = 0; k < replyCommentSnapshot.docs.length; k++) {
-            var replyComment = CommentModel.fromJson(replyCommentSnapshot.docs[k].data());
-            comment.replyCommentList!.add(replyComment);
-          }
-
-          sumReplyCount.value += comment.replyCommentList!.length;
-          commentList.add(comment);
+          .get()
+          .then((value) {
+        for (var i = 0; i < value.docs.length; i++) {
+          value.docs[i].reference.collection('comments').orderBy('createdAt', descending: true).snapshots().listen((event) {
+            _commentArray.clear();
+            _commentReplyArray.clear();
+            event.docs.forEach((element) {
+              if (element.data()['isReply'] == false) {
+                _commentArray.add(CommentModel.fromJson(element.data()));
+              } else {
+                _commentReplyArray.add(CommentModel.fromJson(element.data()));
+                _commentReplyArray.sort((a, b) => a.createdAt!.compareTo(b.createdAt!));
+              }
+            });
+            _commentArrayList.add(_commentArray);
+            _commentReplyArrayList.add(_commentReplyArray);
+            sumReplyCount.value = _commentArrayList[feedIndex].length + _commentReplyArrayList[feedIndex].length;
+          });
         }
+      });
 
-        _commentArray.addAll(commentList);
-
-      }
 
     } catch (e) {
       AppLog.to.e('fetchComments error: $e');

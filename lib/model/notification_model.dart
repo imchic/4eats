@@ -38,7 +38,7 @@ class NotificationModel {
   NotificationModel.fromJson(Map<String, dynamic> json) {
     title = json['title'];
     body = json['body'];
-    createdAt = Timestamp.fromDate(json['createdAt'].toDate()).toDate();
+    createdAt = json['createdAt'].toDate();
     uid = json['uid'];
     userId = json['userId'];
     userName = json['userName'];
