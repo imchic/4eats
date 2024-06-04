@@ -50,7 +50,7 @@ class _DescriptionTextState extends State<DescriptionText> {
           ? Text(
               firstHalf,
               style: TextStyle(
-                fontSize: widget.fontSize ?? 10.sp,
+                fontSize: widget.fontSize ?? 12.sp,
                 color: widget.color ?? Colors.white,
                 fontWeight: widget.fontWeight ?? FontWeight.normal,
                 height: 1.4,
@@ -64,7 +64,7 @@ class _DescriptionTextState extends State<DescriptionText> {
                 Text(
                   flag ? (firstHalf + " ...") : (firstHalf + secondHalf),
                   style: TextStyle(
-                    fontSize: widget.fontSize ?? 10.sp,
+                    fontSize: widget.fontSize ?? 12.sp,
                     color: widget.color ?? Colors.white,
                     fontWeight: widget.fontWeight ?? FontWeight.normal,
                     height: 1.4,

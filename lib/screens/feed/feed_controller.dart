@@ -498,47 +498,117 @@ class FeedController extends GetxController {
 
     try {
 
-      // var commentId = _commentArrayList[currentFeedIndex.value][index].commentId;
+      await _firestore
+          .collection('feeds')
+          .where('seq', isEqualTo: feedId)
+          .snapshots()
+          .listen((value) {
+        for (var i = 0; i < value.docs.length; i++) {
+          if (value.docs[i].reference.collection('comments').where('commentId', isEqualTo: commentArrayList[currentFeedIndex.value][index].commentId).get() != null) {
+            value.docs[i].reference.collection('comments').where('commentId', isEqualTo: commentArrayList[currentFeedIndex.value][index].commentId).get().then((value) {
+              for (var j = 0; j < value.docs.length; j++) {
+                Map<String, dynamic> replyComment = {
+                  'comment': comment,
+                  'createdAt': Timestamp.now(),
+                  'uid': '',
+                  'userId': UserStore.to.user.value.id,
+                  'userName': UserStore.to.user.value.displayName,
+                  'userNickname': UserStore.to.user.value.nickname,
+                  'userPhotoUrl': UserStore.to.user.value.profileImage,
+                  'feedId': feedId,
+                  'commentId': commentArrayList[currentFeedIndex.value][index].commentId,
+                  'likeCount': 0,
+                  'likeUserIds': [],
+                  'isReply': true,
+                  'replyCommentId': value.docs[j].data()['commentId'],
+                  'replyCommentList': [],
+                };
+                // update
+                value.docs[j].reference.update({
+                  'replyCommentList': FieldValue.arrayUnion([replyComment]),
+                });
+              }
+            });
+          }
+        }
+      });
+
+      // AppLog.to.d('index: $index , comment: $comment, feedId: $feedId');
+
+      // 코멘트 아이디 가져오기
+      // var commentId = commentArrayList[currentFeedIndex.value][index].commentId;
       // AppLog.to.d('commentId: $commentId');
-      //
-      // QuerySnapshot<Map<String, dynamic>> feedSnapshot = await _firestore
+
+      // 대댓글 추가
+      // await _firestore
       //     .collection('feeds')
       //     .where('seq', isEqualTo: feedId)
-      //     .get();
-      //
-      // for (var i = 0; i < feedSnapshot.docs.length; i++) {
-      //   feedSnapshot.docs[i].reference.collection('comments').where('commentId', isEqualTo: commentId).get().then((value) {
-      //
-      //     // isReply가 true업데이트
-      //     value.docs[i].reference.update({
-      //       'isReply': true,
+      //     .snapshots()
+      //     .listen((value) {
+      //   for (var i = 0; i < value.docs.length; i++) {
+      //     value.docs[i].reference.collection('comments').where('commentId', isEqualTo: commentId).get().then((value) {
+      //       for (var j = 0; j < value.docs.length; j++) {
+      //         Map<String, dynamic> replyComment = {
+      //           'comment': comment,
+      //           'createdAt': Timestamp.now(),
+      //           'uid': '',
+      //           'userId': UserStore.to.user.value.id,
+      //           'userName': UserStore.to.user.value.displayName,
+      //           'userNickname': UserStore.to.user.value.nickname,
+      //           'userPhotoUrl': UserStore.to.user.value.profileImage,
+      //           'feedId': feedId,
+      //           'commentId': commentId,
+      //           'likeCount': 0,
+      //           'likeUserIds': [],
+      //           'isReply': true,
+      //           'replyCommentId': value.docs[j].data()['commentId'],
+      //           'replyCommentList': [],
+      //         };
+      //         // update
+      //         value.docs[j].reference.update({
+      //           'replyCommentList': FieldValue.arrayUnion([replyComment]),
+      //         });
+      //       }
       //     });
-      //
-      //     for (var j = 0; j < value.docs.length; j++) {
-      //       value.docs[j].reference.collection('reply').add({
-      //         'comment': comment,
-      //         'createdAt': Timestamp.now(),
-      //         'uid': '',
-      //         'userId': UserStore.to.user.value.id,
-      //         'userName': UserStore.to.user.value.displayName,
-      //         'userNickname': UserStore.to.user.value.nickname,
-      //         'userPhotoUrl': UserStore.to.user.value.photoUrl,
-      //         'feedId': feedId,
-      //         'commentId': commentId,
-      //         'likeCount': 0,
-      //         'likeUserIds': [],
-      //         'isReply': true,
-      //         'replyCommentId': commentId,
-      //         'replyCommentList': [],
-      //       });
-      //     }
-      //   });
-      // }
-      //
-      // await refreshComments(feedId, currentFeedIndex.value);
-      //
-      // // fcm 발송
-      // await sendFcm(feedId, comment, '대댓글');
+      //   }
+      // });
+
+      // 대댓글 추가
+      // await _firestore
+      //     .collection('feeds')
+      //     .where('seq', isEqualTo: feedId)
+      //     .snapshots()
+      //     .listen((value) {
+      //   for (var i = 0; i < value.docs.length; i++) {
+      //     value.docs[i].reference.collection('comments').where('commentId', isEqualTo: commentId).get().then((value) {
+      //       for (var j = 0; j < value.docs.length; j++) {
+      //         Map<String, dynamic> replyComment = {
+      //           'comment': comment,
+      //           'createdAt': Timestamp.now(),
+      //           'uid': '',
+      //           'userId': UserStore.to.user.value.id,
+      //           'userName': UserStore.to.user.value.displayName,
+      //           'userNickname': UserStore.to.user.value.nickname,
+      //           'userPhotoUrl': UserStore.to.user.value.profileImage,
+      //           'feedId': feedId,
+      //           'commentId': commentId,
+      //           'likeCount': 0,
+      //           'likeUserIds': [],
+      //           'isReply': true,
+      //           'replyCommentId': value.docs[j].data()['commentId'],
+      //           'replyCommentList': [],
+      //         };
+      //         // update
+      //         value.docs[j].reference.update({
+      //           'replyCommentList': FieldValue.arrayUnion([replyComment]),
+      //         });
+      //       }
+      //     });
+      //   }
+      // });
+
+      // 코멘트 초기화
+      commentController.clear();
 
     } catch (e) {
       AppLog.to.e('addReplyComment error: $e');
@@ -1176,14 +1246,14 @@ class FeedController extends GetxController {
 
           for (var i = 0; i < value.docs.length; i++) {
             var user = UserModel.fromJson(value.docs[i].data());
-            AppLog.to.d('nickname: ${user.nickname}');
+            //AppLog.to.d('nickname: ${user.nickname}');
             _allUserList.add(user);
           }
 
           if (keyword.length > 1) {
             for (var i = 0; i < _allUserList.length; i++) {
               if (_allUserList[i].nickname!.contains(keyword.substring(1))) {
-                AppLog.to.d('nickname: ${_allUserList[i].nickname}');
+                //AppLog.to.d('nickname: ${_allUserList[i].nickname}');
                 _mentionUserList.add(_allUserList[i]);
               }
               _isMentionLoading.value = false;

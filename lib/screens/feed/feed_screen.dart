@@ -688,7 +688,7 @@ class FeedScreen extends GetView<FeedController> {
                               children: [
                                 SizedBox(
                                   width: Get.width,
-                                  height: 0.3.sh,
+                                  height: 0.5.sh,
                                   child: Obx(
                                     () => RefreshIndicator(
                                       onRefresh: () async {
@@ -777,7 +777,7 @@ class FeedScreen extends GetView<FeedController> {
                                     if (controller
                                         .commentController.text.isNotEmpty) {
                                       if (controller.isReply) {
-                                        await FeedController.to.addReplyComment(feedIndex, FeedController.to.commentController.text, FeedController.to.feedList[feedIndex].seq ?? '',);
+                                        await FeedController.to.addReplyComment(feedIndex, controller.commentController.text, FeedController.to.feedList[feedIndex].seq ?? '',);
                                       } else {
                                         await FeedController.to.addComment(FeedController.to.feedList[feedIndex].seq ?? '', FeedController.to.commentController.text,);
                                       }
@@ -1009,7 +1009,7 @@ class FeedScreen extends GetView<FeedController> {
                   Get.bottomSheet(
                     Container(
                       width: 1.sw,
-                      height: 0.2.sh,
+                      height: 0.5.sh,
                       padding: EdgeInsets.symmetric(horizontal: 10.w),
                       decoration: BoxDecoration(
                         color: Colors.white,

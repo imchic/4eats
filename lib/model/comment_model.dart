@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class CommentModel {
 
   String? commentId;
+  String? uid;
   String? userId;
   String? userName;
   String? userNickname;
@@ -16,11 +17,13 @@ class CommentModel {
   String? likeCount;
   String? userPhotoUrl;
   List<String>? likeUserIds;
+  String? replyCommentId;
   List<CommentModel>? replyCommentList;
   bool isReply = false;
 
   CommentModel({
     this.commentId,
+    this.uid,
     this.userId,
     this.userName,
     this.userNickname,
@@ -32,12 +35,14 @@ class CommentModel {
     this.likeCount,
     this.userPhotoUrl,
     this.likeUserIds,
+    this.replyCommentId,
     this.replyCommentList,
     this.isReply = false,
   });
 
   CommentModel.fromJson(Map<String, dynamic> json) {
     commentId = json['commentId'];
+    uid = json['uid'];
     userId = json['userId'];
     userName = json['userName'];
     userNickname = json['userNickname'];
@@ -49,6 +54,7 @@ class CommentModel {
     likeCount = json['likeCount'].toString();
     userPhotoUrl = json['userPhotoUrl'];
     likeUserIds = List<String>.from(json['likeUserIds']);
+    replyCommentId = json['replyCommentId'];
     if (json['replyCommentList'] != null) {
       replyCommentList = <CommentModel>[];
       json['replyCommentList'].forEach((v) {
@@ -61,6 +67,7 @@ class CommentModel {
   // from map
   CommentModel.fromMap(Map<Object, dynamic> map) {
     commentId = map['commentId'];
+    uid = map['uid'];
     userId = map['userId'];
     userName = map['userName'];
     userNickname = map['userNickname'];
@@ -72,6 +79,7 @@ class CommentModel {
     likeCount = map['likeCount'].toString();
     userPhotoUrl = map['userPhotoUrl'];
     likeUserIds = List<String>.from(map['likeUserIds']);
+    replyCommentId = map['replyCommentId'];
     if (map['replyCommentList'] != null) {
       replyCommentList = <CommentModel>[];
       map['replyCommentList'].forEach((v) {
@@ -84,6 +92,7 @@ class CommentModel {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
     data['commentId'] = commentId;
+    data['uid'] = uid;
     data['userId'] = userId;
     data['userName'] = userName;
     data['userNickname'] = userNickname;
@@ -95,6 +104,7 @@ class CommentModel {
     data['likeCount'] = likeCount;
     data['userPhotoUrl'] = userPhotoUrl;
     data['likeUserIds'] = likeUserIds;
+    data['replyCommentId'] = replyCommentId;
     if (replyCommentList != null) {
       data['replyCommentList'] = replyCommentList!.map((v) => v.toJson()).toList();
     }
