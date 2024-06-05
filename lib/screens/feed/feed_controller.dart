@@ -1037,7 +1037,7 @@ class FeedController extends GetxController {
         // add notification
         await _firestore.collection('notifications').add({
           'title': '포잇',
-          'body': type == '댓글' ? '$nickname님이 회원님의 게시글에 $type을 남겼어요' : '$nickname님이 회원님의 게시글에 $type를 눌렀어요',
+          'body': type == '댓글' || type  =='대댓글' ? '$nickname님이 회원님의 게시글에 $type을 남겼어요 ${comment}' : '$nickname님이 회원님의 게시글에 $type를 눌렀어요',
           'createdAt': timestamp,
           'uid': UserStore.to.user.value.uid,
           'userId': UserStore.to.user.value.id,

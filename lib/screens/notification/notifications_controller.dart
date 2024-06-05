@@ -12,31 +12,14 @@ class NotificationsController extends GetxController {
   Future<List<NotificationModel>?> fetchNotification() async {
     try {
 
-      // AppLog.to.i('UserStore.to.user.value.uid: ${UserStore.to.user.value.nickname}');
-
-      // final feedSnapshot = await _fireStore.collection('feeds')
-      //     .where('uid', isEqualTo: UserStore.to.user.value.uid)
-      //     // .where('userNickname', isEqualTo: UserStore.to.user.value.nickname)
-      //     .get();
-
-      // feedSnapshot.docs.forEach((element) {
-      //   // get feed id
-      //   final feedId = element.id;
-      //   AppLog.to.i('feedId: $feedId');
-      //
-      //   final notiSnapshot = _fireStore.collection('notifications')
-      //       // .where('feedId', isEqualTo: feedId)
-      //       .get();
-      // });
-
       final snapshot = await _fireStore.collection('notifications')
           .where('receiverId', isEqualTo: UserStore.to.user.value.id)
-          //.orderBy('createdAt', descending: true)
+          .where('isRead', isEqualTo: false)
+          .orderBy('createdAt', descending: true)
           .get();
-      final data = snapshot.docs
-          .map((e) => NotificationModel.fromJson(e.data()))
-          .toList();
-      return data;
+
+      return snapshot.docs.map((e) => NotificationModel.fromJson(e.data())).toList();
+
     } catch (e) {
       AppLog.to.e('fetchNotification : ${e.toString()}');
       return null;

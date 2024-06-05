@@ -25,11 +25,7 @@ class FirebaseMessageApi {
 
     // 플랫폼 별 토큰 가져오기
     String? token = '';
-    // if(defaultTargetPlatform == TargetPlatform.iOS) {
-    //   token = await _firebaseMessaging.getAPNSToken();
-    // } else if(defaultTargetPlatform == TargetPlatform.android) {
-      token = await _firebaseMessaging.getToken();
-    // }
+    token = await _firebaseMessaging.getToken();
 
     _logger.i('initNotifications token = $token');
 
@@ -88,6 +84,7 @@ class FirebaseMessageApi {
 
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
       final notification = NotificationModel.fromJson(message.data);
+      _logger.i('onMessageOpenedApp notification = $notification');
       // fcm 누르고 화면 이동
     });
 
