@@ -1,20 +1,17 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cached_video_player_plus/cached_video_player_plus.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:foreats/utils/dialog_util.dart';
-import 'package:foreats/utils/global_toast_controller.dart';
-import 'package:foreats/utils/text_style.dart';
 import 'package:get/get.dart';
 
 import '../../home/home_controller.dart';
 import '../../utils/app_routes.dart';
 import '../../utils/colors.dart';
+import '../../utils/dialog_util.dart';
+import '../../utils/global_toast_controller.dart';
 import '../../utils/logger.dart';
+import '../../utils/text_style.dart';
 import '../../widget/description_text.dart';
 import '../../widget/login_bottomsheet.dart';
 import '../login/user_store.dart';
@@ -22,11 +19,6 @@ import 'feed_controller.dart';
 
 class FeedScreen extends GetView<FeedController> {
   FeedScreen({super.key});
-
-  @override
-  initState() {
-    AppLog.to.d('FeedScreen');
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,9 +37,18 @@ class FeedScreen extends GetView<FeedController> {
               scrollDirection: Axis.vertical,
               onPageChanged: (index) {
                 controller.currentFeedIndex.value = index;
-                controller.initializeVideoPlayer(controller.videoControllerList);
+                controller.videoControllerList[controller.currentFeedIndex.value][controller.currentVideoUrlIndex.value].dispose();
+                controller.videoControllerList[controller.currentFeedIndex.value][controller.currentVideoUrlIndex.value] = CachedVideoPlayerPlusController.networkUrl(Uri.parse(controller.feedList[index].videoUrls![controller.currentVideoUrlIndex.value]))..initialize().then((_) {
+                    controller.videoControllerList[controller.currentFeedIndex.value][controller.currentVideoUrlIndex.value].play();
+                    controller.videoControllerList[controller.currentFeedIndex.value][controller.currentVideoUrlIndex.value].setLooping(true);
+                    controller.videoControllerList[controller.currentFeedIndex.value][controller.currentVideoUrlIndex.value].setVolume(0.0);
+                  });
+
+
                 controller.allPause();
                 controller.allMute();
+                // controller.sumReplyCnt();
+
                 controller.fetchComments(controller.feedList[index].seq ?? '', index);
                 controller.fetchLikes(controller.feedList[index].seq ?? '');
                 controller.fetchBookmarks(controller.feedList[index].seq ?? '');
@@ -57,9 +58,9 @@ class FeedScreen extends GetView<FeedController> {
                     Stack(
                       children: [
                         // 동영상
-                        //CachedVideoPlayerPlus(controller.videoControllerList[controller.currentFeedIndex.value][controller.currentVideoUrlIndex.value]),
                         Container(
                           width: 1.sw,
+                          height: 1.sh,
                           alignment: Alignment.bottomCenter,
                           decoration: BoxDecoration(
                             //color: Colors.black,
@@ -185,12 +186,12 @@ class FeedScreen extends GetView<FeedController> {
                           InkWell(
                             onTap: () {
                               // 소리
-                              controller.changeMute(index);
+                              controller.isMuted
+                                  ? controller.unMute()
+                                  : controller.mute();
                             },
                             child: Icon(
-                              controller.isMuted
-                                  ? Icons.volume_off
-                                  : Icons.volume_up,
+                              controller.isMuted ? Icons.volume_off : Icons.volume_up,
                               color: gray300,
                               size: 24.w,
                             ),
@@ -377,6 +378,21 @@ class FeedScreen extends GetView<FeedController> {
                       ],
                     ),
                   ],
+                ),
+                // 작성일자
+                Container(
+                  margin: EdgeInsets.only(top: 4.h, left: 10.w),
+                  child: Text(
+                    HomeController.to.timeAgo(
+                      DateTime.parse(
+                        controller.feedList[index].createdAt ?? '',
+                      ),
+                    ),
+                    style: TextStyleUtils.whiteTextStyle(
+                      fontSize: 10.sp,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -672,7 +688,7 @@ class FeedScreen extends GetView<FeedController> {
                               children: [
                                 SizedBox(
                                   width: Get.width,
-                                  height: 0.3.sh,
+                                  height: 0.5.sh,
                                   child: Obx(
                                     () => RefreshIndicator(
                                       onRefresh: () async {
@@ -761,7 +777,7 @@ class FeedScreen extends GetView<FeedController> {
                                     if (controller
                                         .commentController.text.isNotEmpty) {
                                       if (controller.isReply) {
-                                        await FeedController.to.addReplyComment(feedIndex, FeedController.to.commentController.text, FeedController.to.feedList[feedIndex].seq ?? '',);
+                                        await FeedController.to.addReplyComment(feedIndex, controller.commentController.text, FeedController.to.feedList[feedIndex].seq ?? '',);
                                       } else {
                                         await FeedController.to.addComment(FeedController.to.feedList[feedIndex].seq ?? '', FeedController.to.commentController.text,);
                                       }
@@ -993,7 +1009,7 @@ class FeedScreen extends GetView<FeedController> {
                   Get.bottomSheet(
                     Container(
                       width: 1.sw,
-                      height: 0.2.sh,
+                      height: 0.5.sh,
                       padding: EdgeInsets.symmetric(horizontal: 10.w),
                       decoration: BoxDecoration(
                         color: Colors.white,

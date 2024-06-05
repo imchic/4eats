@@ -88,7 +88,7 @@ class FeedController extends GetxController {
 
   final isVideoLoading = true.obs;
   final _isCommentLoading = false.obs;
-  final _isMuted = false.obs;
+  final _isMuted = true.obs;
 
   bool get isLoading => isVideoLoading.value;
   set isLoading(bool value) => isVideoLoading.value = value;
@@ -153,22 +153,16 @@ class FeedController extends GetxController {
         LoungeController.to.loungeFeedList.addAll(value);
       });
 
-      // 북마크 & 좋아요 여부 확인
-      for (var i = 0; i < _feedList.length; i++) {
-        await fetchBookmarks(_feedList[i].seq ?? '');
-        await fetchLikes(_feedList[i].seq ?? '');
-      }
-
       if (_feedList.isNotEmpty) {
         await getFeedVideoList(videoControllerList);
 
         // 썸네일
         for (var i = 0; i < _feedList.length; i++) {
           _thumbnailList.add(_feedList[i].thumbnailUrls![0]);
-          //await fetchComments(feedList[i].seq ?? '', i);
         }
 
         // 북마크, 좋아요 갯수
+        fetchComments(_feedList[currentFeedIndex.value].seq ?? '', currentFeedIndex.value);
         fetchLikes(_feedList[currentFeedIndex.value].seq ?? '');
         fetchBookmarks(_feedList[currentFeedIndex.value].seq ?? '');
 
@@ -300,22 +294,29 @@ class FeedController extends GetxController {
   }
 
   /// 비디오 플레이어 초기화
-  Future<CachedVideoPlayerPlusController?> initializeVideoPlayer(List<List<CachedVideoPlayerPlusController>> videoControllerList) async {
+  Future<void> initializeVideoPlayer(List<List<CachedVideoPlayerPlusController>> videoControllerList) async {
     try {
 
+      // videoControllerList[currentFeedIndex.value][currentVideoUrlIndex.value].initialize().then((_) {
+      //   initializeVideoPlayerFuture = videoControllerList[currentFeedIndex.value][currentVideoUrlIndex.value].play();
+      //   // mute
+      //   if (videoControllerList[currentFeedIndex.value].length == 1) {
+      //     videoControllerList[currentFeedIndex.value][currentVideoUrlIndex.value].setLooping(true);
+      //     videoControllerList[currentFeedIndex.value][currentVideoUrlIndex.value].setVolume(0);
+      //   }
+      //   //videoControllerList[currentFeedIndex.value][currentVideoUrlIndex.value].addListener(_onVideoPlayerStateChanged);
+      //   return videoControllerList[currentFeedIndex.value][currentVideoUrlIndex.value];
+      // });
+
       videoControllerList[currentFeedIndex.value][currentVideoUrlIndex.value].initialize().then((_) {
-        initializeVideoPlayerFuture = videoControllerList[currentFeedIndex.value][currentVideoUrlIndex.value].play();
-        // mute
-        if (videoControllerList[currentFeedIndex.value].length == 1) {
-          videoControllerList[currentFeedIndex.value][currentVideoUrlIndex.value].setLooping(true);
-          videoControllerList[currentFeedIndex.value][currentVideoUrlIndex.value].setVolume(0);
-        }
+        videoControllerList[currentFeedIndex.value][currentVideoUrlIndex.value].play();
+        videoControllerList[currentFeedIndex.value][currentVideoUrlIndex.value].setLooping(true);
+        videoControllerList[currentFeedIndex.value][currentVideoUrlIndex.value].setVolume(0);
         videoControllerList[currentFeedIndex.value][currentVideoUrlIndex.value].addListener(_onVideoPlayerStateChanged);
-        return videoControllerList[currentFeedIndex.value][currentVideoUrlIndex.value];
       });
+
     } catch (e) {
       AppLog.to.e('_initializeVideoPlayer error: $e');
-      return null;
     }
   }
 
@@ -355,12 +356,22 @@ class FeedController extends GetxController {
   }
 
   /// 음소거 상태 변경
-  Future<void> changeMute(int index) async {
+  // unmute
+  Future<void> mute() async {
     try {
-      isMuted = !isMuted;
-      videoControllerList[currentFeedIndex.value][currentVideoUrlIndex.value].setVolume(isMuted ? 0 : 1);
+      videoControllerList[currentFeedIndex.value][currentVideoUrlIndex.value].setVolume(0);
+      isMuted = true;
     } catch (e) {
-      AppLog.to.e('changeMute error: $e');
+      AppLog.to.e('mute error: $e');
+    }
+  }
+
+  Future<void> unMute() async {
+    try {
+      videoControllerList[currentFeedIndex.value][currentVideoUrlIndex.value].setVolume(1);
+      isMuted = false;
+    } catch (e) {
+      AppLog.to.e('unmute error: $e');
     }
   }
 
@@ -414,10 +425,10 @@ class FeedController extends GetxController {
     try {
       for (var videoController in videoControllerList) {
         for (var element in videoController) {
-          element.setVolume(isMuted ? 0 : 1);
+          element.setVolume(0);
         }
       }
-      isMuted = !isMuted;
+      isMuted = true;
     } catch (e) {
       AppLog.to.e('allMute error: $e');
     }
@@ -487,47 +498,43 @@ class FeedController extends GetxController {
 
     try {
 
-      // var commentId = _commentArrayList[currentFeedIndex.value][index].commentId;
-      // AppLog.to.d('commentId: $commentId');
-      //
-      // QuerySnapshot<Map<String, dynamic>> feedSnapshot = await _firestore
-      //     .collection('feeds')
-      //     .where('seq', isEqualTo: feedId)
-      //     .get();
-      //
-      // for (var i = 0; i < feedSnapshot.docs.length; i++) {
-      //   feedSnapshot.docs[i].reference.collection('comments').where('commentId', isEqualTo: commentId).get().then((value) {
-      //
-      //     // isReply가 true업데이트
-      //     value.docs[i].reference.update({
-      //       'isReply': true,
-      //     });
-      //
-      //     for (var j = 0; j < value.docs.length; j++) {
-      //       value.docs[j].reference.collection('reply').add({
-      //         'comment': comment,
-      //         'createdAt': Timestamp.now(),
-      //         'uid': '',
-      //         'userId': UserStore.to.user.value.id,
-      //         'userName': UserStore.to.user.value.displayName,
-      //         'userNickname': UserStore.to.user.value.nickname,
-      //         'userPhotoUrl': UserStore.to.user.value.photoUrl,
-      //         'feedId': feedId,
-      //         'commentId': commentId,
-      //         'likeCount': 0,
-      //         'likeUserIds': [],
-      //         'isReply': true,
-      //         'replyCommentId': commentId,
-      //         'replyCommentList': [],
-      //       });
-      //     }
-      //   });
-      // }
-      //
-      // await refreshComments(feedId, currentFeedIndex.value);
-      //
-      // // fcm 발송
-      // await sendFcm(feedId, comment, '대댓글');
+      await _firestore
+          .collection('feeds')
+          .where('seq', isEqualTo: feedId)
+          .snapshots()
+          .listen((value) {
+        for (var i = 0; i < value.docs.length; i++) {
+          if (value.docs[i].reference.collection('comments').where('commentId', isEqualTo: commentArrayList[currentFeedIndex.value][index].commentId).get() != null) {
+            value.docs[i].reference.collection('comments').where('commentId', isEqualTo: commentArrayList[currentFeedIndex.value][index].commentId).get().then((value) {
+              for (var j = 0; j < value.docs.length; j++) {
+                Map<String, dynamic> replyComment = {
+                  'comment': comment,
+                  'createdAt': Timestamp.now(),
+                  'uid': '',
+                  'userId': UserStore.to.user.value.id,
+                  'userName': UserStore.to.user.value.displayName,
+                  'userNickname': UserStore.to.user.value.nickname,
+                  'userPhotoUrl': UserStore.to.user.value.profileImage,
+                  'feedId': feedId,
+                  'commentId': commentArrayList[currentFeedIndex.value][index].commentId,
+                  'likeCount': 0,
+                  'likeUserIds': [],
+                  'isReply': true,
+                  'replyCommentId': value.docs[j].data()['commentId'],
+                  'replyCommentList': [],
+                };
+                // update
+                value.docs[j].reference.update({
+                  'replyCommentList': FieldValue.arrayUnion([replyComment]),
+                });
+              }
+            });
+          }
+        }
+      });
+
+      // 코멘트 초기화
+      commentController.clear();
 
     } catch (e) {
       AppLog.to.e('addReplyComment error: $e');
@@ -543,7 +550,8 @@ class FeedController extends GetxController {
       _commentArrayList.clear();
       _commentReplyArrayList.clear();
 
-      await fetchComments(feedId, feedIndex);
+      //await fetchComments(feedId, feedIndex);
+      //sumReplyCount.value = 0;
 
       _isCommentLoading.value = false;
       commentController.clear();
@@ -560,43 +568,28 @@ class FeedController extends GetxController {
     try {
 
       sumReplyCount.value = 0;
-      _commentArray.clear();
-      _commentReplyArray.clear();
 
-      var feedSnapshot = await _firestore
+      // 실시간 댓글
+      _firestore
           .collection('feeds')
           .where('seq', isEqualTo: feedId)
-          .get();
-
-      var commentList = <CommentModel>[];
-
-      for (var i = 0; i < feedSnapshot.docs.length; i++) {
-
-        var commentSnapshot = await feedSnapshot.docs[i].reference.collection('comments').orderBy('createdAt', descending: false).get();
-
-        for (var j = 0; j < commentSnapshot.docs.length; j++) {
-
-          var comment = CommentModel.fromJson(commentSnapshot.docs[j].data());
-          sumReplyCount.value = commentSnapshot.docs.length;
-
-          // 대댓글 조회
-          var replyCommentSnapshot = await commentSnapshot.docs[j].reference.collection('reply').orderBy('createdAt', descending: false).get();
-
-          for (var k = 0; k < replyCommentSnapshot.docs.length; k++) {
-            var replyComment = CommentModel.fromJson(replyCommentSnapshot.docs[k].data());
-            comment.replyCommentList!.add(replyComment);
-          }
-
-          sumReplyCount.value += comment.replyCommentList!.length;
-          commentList.add(comment);
+          .get()
+          .then((value) {
+        for (var i = 0; i < value.docs.length; i++) {
+          value.docs[i].reference.collection('comments').orderBy('createdAt', descending: true).snapshots().listen((event) {
+            _commentArray.clear();
+            _commentReplyArray.clear();
+            event.docs.forEach((element) {
+              if (element.data()['replyCommentList'].isNotEmpty) {
+                _commentArray.add(CommentModel.fromJson(element.data()));
+                var comment = CommentModel.fromJson(element.data());
+                sumReplyCount.value += comment.replyCommentList!.length;
+              }
+            });
+            sumReplyCount.value += event.docs.length;
+          });
         }
-
-        _commentArray.addAll(commentList);
-
-
-
-      }
-
+      });
     } catch (e) {
       AppLog.to.e('fetchComments error: $e');
     }
@@ -1027,60 +1020,51 @@ class FeedController extends GetxController {
       var userLoginType = UserStore.to.user.value.loginType;
       AppLog.to.i('userLoginType: $userLoginType');
 
-      if (userLoginType == 'kakao') {
-        await _firestore
-            .collection('users')
-            .where('id', isEqualTo: feed.userid)
-            .get()
-            .then((value) {
-          var fcmToken = value.docs.first.data()['fcmToken'];
-          AppLog.to.i('fcmToken: $fcmToken');
-          // fcm 발송
-        });
-      } else if (userLoginType == 'google') {
-        await _firestore
-            .collection('users')
-            .where('id', isEqualTo: feed.userid)
-            .get()
-            .then((value) async {
-          // SharedPreferences prefs = await SharedPreferences.getInstance();
-          // var fcmToken = prefs.getString('fcmToken') ?? '';
-          //var fcmToken = UserStore.to.user.value.fcmToken ?? '';
-          var fcmToken = value.docs.first.data()['fcmToken'];
-          var nickname = value.docs.first.data()['nickname'];
-          AppLog.to.i('fcmToken: $fcmToken , nickname: $nickname');
+      await _firestore
+          .collection('users')
+          .where('id', isEqualTo: feed.userid)
+          .get()
+          .then((value) async {
 
-          // datetime to timestamp
-          var timestamp = Timestamp.fromDate(DateTime.now());
+        var fcmToken = value.docs.first.data()['fcmToken'];
+        var nickname = UserStore.to.user.value.nickname;
 
-          // add notification
-          await _firestore.collection('notifications').add({
-            'title': '포잇',
-            'body': '${UserStore.to.user.value.nickname}님이 회원님의 게시글에 $type을 남겼어요',
-            'createdAt': timestamp,
-            'uid': UserStore.to.user.value.uid,
-            'userId': UserStore.to.user.value.id,
-            'userName': UserStore.to.user.value.displayName,
-            'userNickname': UserStore.to.user.value.nickname,
-            'userPhotoUrl': UserStore.to.user.value.profileImage,
-            'feedId': feedId,
-            'comment': comment,
-            'type': type,
-            'isRead': false,
-          });
+        AppLog.to.i('fcmToken: $fcmToken , nickname: $nickname');
 
-          if(type == '댓글'){
-            sendPushMessage(fcmToken, '포잇', '${value.docs.first.data()['nickname']}님이 회원님의 게시글에 $type을 남겼어요 ${comment}');
-          } else {
-            sendPushMessage(fcmToken, '포잇', '${value.docs.first.data()['nickname']}님이 회원님의 게시글에 $type를 눌렀어요');
-          }
+        // datetime to timestamp
+        var timestamp = Timestamp.fromDate(DateTime.now());
 
+        // add notification
+        await _firestore.collection('notifications').add({
+          'title': '포잇',
+          'body': type == '댓글' || type  =='대댓글' ? '$nickname님이 회원님의 게시글에 $type을 남겼어요 ${comment}' : '$nickname님이 회원님의 게시글에 $type를 눌렀어요',
+          'createdAt': timestamp,
+          'uid': UserStore.to.user.value.uid,
+          'userId': UserStore.to.user.value.id,
+          'userName': UserStore.to.user.value.displayName,
+          'userNickname': UserStore.to.user.value.nickname,
+          'userPhotoUrl': UserStore.to.user.value.profileImage,
+          // 수신자
+          'receiverId': feed.userid,
+          // 발신자
+          'senderId': UserStore.to.user.value.id,
+          'feedId': feedId,
+          'comment': comment,
+          'type': type,
+          'isRead': false,
         });
 
-        // 새로고침
-        await refreshComments(feedId, currentFeedIndex.value);
+        if(type == '댓글'){
+          sendPushMessage(fcmToken, '포잇', '${UserStore.to.user.value.nickname}님이 회원님의 게시글에 $type을 남겼어요 $comment');
+        } else {
+          sendPushMessage(fcmToken, '포잇', '${UserStore.to.user.value.nickname}님이 회원님의 게시글에 $type를 눌렀어요');
+        }
 
-      }
+      });
+
+      // 새로고침
+      await refreshComments(feedId, currentFeedIndex.value);
+
     } catch (e) {
       AppLog.to.e('sendFcm error: $e');
     }
@@ -1184,14 +1168,14 @@ class FeedController extends GetxController {
 
           for (var i = 0; i < value.docs.length; i++) {
             var user = UserModel.fromJson(value.docs[i].data());
-            AppLog.to.d('nickname: ${user.nickname}');
+            //AppLog.to.d('nickname: ${user.nickname}');
             _allUserList.add(user);
           }
 
           if (keyword.length > 1) {
             for (var i = 0; i < _allUserList.length; i++) {
               if (_allUserList[i].nickname!.contains(keyword.substring(1))) {
-                AppLog.to.d('nickname: ${_allUserList[i].nickname}');
+                //AppLog.to.d('nickname: ${_allUserList[i].nickname}');
                 _mentionUserList.add(_allUserList[i]);
               }
               _isMentionLoading.value = false;

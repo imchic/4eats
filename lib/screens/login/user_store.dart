@@ -58,6 +58,17 @@ class UserStore extends GetxController {
       final userDoc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
       if(userDoc.exists) {
         final userModel = UserModel.fromJson(userDoc.data() as Map<String, dynamic>);
+
+        // fcm Token 업데이트
+        final prefs = await SharedPreferences.getInstance();
+        final fcmToken = prefs.getString('fcmToken') ?? '';
+        if(userModel.fcmToken != fcmToken) {
+          await FirebaseFirestore.instance.collection('users').doc(user.uid).update({
+            'fcmToken': fcmToken,
+          });
+          userModel.fcmToken = fcmToken;
+        }
+
         this.user.value = userModel;
       }
       AppLog.to.d('user: ${user.toString()}');

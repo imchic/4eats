@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:foreats/screens/login/user_store.dart';
@@ -67,7 +68,21 @@ class LoginController extends GetxController {
 
       // birthdate
       final User? user = userCredential.user;
-      final fcmToken = await FirebaseMessaging.instance.getToken();
+      //final fcmToken = await FirebaseMessaging.instance.getToken();
+
+      // android os일 경우
+      //final fcmToken = await FirebaseMessaging.instance.getToken();
+
+      // ios os일 경우
+      //final iosToken = await FirebaseMessaging.instance.getAPNSToken();
+
+      // 플랫폼 별 토큰 가져오기
+      String? fcmToken = '';
+      // if(defaultTargetPlatform == TargetPlatform.iOS) {
+      //   fcmToken = await FirebaseMessaging.instance.getAPNSToken();
+      // } else if(defaultTargetPlatform == TargetPlatform.android) {
+        fcmToken = await FirebaseMessaging.instance.getToken();
+      // }
 
       var currentUser = _firebase.currentUser;
       userModel.value = UserModel(
