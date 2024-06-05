@@ -1,9 +1,6 @@
-import 'package:cached_video_player_plus/cached_video_player_plus.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:foreats/utils/logger.dart';
 import 'package:get/get.dart';
-import 'package:googleapis/admob/v1.dart';
 import 'package:logger/logger.dart';
 
 import '../../model/feed_model.dart';
@@ -36,6 +33,7 @@ class MyPageController extends GetxController with GetSingleTickerProviderStateM
       final feeds = await FirebaseFirestore.instance
           .collection('feeds')
           .where('uid', isEqualTo: UserStore.to.user.value.uid)
+          .orderBy('createdAt', descending: true)
           .get();
       myFeeds.clear();
       for (final feed in feeds.docs) {

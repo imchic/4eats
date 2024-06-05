@@ -34,15 +34,13 @@ class FirebaseMessageApi {
     await prefs.setString('fcmToken', token!);
 
     FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
-
       var title = message.notification?.title;
       var body = message.notification?.body;
       var data = message.data;
 
       _logger.i('onMessage title = $title');
       _logger.i('onMessage body = $body');
-
-      final notification = NotificationModel.fromJson(message.data);
+      _logger.i('onMessage data = $data');
 
       final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
       final initializationSettings = InitializationSettings(
@@ -54,13 +52,19 @@ class FirebaseMessageApi {
         ),
       );
 
-      await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+      flutterLocalNotificationsPlugin.initialize(initializationSettings);
+
+      // ios
+      if (kIsWeb) {
+        return;
+      }
 
       final androidPlatformChannelSpecifics = AndroidNotificationDetails(
-        '댓글',
-        '댓글 알림',
-        importance: Importance.defaultImportance,
+        '4eat',
+        '포잇알림',
+        importance: Importance.max,
         priority: Priority.high,
+        ticker: 'ticker',
       );
 
       final iOSPlatformChannelSpecifics = DarwinNotificationDetails();
@@ -70,14 +74,12 @@ class FirebaseMessageApi {
         iOS: iOSPlatformChannelSpecifics,
       );
 
-      _logger.i('onMessage notification = ${notification.toJson()}');
-
       await flutterLocalNotificationsPlugin.show(
-        0,
-        title,
-        body,
-        platformChannelSpecifics,
-        payload: notification.deepLink,
+          0,
+          title,
+          body,
+          platformChannelSpecifics,
+          //payload: notification.deepLink,
       );
 
     });

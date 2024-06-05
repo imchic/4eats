@@ -4,16 +4,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:foreats/screens/login/user_store.dart';
-import 'package:foreats/screens/map/location_service.dart';
-import 'package:foreats/utils/app_routes.dart';
-import 'package:foreats/utils/colors.dart';
-import 'package:foreats/utils/firebase_message.dart';
-import 'package:foreats/utils/logger.dart';
 import 'package:get/get.dart';
 import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart';
 
 import 'firebase_options.dart';
+import 'screens/login/user_store.dart';
+import 'screens/map/location_service.dart';
+import 'utils/app_routes.dart';
+import 'utils/colors.dart';
+import 'utils/logger.dart';
 
 Future<void> onBackgroundHandler(RemoteMessage message) async {
   print('onBackgroundHandler message = $message');

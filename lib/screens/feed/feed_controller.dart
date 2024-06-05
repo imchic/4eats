@@ -145,7 +145,10 @@ class FeedController extends GetxController {
   Future<void> fetchFeeds() async {
 
     try {
+
       _feedList.clear();
+      _thumbnailList.clear();
+
       isVideoLoading.value = true;
 
       await FeedService.to.getFeedList().then((value) {
@@ -165,8 +168,8 @@ class FeedController extends GetxController {
         fetchComments(_feedList[currentFeedIndex.value].seq ?? '', currentFeedIndex.value);
         fetchLikes(_feedList[currentFeedIndex.value].seq ?? '');
         fetchBookmarks(_feedList[currentFeedIndex.value].seq ?? '');
-
         isVideoLoading.value = false;
+
       } else {
         isVideoLoading.value = false;
       }
@@ -498,38 +501,71 @@ class FeedController extends GetxController {
 
     try {
 
+      // await _firestore
+      //     .collection('feeds')
+      //     .where('seq', isEqualTo: feedId)
+      //     .snapshots()
+      //     .listen((value) {
+      //   for (var i = 0; i < value.docs.length; i++) {
+      //       value.docs[i].reference.collection('comments').where('commentId', isEqualTo: commentArrayList[currentFeedIndex.value][index].commentId).get().then((value) {
+      //         for (var j = 0; j < value.docs.length; j++) {
+      //           Map<String, dynamic> replyComment = {
+      //             'comment': comment,
+      //             'createdAt': Timestamp.now(),
+      //             'uid': '',
+      //             'userId': UserStore.to.user.value.id,
+      //             'userName': UserStore.to.user.value.displayName,
+      //             'userNickname': UserStore.to.user.value.nickname,
+      //             'userPhotoUrl': UserStore.to.user.value.profileImage,
+      //             'feedId': feedId,
+      //             'commentId': commentArrayList[currentFeedIndex.value][index].commentId,
+      //             'likeCount': 0,
+      //             'likeUserIds': [],
+      //             'isReply': true,
+      //             'replyCommentId': value.docs[j].data()['commentId'],
+      //             'replyCommentList': [],
+      //           };
+      //           // update
+      //           value.docs[j].reference.update({
+      //             'replyCommentList': FieldValue.arrayUnion([replyComment]),
+      //           });
+      //         }
+      //       });
+      //     }
+      // });
+
+      // 댓글 추가
       await _firestore
           .collection('feeds')
           .where('seq', isEqualTo: feedId)
-          .snapshots()
-          .listen((value) {
+          .get()
+          .then((value) {
         for (var i = 0; i < value.docs.length; i++) {
-          if (value.docs[i].reference.collection('comments').where('commentId', isEqualTo: commentArrayList[currentFeedIndex.value][index].commentId).get() != null) {
-            value.docs[i].reference.collection('comments').where('commentId', isEqualTo: commentArrayList[currentFeedIndex.value][index].commentId).get().then((value) {
-              for (var j = 0; j < value.docs.length; j++) {
-                Map<String, dynamic> replyComment = {
-                  'comment': comment,
-                  'createdAt': Timestamp.now(),
-                  'uid': '',
-                  'userId': UserStore.to.user.value.id,
-                  'userName': UserStore.to.user.value.displayName,
-                  'userNickname': UserStore.to.user.value.nickname,
-                  'userPhotoUrl': UserStore.to.user.value.profileImage,
-                  'feedId': feedId,
-                  'commentId': commentArrayList[currentFeedIndex.value][index].commentId,
-                  'likeCount': 0,
-                  'likeUserIds': [],
-                  'isReply': true,
-                  'replyCommentId': value.docs[j].data()['commentId'],
-                  'replyCommentList': [],
-                };
-                // update
-                value.docs[j].reference.update({
-                  'replyCommentList': FieldValue.arrayUnion([replyComment]),
-                });
-              }
-            });
-          }
+          AppLog.to.d('value.docs.length: ${value.docs.length}');
+          value.docs[i].reference.collection('comments').where('commentId', isEqualTo: commentArray[index].commentId).get().then((value) {
+            for (var j = 0; j < value.docs.length; j++) {
+              Map<String, dynamic> replyComment = {
+                'comment': comment,
+                'createdAt': Timestamp.now(),
+                'uid': '',
+                'userId': UserStore.to.user.value.id,
+                'userName': UserStore.to.user.value.displayName,
+                'userNickname': UserStore.to.user.value.nickname,
+                'userPhotoUrl': UserStore.to.user.value.profileImage,
+                'feedId': feedId,
+                'commentId': commentArray[index].commentId,
+                'likeCount': 0,
+                'likeUserIds': [],
+                'isReply': true,
+                'replyCommentId': value.docs[j].data()['commentId'],
+                'replyCommentList': [],
+              };
+              // update
+              value.docs[j].reference.update({
+                'replyCommentList': FieldValue.arrayUnion([replyComment]),
+              });
+            }
+          });
         }
       });
 
@@ -567,6 +603,8 @@ class FeedController extends GetxController {
 
     try {
 
+      //AppLog.to.d('feedId: $feedId');
+
       sumReplyCount.value = 0;
 
       // 실시간 댓글
@@ -576,6 +614,8 @@ class FeedController extends GetxController {
           .get()
           .then((value) {
         for (var i = 0; i < value.docs.length; i++) {
+          //AppLog.to.d('value.docs.length: ${value.docs.length}');
+
           value.docs[i].reference.collection('comments').orderBy('createdAt', descending: true).snapshots().listen((event) {
             _commentArray.clear();
             _commentReplyArray.clear();
@@ -583,7 +623,10 @@ class FeedController extends GetxController {
               if (element.data()['replyCommentList'].isNotEmpty) {
                 _commentArray.add(CommentModel.fromJson(element.data()));
                 var comment = CommentModel.fromJson(element.data());
+                //AppLog.to.d('comment: $comment');
                 sumReplyCount.value += comment.replyCommentList!.length;
+              } else {
+                _commentArray.add(CommentModel.fromJson(element.data()));
               }
             });
             sumReplyCount.value += event.docs.length;

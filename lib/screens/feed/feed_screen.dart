@@ -25,88 +25,91 @@ class FeedScreen extends GetView<FeedController> {
     Get.put(AppLog());
 
     return Scaffold(
-      body: FutureBuilder(
-        future: controller.fetchFeeds(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return DialogUtil().buildLoadingDialog();
-          } else {
-            return PageView.builder(
-              controller: controller.pageController,
-              itemCount: controller.feedList.length,
-              scrollDirection: Axis.vertical,
-              onPageChanged: (index) {
-                controller.currentFeedIndex.value = index;
-                controller.videoControllerList[controller.currentFeedIndex.value][controller.currentVideoUrlIndex.value].dispose();
-                controller.videoControllerList[controller.currentFeedIndex.value][controller.currentVideoUrlIndex.value] = CachedVideoPlayerPlusController.networkUrl(Uri.parse(controller.feedList[index].videoUrls![controller.currentVideoUrlIndex.value]))..initialize().then((_) {
-                    controller.videoControllerList[controller.currentFeedIndex.value][controller.currentVideoUrlIndex.value].play();
-                    controller.videoControllerList[controller.currentFeedIndex.value][controller.currentVideoUrlIndex.value].setLooping(true);
-                    controller.videoControllerList[controller.currentFeedIndex.value][controller.currentVideoUrlIndex.value].setVolume(0.0);
-                  });
-
-
-                controller.allPause();
-                controller.allMute();
-                // controller.sumReplyCnt();
-
-                controller.fetchComments(controller.feedList[index].seq ?? '', index);
-                controller.fetchLikes(controller.feedList[index].seq ?? '');
-                controller.fetchBookmarks(controller.feedList[index].seq ?? '');
-              },
-              itemBuilder: (context, index) {
-                return Obx(() =>
-                    Stack(
-                      children: [
-                        // 동영상
-                        Container(
-                          width: 1.sw,
-                          height: 1.sh,
-                          alignment: Alignment.bottomCenter,
-                          decoration: BoxDecoration(
-                            //color: Colors.black,
-                            borderRadius: BorderRadius.circular(30.r),
-                            shape: BoxShape.rectangle,
-                          ),
-                          child: ClipRRect(
-                              borderRadius: BorderRadius.circular(30.r),
-                              child: CachedVideoPlayerPlus(
-                                  controller.videoControllerList[controller.currentFeedIndex.value][controller.currentVideoUrlIndex.value])),
-                        ),
-                        // 배경 그라디언트 이미지
-                        Container(
-                          width: 1.sw,
-                          height: 1.sh,
-                          child: ClipRRect(
-                              borderRadius: BorderRadius.circular(30.r),
-                              child: Opacity(
-                                opacity: 0.2,
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    image: DecorationImage(
-                                      image: Image.asset(
-                                        "assets/images/bg_gradient.png",
-                                      ).image,
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
-                                  /*child: Image.asset(
-                                  "assets/images/bg_gradient.png",
-                                ),*/
-                                ),
-                              )
-                          ),
-                        ),
-                        // 상단 메뉴
-                        _topMenu(context, index),
-                        // 게시물 정보
-                        _feedInfo(context, index),
-                      ],
-                    ),
-                );
-              },
-            );
-          }
+      body: RefreshIndicator(
+        onRefresh: () async {
+          await controller.fetchFeeds();
         },
+        child: FutureBuilder(
+          future: controller.fetchFeeds(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return DialogUtil().buildLoadingDialog();
+            } else {
+              return PageView.builder(
+                controller: controller.pageController,
+                itemCount: controller.feedList.length,
+                scrollDirection: Axis.vertical,
+                onPageChanged: (index) {
+                  controller.currentFeedIndex.value = index;
+                  controller.videoControllerList[controller.currentFeedIndex.value][controller.currentVideoUrlIndex.value].dispose();
+                  controller.videoControllerList[controller.currentFeedIndex.value][controller.currentVideoUrlIndex.value] = CachedVideoPlayerPlusController.networkUrl(Uri.parse(controller.feedList[index].videoUrls![controller.currentVideoUrlIndex.value]))..initialize().then((_) {
+                      controller.videoControllerList[controller.currentFeedIndex.value][controller.currentVideoUrlIndex.value].play();
+                      controller.videoControllerList[controller.currentFeedIndex.value][controller.currentVideoUrlIndex.value].setLooping(true);
+                      controller.videoControllerList[controller.currentFeedIndex.value][controller.currentVideoUrlIndex.value].setVolume(0.0);
+                    });
+                  controller.allPause();
+                  controller.allMute();
+                  // controller.sumReplyCnt();
+
+                  controller.fetchComments(controller.feedList[index].seq ?? '', index);
+                  controller.fetchLikes(controller.feedList[index].seq ?? '');
+                  controller.fetchBookmarks(controller.feedList[index].seq ?? '');
+                },
+                itemBuilder: (context, index) {
+                  return Obx(() =>
+                      controller.feedList.isEmpty ? Container() : Stack(
+                        children: [
+                          // 동영상
+                          Container(
+                            width: 1.sw,
+                            height: 1.sh,
+                            alignment: Alignment.bottomCenter,
+                            decoration: BoxDecoration(
+                              //color: Colors.black,
+                              borderRadius: BorderRadius.circular(30.r),
+                              shape: BoxShape.rectangle,
+                            ),
+                            child: ClipRRect(
+                                borderRadius: BorderRadius.circular(30.r),
+                                child: CachedVideoPlayerPlus(
+                                    controller.videoControllerList[controller.currentFeedIndex.value][controller.currentVideoUrlIndex.value])),
+                          ),
+                          // 배경 그라디언트 이미지
+                          Container(
+                            width: 1.sw,
+                            height: 1.sh,
+                            child: ClipRRect(
+                                borderRadius: BorderRadius.circular(30.r),
+                                child: Opacity(
+                                  opacity: 0.2,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      image: DecorationImage(
+                                        image: Image.asset(
+                                          "assets/images/bg_gradient.png",
+                                        ).image,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                    /*child: Image.asset(
+                                    "assets/images/bg_gradient.png",
+                                  ),*/
+                                  ),
+                                )
+                            ),
+                          ),
+                          // 상단 메뉴
+                          _topMenu(context, index),
+                          // 게시물 정보
+                          _feedInfo(context, index),
+                        ],
+                      ),
+                  );
+                },
+              );
+            }
+          },
+        ),
       ),
     );
   }
@@ -489,9 +492,7 @@ class FeedScreen extends GetView<FeedController> {
   /// 가게 정보
   _feedStoreInfo(BuildContext context, int index) {
     return Container(
-      //height: !FeedController.to.isFeedMore ? 0.0.sh : 0.15.sh,
-      margin: EdgeInsets.only(top: 4.h),
-      padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 4.h),
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
       child: Row(
         children: [
           Column(
@@ -507,10 +508,10 @@ class FeedScreen extends GetView<FeedController> {
                           SizedBox(height: 5.h),
                           // singleChildScrollView
                           SizedBox(
-                            height: 0.18.sh,
                             child: SingleChildScrollView(
                               child: Text(
                                 '${controller.convertMenuList(controller.feedList[index].storeMenuInfo ?? '')}',
+                                //'',
                                 style: TextStyle(
                                   fontSize: 10.sp,
                                   color: Colors.white,
@@ -519,36 +520,6 @@ class FeedScreen extends GetView<FeedController> {
                               ),
                             ),
                           ),
-                          // SizedBox(height: 10.h),
-                          // controller.convertNaverPlaceContext(controller.feedList[index].storeContext ?? '') != ''
-                          //     ? Column(
-                          //         crossAxisAlignment: CrossAxisAlignment.start,
-                          //         children: [
-                          //           Text(
-                          //             '가게 소개',
-                          //             style: TextStyle(
-                          //               color: Colors.white,
-                          //               fontSize: 12.sp,
-                          //               fontWeight: FontWeight.w600,
-                          //             ),
-                          //           ),
-                          //           SizedBox(height: 5.h),
-                          //           Text(
-                          //             // controller.feedList[index].storeContext ?? '',
-                          //             // 스트링을 리스트로
-                          //             controller.convertNaverPlaceContext(
-                          //                 controller.feedList[index]
-                          //                         .storeContext ??
-                          //                     ''),
-                          //             style: TextStyle(
-                          //               color: CupertinoColors.activeGreen,
-                          //               fontSize: 11.sp,
-                          //               fontWeight: FontWeight.w600,
-                          //             ),
-                          //           ),
-                          //         ],
-                          //       )
-                          //     : Container(),
                         ],
                       ),
                     )
@@ -652,8 +623,7 @@ class FeedScreen extends GetView<FeedController> {
               () => SingleChildScrollView(
                 child: Container(
                   width: Get.width,
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
+                  padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.only(
@@ -692,9 +662,7 @@ class FeedScreen extends GetView<FeedController> {
                                   child: Obx(
                                     () => RefreshIndicator(
                                       onRefresh: () async {
-                                        // await controller.fetchComments(
-                                        //     controller.feedList[feedIndex].feedId ?? '',
-                                        //     feedIndex);
+                                        await controller.fetchComments(controller.feedList[feedIndex].seq ?? '', feedIndex);
                                       },
                                       child: buildComment(feedIndex),
                                     ),
