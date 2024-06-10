@@ -63,6 +63,7 @@ class UserStore extends GetxController {
         final prefs = await SharedPreferences.getInstance();
         final fcmToken = prefs.getString('fcmToken') ?? '';
         if(userModel.fcmToken != fcmToken) {
+
           await FirebaseFirestore.instance.collection('users').doc(user.uid).update({
             'fcmToken': fcmToken,
           });

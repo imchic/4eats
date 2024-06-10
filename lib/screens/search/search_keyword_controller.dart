@@ -86,14 +86,30 @@ class SearchKeywordController extends GetxController {
 
   // 서버 내 인기검색어 불러오기
   Future<void> getBestKeywords() async {
+    // await _firebase
+    //     .collection('search_keywords')
+    //     .orderBy('count', descending: true)
+    //     .limit(10)
+    //     .get().then((event) {
+    //   searchBestKeywords.clear();
+    //   // 중복제거
+    //   event.docs.forEach((element) {
+    //     if(!searchBestKeywords.contains(element['keyword'])) {
+    //       searchBestKeywords.add(element['keyword']);
+    //     }
+    //   });
+    // });
     await _firebase
         .collection('search_keywords')
         .orderBy('count', descending: true)
         .limit(10)
-        .snapshots().listen((event) {
+        .get()
+        .then((value) {
       searchBestKeywords.clear();
-      event.docs.forEach((element) {
-        searchBestKeywords.add(element['keyword']);
+      value.docs.forEach((element) {
+        if(!searchBestKeywords.contains(element['keyword'])) {
+          searchBestKeywords.add(element['keyword']);
+        }
       });
     });
   }

@@ -39,19 +39,22 @@ class NotificationsController extends GetxController {
   Future<int> countNotification() async {
 
     try {
+
       final snapshot = await _fireStore.collection('notifications')
           .where('receiverId', isEqualTo: UserStore.to.user.value.id)
           .where('isRead', isEqualTo: false)
-          .orderBy('createdAt', descending: true)
-          .snapshots()
-          .first;
+          .get();
 
-      return snapshot.docs.length;
+      notificationCount.value = snapshot.docs.length;
+      AppLog.to.i('notificationCount : ${notificationCount.value}');
+
+      return notificationCount.value;
 
     } catch (e) {
       AppLog.to.e('countNotification : ${e.toString()}');
       return 0;
     }
+
   }
 
 }

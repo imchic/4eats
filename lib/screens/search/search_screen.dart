@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:foreats/model/feed_model.dart';
+import 'package:foreats/utils/dialog_util.dart';
 import 'package:foreats/utils/text_style.dart';
 
 import 'package:get/get.dart';
@@ -31,15 +32,16 @@ class SearchKeywordScreen extends GetView<SearchKeywordController> {
           _buildSearchBar(),
           SizedBox(height: 10.h),
           _bestKeywordTextView(),
+          SizedBox(height: 6.h),
           _buildBestKeyword(),
           SizedBox(height: 10.h),
           _buildRecentKeywordTextView(),
-          _buildRecentKeyword(),
-          SizedBox(height: 10.h),
-          _searchResultTextView(),
-          Expanded(
-            child: _buildSearchResults(context),
-          ),
+          //_buildRecentKeyword(),
+          // SizedBox(height: 10.h),
+          // _searchResultTextView(),
+          // Expanded(
+          //   child: _buildSearchResults(context),
+          // ),
         ],
       ),
     );
@@ -79,7 +81,7 @@ class SearchKeywordScreen extends GetView<SearchKeywordController> {
                 },
               );
             } else {
-              return Center(child: CircularProgressIndicator());
+              return Center(child: DialogUtil().buildLoadingDialog());
             }
           },
         ),
@@ -87,22 +89,14 @@ class SearchKeywordScreen extends GetView<SearchKeywordController> {
     );
   }
 
-  /// 인기검색 키워드
+  /// 인기검색 키워드허
   Widget _searchBestKeyword(String value) {
     return Container(
-      margin: EdgeInsets.only(right: 2.w, left: 10.w),
-      padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 5.h),
+      margin: EdgeInsets.only(left: 10.w),
+      padding: EdgeInsets.only(left: 10.w, right: 10.w),
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        //color: Theme.of(Get.context!).colorScheme.primary.withOpacity(0.75),
-        gradient: LinearGradient(
-          colors: [
-            Theme.of(Get.context!).colorScheme.primary.withOpacity(0.75),
-            Theme.of(Get.context!).colorScheme.secondary.withOpacity(0.75),
-          ],
-          begin: Alignment.centerRight,
-          end: Alignment.centerLeft,
-        ),
+        color: Theme.of(Get.context!).colorScheme.primary,
         borderRadius: BorderRadius.circular(20.r),
       ),
       child: Text(value, style: TextStyle(fontSize: 10.sp, color: Colors.white, fontWeight: FontWeight.bold)),
@@ -137,14 +131,11 @@ class SearchKeywordScreen extends GetView<SearchKeywordController> {
 
   /// 최근검색 키워드
   Widget _buildRecentKeyword() {
-    return Column(
-      children: List.generate(
-        controller.searchRecentKeywords.length,
-        (index) => InkWell(
-          onTap: () {
-            controller.addRecentKeyword(controller.searchRecentKeywords[index]);
-          },
-          child: _searchRecentKeyword(controller.searchRecentKeywords[index]),
+    return SingleChildScrollView(
+      child: TextButton(
+        onPressed: () {},
+        child: Column(
+          children: controller.searchRecentKeywords.map((e) => _searchRecentKeyword(e)).toList(),
         ),
       ),
     );
@@ -159,7 +150,6 @@ class SearchKeywordScreen extends GetView<SearchKeywordController> {
       },
       child: Container(
         padding: EdgeInsets.only(left: 20.w, right: 20.w),
-        height: 30.h,
         alignment: Alignment.centerLeft,
         child: Row(
           children: [

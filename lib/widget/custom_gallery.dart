@@ -168,10 +168,10 @@ class CustomGallery extends GetView<UploadController> {
       right: 8.w,
       child: asset.type == AssetType.video
           ? Container(
-              padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 1.h),
+              padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 2.h),
               decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.15),
-                borderRadius: BorderRadius.circular(5.r),
+                color: Colors.black.withOpacity(0.5),
+                borderRadius: BorderRadius.circular(6.r),
               ),
               child: Text(
                 '${_convertDuration(asset.duration)}',

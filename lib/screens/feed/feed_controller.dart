@@ -1078,24 +1078,55 @@ class FeedController extends GetxController {
         var timestamp = Timestamp.fromDate(DateTime.now());
 
         // add notification
-        await _firestore.collection('notifications').add({
-          'title': '포잇',
-          'body': type == '댓글' || type  =='대댓글' ? '$nickname님이 회원님의 게시글에 $type을 남겼어요 ${comment}' : '$nickname님이 회원님의 게시글에 $type를 눌렀어요',
-          'createdAt': timestamp,
-          'uid': UserStore.to.user.value.uid,
-          'userId': UserStore.to.user.value.id,
-          'userName': UserStore.to.user.value.displayName,
-          'userNickname': UserStore.to.user.value.nickname,
-          'userPhotoUrl': UserStore.to.user.value.profileImage,
-          // 수신자
-          'receiverId': feed.userid,
-          // 발신자
-          'senderId': UserStore.to.user.value.id,
-          'feedId': feedId,
-          'comment': comment,
-          'type': type,
-          'isRead': false,
-        });
+        QuerySnapshot<Map<String, dynamic>> notificationSnapshot = await _firestore
+            .collection('notifications')
+            .where('feedId', isEqualTo: feedId)
+            .where('senderId', isEqualTo: UserStore.to.user.value.id)
+            .where('receiverId', isEqualTo: feed.userid)
+            .where('type', isEqualTo: type)
+            .get();
+
+        if(notificationSnapshot.docs.isNotEmpty){
+          for (var i = 0; i < notificationSnapshot.docs.length; i++) {
+            notificationSnapshot.docs[i].reference.update({
+              'title': '포잇',
+              'body': type == '댓글' || type  =='대댓글' ? '$nickname님이 회원님의 게시글에 $type을 남겼어요 $comment' : '$nickname님이 회원님의 게시글에 $type를 눌렀어요',
+              'createdAt': timestamp,
+              'uid': UserStore.to.user.value.uid,
+              'userId': UserStore.to.user.value.id,
+              'userName': UserStore.to.user.value.displayName,
+              'userNickname': UserStore.to.user.value.nickname,
+              'userPhotoUrl': UserStore.to.user.value.profileImage,
+              // 수신자
+              'receiverId': feed.userid,
+              // 발신자
+              'senderId': UserStore.to.user.value.id,
+              'feedId': feedId,
+              'comment': comment,
+              'type': type,
+              'isRead': false,
+            });
+          }
+        } else {
+          await _firestore.collection('notifications').add({
+            'title': '포잇',
+            'body': type == '댓글' || type  =='대댓글' ? '$nickname님이 회원님의 게시글에 $type을 남겼어요 $comment' : '$nickname님이 회원님의 게시글에 $type를 눌렀어요',
+            'createdAt': timestamp,
+            'uid': UserStore.to.user.value.uid,
+            'userId': UserStore.to.user.value.id,
+            'userName': UserStore.to.user.value.displayName,
+            'userNickname': UserStore.to.user.value.nickname,
+            'userPhotoUrl': UserStore.to.user.value.profileImage,
+            // 수신자
+            'receiverId': feed.userid,
+            // 발신자
+            'senderId': UserStore.to.user.value.id,
+            'feedId': feedId,
+            'comment': comment,
+            'type': type,
+            'isRead': false,
+          });
+        }
 
         if(type == '댓글'){
           sendPushMessage(fcmToken, '포잇', '${UserStore.to.user.value.nickname}님이 회원님의 게시글에 $type을 남겼어요 $comment');

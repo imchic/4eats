@@ -2,16 +2,14 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:foreats/utils/dialog_util.dart';
-import 'package:foreats/utils/text_style.dart';
 import 'package:get/get.dart';
 
 import '../../utils/app_routes.dart';
 import '../../utils/colors.dart';
+import '../../utils/dialog_util.dart';
+import '../../utils/text_style.dart';
 import '../../widget/base_appbar.dart';
 import '../../widget/point_card.dart';
-import '../biz/biz_controller.dart';
-import '../feed/feed_controller.dart';
 import '../login/login_controller.dart';
 import '../login/user_store.dart';
 import 'mypage_controller.dart';
@@ -213,12 +211,32 @@ class MyPageScreen extends GetView<MyPageController> {
                                     ),
                                     // 좋아요
                                     Positioned(
-                                      right: 0.w,
-                                      child: IconButton(
-                                        icon: Icon(Icons.favorite_border, color: Colors.white, size: 16.sp),
-                                        onPressed: () {
-                                          // 좋아요 추가
-                                        },
+                                      top: 5.h,
+                                      right: 5.w,
+                                      child: Container(
+                                        padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 2.h),
+                                        decoration: BoxDecoration(
+                                          color: Colors.black.withOpacity(0.5),
+                                          borderRadius: BorderRadius.circular(6.r),
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            Icon(
+                                              Icons.favorite,
+                                              color: Colors.white,
+                                              size: 12.sp,
+                                            ),
+                                            SizedBox(width: 5.w),
+                                            Text(
+                                              snapshot.data[index].likeCount.toString(),
+                                              style: TextStyleUtils.bodyTextStyle(
+                                                fontSize: 8.sp,
+                                                fontWeight: FontWeight.w500,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ),
                                   ],

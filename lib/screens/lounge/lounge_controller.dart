@@ -80,7 +80,13 @@ class LoungeController extends GetxController {
         final feed = FeedModel.fromJson(query.data() as Map<String, dynamic>);
         loungeFeedList.add(feed);
       }
+
+      // likecount가 많은 순으로 정렬
+      // loungeFeedList.sort((a, b) => b.likeCount ?? 0.compareTo(a.likeCount ?? 0));
+      loungeFeedList.sort((a, b) => b.likeCount!.compareTo(a.likeCount!));
+
       _loungeFeedList.value = loungeFeedList;
+
       return loungeFeedList;
     } catch (e) {
       _logger.d('fetchLoungeFeedList error: $e');
@@ -97,7 +103,7 @@ class LoungeController extends GetxController {
         final feed = FeedModel.fromJson(query.data() as Map<String, dynamic>);
         loungeFeedList.add(feed);
       }
-      _loungeFeedList.value = loungeFeedList;
+
       return loungeFeedList;
     } catch (e) {
       _logger.d('fetchLoungeFeedSearchResult error: $e');
