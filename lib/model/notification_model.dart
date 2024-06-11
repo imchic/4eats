@@ -9,7 +9,9 @@ class NotificationModel {
   String? userNickname;
   String? userPhotoUrl;
   String? senderId;
+  String? senderUid;
   String? receiverId;
+  String? receiverUid;
   String? feedId;
   String? comment;
   String? type;
@@ -27,7 +29,9 @@ class NotificationModel {
     this.userNickname,
     this.userPhotoUrl,
     this.senderId,
+    this.senderUid,
     this.receiverId,
+    this.receiverUid,
     this.feedId,
     this.comment,
     this.type,
@@ -38,14 +42,16 @@ class NotificationModel {
   NotificationModel.fromJson(Map<String, dynamic> json) {
     title = json['title'];
     body = json['body'];
-    createdAt = json['createdAt'].toDate();
+    createdAt = Timestamp.fromDate(json['createdAt'].toDate()).toDate();
     uid = json['uid'];
     userId = json['userId'];
     userName = json['userName'];
     userNickname = json['userNickname'];
     userPhotoUrl = json['userPhotoUrl'];
     senderId = json['senderId'];
+    senderUid = json['senderUid'];
     receiverId = json['receiverId'];
+    receiverUid = json['receiverUid'];
     feedId = json['feedId'];
     comment = json['comment'];
     type = json['type'];
@@ -64,7 +70,9 @@ class NotificationModel {
     data['userNickname'] = userNickname;
     data['userPhotoUrl'] = userPhotoUrl;
     data['senderId'] = senderId;
+    data['senderUid'] = senderUid;
     data['receiverId'] = receiverId;
+    data['receiverUid'] = receiverUid;
     data['feedId'] = feedId;
     data['comment'] = comment;
     data['type'] = type;

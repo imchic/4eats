@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:foreats/screens/notification/notifications_controller.dart';
 import 'package:get/get.dart';
 
 import '../screens/feed/feed_controller.dart';
@@ -29,8 +30,7 @@ class BaseAppBar extends GetWidget implements PreferredSizeWidget {
       this.actions = false,
       this.notification = false,
       this.customTitle = false,
-      this.callback
-      });
+      this.callback});
 
   @override
   Widget build(BuildContext context) {
@@ -58,27 +58,61 @@ class BaseAppBar extends GetWidget implements PreferredSizeWidget {
               ),
             ),
             notification == true
-                ? Container(
-                    margin: EdgeInsets.only(right: 10.w),
-                    child:
-                    // IconButton(
-                    //   icon: Icon(Icons.notifications_none, color: gray800, size: 18.sp),
-                    //   onPressed: () {
-                    //     Get.toNamed(AppRoutes.notification);
-                    //   },
-                    // ),
-                  InkWell(
-                    onTap: () {
-                      Get.toNamed(AppRoutes.notification);
-                    },
-                    child: SvgPicture.asset(
-                      'assets/images/ic_bell.svg',
-                      width: 18.w,
-                      height: 18.w,
-                      color: gray800,
+                ? Obx(() => Container(
+                      margin: EdgeInsets.only(right: 10.w),
+                      child: InkWell(
+                        onTap: () {
+                          Get.toNamed(AppRoutes.notification);
+                        },
+                        child: FutureBuilder(
+                          future: NotificationsController.to.countNotification(),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState == ConnectionState.waiting) {
+                              return Container();
+                            } else {
+                              return snapshot.data == 0
+                                  ? SvgPicture.asset(
+                                      'assets/images/ic_bell.svg',
+                                      color: gray800,
+                                      width: 20.w,
+                                    )
+                                  : Stack(
+                                      children: [
+                                        Container(
+                                          margin: EdgeInsets.only(top: 6.w),
+                                          child: SvgPicture.asset(
+                                            'assets/images/ic_bell.svg',
+                                            color: gray800,
+                                            width: 20.w,
+                                          ),
+                                        ),
+                                        Positioned(
+                                          right: 0,
+                                          top: 0,
+                                          child: Container(
+                                            padding: EdgeInsets.all(2.w),
+                                            decoration: BoxDecoration(
+                                              color: Colors.red,
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: Text(
+                                              snapshot.data.toString(),
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 10.sp,
+                                                fontWeight: FontWeight.w700,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    );
+                            }
+                          },
+                        ),
+                      ),
                     ),
-                  ),
-                  )
+                )
                 : Container(),
           ],
         ),
@@ -108,7 +142,8 @@ class BaseAppBar extends GetWidget implements PreferredSizeWidget {
               icon: Icon(Icons.arrow_forward, color: gray800, size: 16.sp),
               onPressed: () {
                 if (UploadController.to.selectedList.isNotEmpty) {
-                  Get.toNamed(AppRoutes.uploadRegister, preventDuplicates: false);
+                  Get.toNamed(AppRoutes.uploadRegister,
+                      preventDuplicates: false);
                 } else {
                   GlobalToastController.to.showToast('동영상을 선택해주세요.');
                 }

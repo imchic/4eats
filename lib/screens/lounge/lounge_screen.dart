@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:foreats/model/user_model.dart';
 import 'package:get/get.dart';
 
 import '../../model/feed_model.dart';
@@ -57,16 +58,16 @@ class LoungeScreen extends GetView<LoungeController> {
                   }
                 },
               ),
-              FutureBuilder(
-                future: controller.fetchLoungeFeedList('성수동'),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return DialogUtil().buildLoadingDialog();
-                  } else {
-                    return _hotPlaceContainer(context, '요즘 떠오르는 성수동 핫플레이스', '성수동에서 인기있는 가게들이에요 ⚡️');
-                  }
-                },
-              ),
+              // FutureBuilder(
+              //   future: controller.fetchLoungeFeedList('성수동'),
+              //   builder: (context, snapshot) {
+              //     if (snapshot.connectionState == ConnectionState.waiting) {
+              //       return DialogUtil().buildLoadingDialog();
+              //     } else {
+              //       return _hotPlaceContainer(context, '요즘 떠오르는 성수동 핫플레이스', '성수동에서 인기있는 가게들이에요 ⚡️');
+              //     }
+              //   },
+              // ),
             ],
           ),
         ),
@@ -81,8 +82,21 @@ class LoungeScreen extends GetView<LoungeController> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('오늘의 추천은 어떠세요? 😎',
-              style: TextStyleUtils.loungeTitleTextStyle()),
+          Row(
+            children: [
+              Text('오늘의 추천은 어떠세요? 😎',
+                  style: TextStyleUtils.loungeTitleTextStyle()),
+              Spacer(),
+              // 더보기
+              InkWell(
+                onTap: () {
+                  Get.toNamed(AppRoutes.loungeFeed);
+                },
+                child: Text('더보기',
+                    style: TextStyleUtils.bodyTextStyle(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.w500, fontSize: 10.sp)),
+              ),
+            ],
+          ),
           SizedBox(height: 5.h),
           Text('포잇에서 추천하는 가게들이에요',
               style: TextStyleUtils.bodyTextStyle(color: gray600)),
@@ -97,7 +111,7 @@ class LoungeScreen extends GetView<LoungeController> {
   }
 
   /// 지역 핫플
-  Widget _hotPlaceContainer(BuildContext context, String title, String subTitle) {
+  /*Widget _hotPlaceContainer(BuildContext context, String title, String subTitle) {
     return Container(
       padding: EdgeInsets.only(left: 20.w, right: 20.w),
       child: Column(
@@ -116,7 +130,7 @@ class LoungeScreen extends GetView<LoungeController> {
         ],
       ),
     );
-  }
+  }*/
 
   /// 인기 서포터즈
   Widget _supporters(BuildContext context) {
@@ -158,8 +172,9 @@ class LoungeScreen extends GetView<LoungeController> {
                       itemCount: snapshot.data!.length,
                       itemBuilder: (context, index) {
                         return _supportersItems(
-                            snapshot.data![index].profileImage ?? '',
-                            snapshot.data![index].nickname ?? '');
+                            // snapshot.data![index].profileImage ?? '',
+                            // snapshot.data![index].nickname ?? '');
+                            snapshot.data![index]);
                       },
                       separatorBuilder: (BuildContext context, int index) {
                         return SizedBox(width: 10.w);
@@ -180,7 +195,9 @@ class LoungeScreen extends GetView<LoungeController> {
         height: Get.height * 0.3,
         child: ListView.separated(
           scrollDirection: Axis.horizontal,
-          itemCount: controller.loungeFeedList.length,
+          itemCount: controller.loungeFeedList.length > 5
+              ? 5
+              : controller.loungeFeedList.length,
           itemBuilder: (context, index) {
             return _todayFeedItem(controller.loungeFeedList, index);
           },
@@ -207,7 +224,7 @@ class LoungeScreen extends GetView<LoungeController> {
                 ClipRRect(
                   borderRadius: BorderRadius.circular(6.r),
                   child: CachedNetworkImage(
-                    imageUrl: feedList[index].thumbnailUrls![0] ?? '',
+                    imageUrl: feedList[index].thumbnailUrls![0],
                     fit: BoxFit.cover,
                     placeholder: (context, url) => Center(
                         child: CircularProgressIndicator(
@@ -217,21 +234,26 @@ class LoungeScreen extends GetView<LoungeController> {
                         const Icon(Icons.error),
                   ),
                 ),
+                // 좋아요
                 Positioned(
-                  bottom: 5.h,
-                  right: 2.w,
+                  top: 5.h,
+                  right: 5.w,
                   child: Container(
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 5.w, vertical: 2.h),
+                    padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 2.h),
                     decoration: BoxDecoration(
                       color: Colors.black.withOpacity(0.5),
                       borderRadius: BorderRadius.circular(6.r),
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    child: Row(
                       children: [
+                        Icon(
+                          Icons.favorite,
+                          color: Colors.white,
+                          size: 12.sp,
+                        ),
+                        SizedBox(width: 5.w),
                         Text(
-                          feedList[index].storeName ?? '',
+                          feedList[index].likeCount.toString(),
                           style: TextStyleUtils.bodyTextStyle(
                             fontSize: 8.sp,
                             fontWeight: FontWeight.w500,
@@ -242,6 +264,31 @@ class LoungeScreen extends GetView<LoungeController> {
                     ),
                   ),
                 ),
+                // Positioned(
+                //   bottom: 5.h,
+                //   right: 2.w,
+                //   child: Container(
+                //     padding:
+                //         EdgeInsets.symmetric(horizontal: 5.w, vertical: 2.h),
+                //     decoration: BoxDecoration(
+                //       color: Colors.black.withOpacity(0.5),
+                //       borderRadius: BorderRadius.circular(6.r),
+                //     ),
+                //     child: Column(
+                //       crossAxisAlignment: CrossAxisAlignment.start,
+                //       children: [
+                //         Text(
+                //           feedList[index].storeName ?? '',
+                //           style: TextStyleUtils.bodyTextStyle(
+                //             fontSize: 8.sp,
+                //             fontWeight: FontWeight.w500,
+                //             color: Colors.white,
+                //           ),
+                //         ),
+                //       ],
+                //     ),
+                //   ),
+                // ),
               ],
             ),
           ),
@@ -251,15 +298,20 @@ class LoungeScreen extends GetView<LoungeController> {
   }
 
   /// 유저 리스트 아이템
-  _supportersItems(String? imageUrl, String value) {
+  _supportersItems(UserModel model) {
     return Column(
       children: [
         InkWell(
           onTap: () {
-            //Get.toNamed(AppRoutes.userProfile, arguments: value);
+            // 유저 포스팅 화면
+            Get.toNamed(AppRoutes.userProfile, arguments: {
+              // 'nickname': nickname,
+              // 'profileImage': imageUrl ?? '',
+              'feedModel': model,
+            });
           },
           child: CachedNetworkImage(
-            imageUrl: imageUrl ?? '',
+            imageUrl: model.profileImage ?? '',
             imageBuilder: (context, imageProvider) => Container(
               width: 50.w,
               height: 50.h,
@@ -293,7 +345,7 @@ class LoungeScreen extends GetView<LoungeController> {
         Row(
           children: [
             Text(
-              value,
+              model.nickname ?? '',
               style: TextStyleUtils.bodyTextStyle(
                   fontSize: 8.sp, fontWeight: FontWeight.w500),
             ),

@@ -13,6 +13,7 @@ import '../screens/landing/landing_screen.dart';
 import '../screens/landing/splash_screen.dart';
 import '../screens/login/login_binding.dart';
 import '../screens/login/login_screen.dart';
+import '../screens/lounge/loungefeed_screen.dart';
 import '../screens/signin/register_birthday_screen.dart';
 import '../screens/signin/register_gender_screen.dart';
 import '../screens/signin/register_id_screen.dart';
@@ -31,6 +32,7 @@ import '../screens/upload/upload_done_screen.dart';
 import '../screens/upload/upload_preview_screen.dart';
 import '../screens/upload/upload_register_screen.dart';
 import '../screens/upload/upload_screen.dart';
+import '../users/user_profile_screen.dart';
 
 class AppRoutes {
 
@@ -47,6 +49,7 @@ class AppRoutes {
   static const String history = '/history';
   static const String feedDetail = '/feed/detail';
   static const String lounge = '/lounge';
+  static const String loungeFeed = '/loungeFeed';
   static const String upload = '/upload';
   static const String uploadRegister = '/uploadRegister';
   static const String uploadPreview = '/uploadPreview';
@@ -69,6 +72,7 @@ class AppRoutes {
   static const String biz = '/biz';
   static const String bizDetail = '/biz/detail';
   static const String bizHistory = '/bizHistory';
+  static const String userProfile = '/userProfile';
 
   static final routes = [
     GetPage(name: home, page: () => HomeScreen(), binding: HomeBinding()),
@@ -83,6 +87,7 @@ class AppRoutes {
     GetPage(name: feed, page: () => FeedScreen()),
     GetPage(name: feedDetail, page: () => FeedDetailScreen(), binding: FeedDetailBinding()),
     GetPage(name: lounge, page: () => LoungeScreen()),
+    GetPage(name: loungeFeed, page: () => LoungeFeedScreen()),
     GetPage(name: upload, page: () => UploadScreen()),
     GetPage(name: uploadPreview, page: () => UploadPreviewScreen()),
     GetPage(name: uploadRegister, page: () => UploadRegisterScreen()),
@@ -95,5 +100,6 @@ class AppRoutes {
     GetPage(name: biz, page: () => BizScreen()),
     GetPage(name: bizDetail, page: () => BizDetailScreen()),
     GetPage(name: bizHistory, page: () => BizHistoryScreen()),
+    GetPage(name: userProfile, page: () => UserProfileScreen()),
   ];
 }

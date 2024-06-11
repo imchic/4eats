@@ -34,7 +34,7 @@ class FeedController extends GetxController {
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  final dio.Dio _dio = dio.Dio();
+  //final dio.Dio _dio = dio.Dio();
 
   List<List<CachedVideoPlayerPlusController>> videoControllerList = <List<CachedVideoPlayerPlusController>>[].obs;
   late CachedVideoPlayerPlusController videoController;
@@ -145,7 +145,10 @@ class FeedController extends GetxController {
   Future<void> fetchFeeds() async {
 
     try {
+
       _feedList.clear();
+      _thumbnailList.clear();
+
       isVideoLoading.value = true;
 
       await FeedService.to.getFeedList().then((value) {
@@ -165,8 +168,8 @@ class FeedController extends GetxController {
         fetchComments(_feedList[currentFeedIndex.value].seq ?? '', currentFeedIndex.value);
         fetchLikes(_feedList[currentFeedIndex.value].seq ?? '');
         fetchBookmarks(_feedList[currentFeedIndex.value].seq ?? '');
-
         isVideoLoading.value = false;
+
       } else {
         isVideoLoading.value = false;
       }
@@ -187,7 +190,7 @@ class FeedController extends GetxController {
 
       videoPlayerController.addListener(() {
         if (videoPlayerController.value.isInitialized) {
-          duration.value = videoPlayerController.value.duration!.inMilliseconds;
+          duration.value = videoPlayerController.value.duration.inMilliseconds;
         }
       });
 
@@ -498,38 +501,71 @@ class FeedController extends GetxController {
 
     try {
 
+      // await _firestore
+      //     .collection('feeds')
+      //     .where('seq', isEqualTo: feedId)
+      //     .snapshots()
+      //     .listen((value) {
+      //   for (var i = 0; i < value.docs.length; i++) {
+      //       value.docs[i].reference.collection('comments').where('commentId', isEqualTo: commentArrayList[currentFeedIndex.value][index].commentId).get().then((value) {
+      //         for (var j = 0; j < value.docs.length; j++) {
+      //           Map<String, dynamic> replyComment = {
+      //             'comment': comment,
+      //             'createdAt': Timestamp.now(),
+      //             'uid': '',
+      //             'userId': UserStore.to.user.value.id,
+      //             'userName': UserStore.to.user.value.displayName,
+      //             'userNickname': UserStore.to.user.value.nickname,
+      //             'userPhotoUrl': UserStore.to.user.value.profileImage,
+      //             'feedId': feedId,
+      //             'commentId': commentArrayList[currentFeedIndex.value][index].commentId,
+      //             'likeCount': 0,
+      //             'likeUserIds': [],
+      //             'isReply': true,
+      //             'replyCommentId': value.docs[j].data()['commentId'],
+      //             'replyCommentList': [],
+      //           };
+      //           // update
+      //           value.docs[j].reference.update({
+      //             'replyCommentList': FieldValue.arrayUnion([replyComment]),
+      //           });
+      //         }
+      //       });
+      //     }
+      // });
+
+      // 댓글 추가
       await _firestore
           .collection('feeds')
           .where('seq', isEqualTo: feedId)
-          .snapshots()
-          .listen((value) {
+          .get()
+          .then((value) {
         for (var i = 0; i < value.docs.length; i++) {
-          if (value.docs[i].reference.collection('comments').where('commentId', isEqualTo: commentArrayList[currentFeedIndex.value][index].commentId).get() != null) {
-            value.docs[i].reference.collection('comments').where('commentId', isEqualTo: commentArrayList[currentFeedIndex.value][index].commentId).get().then((value) {
-              for (var j = 0; j < value.docs.length; j++) {
-                Map<String, dynamic> replyComment = {
-                  'comment': comment,
-                  'createdAt': Timestamp.now(),
-                  'uid': '',
-                  'userId': UserStore.to.user.value.id,
-                  'userName': UserStore.to.user.value.displayName,
-                  'userNickname': UserStore.to.user.value.nickname,
-                  'userPhotoUrl': UserStore.to.user.value.profileImage,
-                  'feedId': feedId,
-                  'commentId': commentArrayList[currentFeedIndex.value][index].commentId,
-                  'likeCount': 0,
-                  'likeUserIds': [],
-                  'isReply': true,
-                  'replyCommentId': value.docs[j].data()['commentId'],
-                  'replyCommentList': [],
-                };
-                // update
-                value.docs[j].reference.update({
-                  'replyCommentList': FieldValue.arrayUnion([replyComment]),
-                });
-              }
-            });
-          }
+          AppLog.to.d('value.docs.length: ${value.docs.length}');
+          value.docs[i].reference.collection('comments').where('commentId', isEqualTo: commentArray[index].commentId).get().then((value) {
+            for (var j = 0; j < value.docs.length; j++) {
+              Map<String, dynamic> replyComment = {
+                'comment': comment,
+                'createdAt': Timestamp.now(),
+                'uid': '',
+                'userId': UserStore.to.user.value.id,
+                'userName': UserStore.to.user.value.displayName,
+                'userNickname': UserStore.to.user.value.nickname,
+                'userPhotoUrl': UserStore.to.user.value.profileImage,
+                'feedId': feedId,
+                'commentId': commentArray[index].commentId,
+                'likeCount': 0,
+                'likeUserIds': [],
+                'isReply': true,
+                'replyCommentId': value.docs[j].data()['commentId'],
+                'replyCommentList': [],
+              };
+              // update
+              value.docs[j].reference.update({
+                'replyCommentList': FieldValue.arrayUnion([replyComment]),
+              });
+            }
+          });
         }
       });
 
@@ -567,6 +603,8 @@ class FeedController extends GetxController {
 
     try {
 
+      //AppLog.to.d('feedId: $feedId');
+
       sumReplyCount.value = 0;
 
       // 실시간 댓글
@@ -576,6 +614,8 @@ class FeedController extends GetxController {
           .get()
           .then((value) {
         for (var i = 0; i < value.docs.length; i++) {
+          //AppLog.to.d('value.docs.length: ${value.docs.length}');
+
           value.docs[i].reference.collection('comments').orderBy('createdAt', descending: true).snapshots().listen((event) {
             _commentArray.clear();
             _commentReplyArray.clear();
@@ -583,7 +623,10 @@ class FeedController extends GetxController {
               if (element.data()['replyCommentList'].isNotEmpty) {
                 _commentArray.add(CommentModel.fromJson(element.data()));
                 var comment = CommentModel.fromJson(element.data());
+                //AppLog.to.d('comment: $comment');
                 sumReplyCount.value += comment.replyCommentList!.length;
+              } else {
+                _commentArray.add(CommentModel.fromJson(element.data()));
               }
             });
             sumReplyCount.value += event.docs.length;
@@ -1035,24 +1078,55 @@ class FeedController extends GetxController {
         var timestamp = Timestamp.fromDate(DateTime.now());
 
         // add notification
-        await _firestore.collection('notifications').add({
-          'title': '포잇',
-          'body': type == '댓글' || type  =='대댓글' ? '$nickname님이 회원님의 게시글에 $type을 남겼어요 ${comment}' : '$nickname님이 회원님의 게시글에 $type를 눌렀어요',
-          'createdAt': timestamp,
-          'uid': UserStore.to.user.value.uid,
-          'userId': UserStore.to.user.value.id,
-          'userName': UserStore.to.user.value.displayName,
-          'userNickname': UserStore.to.user.value.nickname,
-          'userPhotoUrl': UserStore.to.user.value.profileImage,
-          // 수신자
-          'receiverId': feed.userid,
-          // 발신자
-          'senderId': UserStore.to.user.value.id,
-          'feedId': feedId,
-          'comment': comment,
-          'type': type,
-          'isRead': false,
-        });
+        QuerySnapshot<Map<String, dynamic>> notificationSnapshot = await _firestore
+            .collection('notifications')
+            .where('feedId', isEqualTo: feedId)
+            .where('senderId', isEqualTo: UserStore.to.user.value.id)
+            .where('receiverId', isEqualTo: feed.userid)
+            .where('type', isEqualTo: type)
+            .get();
+
+        if(notificationSnapshot.docs.isNotEmpty){
+          for (var i = 0; i < notificationSnapshot.docs.length; i++) {
+            notificationSnapshot.docs[i].reference.update({
+              'title': '포잇',
+              'body': type == '댓글' || type  =='대댓글' ? '$nickname님이 회원님의 게시글에 $type을 남겼어요 $comment' : '$nickname님이 회원님의 게시글에 $type를 눌렀어요',
+              'createdAt': timestamp,
+              'uid': UserStore.to.user.value.uid,
+              'userId': UserStore.to.user.value.id,
+              'userName': UserStore.to.user.value.displayName,
+              'userNickname': UserStore.to.user.value.nickname,
+              'userPhotoUrl': UserStore.to.user.value.profileImage,
+              // 수신자
+              'receiverId': feed.userid,
+              // 발신자
+              'senderId': UserStore.to.user.value.id,
+              'feedId': feedId,
+              'comment': comment,
+              'type': type,
+              'isRead': false,
+            });
+          }
+        } else {
+          await _firestore.collection('notifications').add({
+            'title': '포잇',
+            'body': type == '댓글' || type  =='대댓글' ? '$nickname님이 회원님의 게시글에 $type을 남겼어요 $comment' : '$nickname님이 회원님의 게시글에 $type를 눌렀어요',
+            'createdAt': timestamp,
+            'uid': UserStore.to.user.value.uid,
+            'userId': UserStore.to.user.value.id,
+            'userName': UserStore.to.user.value.displayName,
+            'userNickname': UserStore.to.user.value.nickname,
+            'userPhotoUrl': UserStore.to.user.value.profileImage,
+            // 수신자
+            'receiverId': feed.userid,
+            // 발신자
+            'senderId': UserStore.to.user.value.id,
+            'feedId': feedId,
+            'comment': comment,
+            'type': type,
+            'isRead': false,
+          });
+        }
 
         if(type == '댓글'){
           sendPushMessage(fcmToken, '포잇', '${UserStore.to.user.value.nickname}님이 회원님의 게시글에 $type을 남겼어요 $comment');

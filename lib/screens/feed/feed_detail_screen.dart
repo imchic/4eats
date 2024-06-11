@@ -120,57 +120,6 @@ class FeedDetailScreen extends GetView<FeedController> {
                             : controller.detailFeed.storeAddress!.split(' ')[1],
                         style: TextStyleUtils.feedAddressTitle(),
                       ),
-                      /*Row(
-                        children: [
-                          InkWell(
-                            onTap: () {
-                              // 검색
-                              Get.toNamed(AppRoutes.search);
-                            },
-                            child: Icon(
-                              Icons.search,
-                              color: gray300,
-                              size: 24.w,
-                            ),
-                          ),
-                          SizedBox(width: 10.w),
-                          InkWell(
-                            onTap: () {
-                              // 지도
-                              Get.toNamed(AppRoutes.map, arguments: {
-                                'storeName': controller.detailFeed.storeName,
-                                'storeAddress': controller.detailFeed.storeAddress,
-                                'storeType': controller.detailFeed.storeType,
-                                'lonlat': [
-                                  double.parse(controller.detailFeed.storeLngLat!
-                                      .split(',')[0]),
-                                  double.parse(controller.detailFeed.storeLngLat!
-                                      .split(',')[1])
-                                ]
-                              });
-                            },
-                            child: Icon(
-                              Icons.map_outlined,
-                              color: gray300,
-                              size: 24.w,
-                            ),
-                          ),
-                          SizedBox(width: 10.w),
-                          InkWell(
-                            onTap: () {
-                              // 소리
-                              controller.changeMute(index);
-                            },
-                            child: Icon(
-                              controller.isMuted
-                                  ? Icons.volume_off
-                                  : Icons.volume_up,
-                              color: gray300,
-                              size: 24.w,
-                            ),
-                          ),
-                        ],
-                      ),*/
                     ]
                 ),
               ),

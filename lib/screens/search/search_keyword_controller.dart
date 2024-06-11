@@ -30,6 +30,7 @@ class SearchKeywordController extends GetxController {
         // searchKeywords.add(element['storeType']);
       });
     });
+    getBestKeywords();
     getRecentKeywords();
     FeedController.to.allPause();
   }
@@ -41,9 +42,7 @@ class SearchKeywordController extends GetxController {
   }
 
   void search(String keyword) {
-    print('검색어: $keyword');
     searchResults.clear();
-    //searchResults.addAll(searchKeywords.where((element) => element.contains(keyword)).toList());//print('검색결과: $searchResults');
     searchResults.addAll(searchKeywords.where((element) => element.toString().toLowerCase().contains(keyword.toLowerCase())).toList());
   }
 
@@ -86,14 +85,30 @@ class SearchKeywordController extends GetxController {
 
   // 서버 내 인기검색어 불러오기
   Future<void> getBestKeywords() async {
+    // await _firebase
+    //     .collection('search_keywords')
+    //     .orderBy('count', descending: true)
+    //     .limit(10)
+    //     .get().then((event) {
+    //   searchBestKeywords.clear();
+    //   // 중복제거
+    //   event.docs.forEach((element) {
+    //     if(!searchBestKeywords.contains(element['keyword'])) {
+    //       searchBestKeywords.add(element['keyword']);
+    //     }
+    //   });
+    // });
     await _firebase
         .collection('search_keywords')
         .orderBy('count', descending: true)
         .limit(10)
-        .snapshots().listen((event) {
+        .get()
+        .then((value) {
       searchBestKeywords.clear();
-      event.docs.forEach((element) {
-        searchBestKeywords.add(element['keyword']);
+      value.docs.forEach((element) {
+        if(!searchBestKeywords.contains(element['keyword'])) {
+          searchBestKeywords.add(element['keyword']);
+        }
       });
     });
   }
