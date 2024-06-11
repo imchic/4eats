@@ -111,7 +111,7 @@ class LoungeScreen extends GetView<LoungeController> {
   }
 
   /// 지역 핫플
-  Widget _hotPlaceContainer(BuildContext context, String title, String subTitle) {
+  /*Widget _hotPlaceContainer(BuildContext context, String title, String subTitle) {
     return Container(
       padding: EdgeInsets.only(left: 20.w, right: 20.w),
       child: Column(
@@ -130,7 +130,7 @@ class LoungeScreen extends GetView<LoungeController> {
         ],
       ),
     );
-  }
+  }*/
 
   /// 인기 서포터즈
   Widget _supporters(BuildContext context) {
@@ -224,7 +224,7 @@ class LoungeScreen extends GetView<LoungeController> {
                 ClipRRect(
                   borderRadius: BorderRadius.circular(6.r),
                   child: CachedNetworkImage(
-                    imageUrl: feedList[index].thumbnailUrls![0] ?? '',
+                    imageUrl: feedList[index].thumbnailUrls![0],
                     fit: BoxFit.cover,
                     placeholder: (context, url) => Center(
                         child: CircularProgressIndicator(

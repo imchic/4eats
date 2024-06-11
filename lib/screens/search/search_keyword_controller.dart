@@ -30,6 +30,7 @@ class SearchKeywordController extends GetxController {
         // searchKeywords.add(element['storeType']);
       });
     });
+    getBestKeywords();
     getRecentKeywords();
     FeedController.to.allPause();
   }
@@ -41,9 +42,7 @@ class SearchKeywordController extends GetxController {
   }
 
   void search(String keyword) {
-    print('검색어: $keyword');
     searchResults.clear();
-    //searchResults.addAll(searchKeywords.where((element) => element.contains(keyword)).toList());//print('검색결과: $searchResults');
     searchResults.addAll(searchKeywords.where((element) => element.toString().toLowerCase().contains(keyword.toLowerCase())).toList());
   }
 

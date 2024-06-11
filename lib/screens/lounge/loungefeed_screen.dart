@@ -62,7 +62,7 @@ class LoungeFeedScreen extends GetView<LoungeController> {
                                 });
                               },
                               child: CachedNetworkImage(
-                                imageUrl: feed.thumbnailUrls![0] ?? '',
+                                imageUrl: feed.thumbnailUrls![0],
                                 fit: BoxFit.cover,
                                 placeholder: (context, url) => Container(color: gray200,),
                                 errorWidget: (context, url, error) => Container(color: gray200, child: Icon(Icons.error, color: Colors.red,),),

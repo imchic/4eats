@@ -24,7 +24,7 @@ class MyPageScreen extends GetView<MyPageController> {
       backgroundColor: Theme
           .of(context)
           .colorScheme
-          .background,
+          .surface,
       appBar: BaseAppBar(
         title: '마이페이지',
       ),
@@ -119,7 +119,7 @@ class MyPageScreen extends GetView<MyPageController> {
                                 color: Theme
                                     .of(context)
                                     .colorScheme
-                                    .onBackground,
+                                    .onSurface,
                                 fontSize: 14.sp,
                                 fontWeight: FontWeight.w700,
                                 height: 0,

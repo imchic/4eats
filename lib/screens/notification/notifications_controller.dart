@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:foreats/screens/login/user_store.dart';
 import 'package:get/get.dart';
-import 'package:googleapis/admob/v1.dart';
 
 import '../../model/notification_model.dart';
 import '../../utils/logger.dart';

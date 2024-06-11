@@ -34,7 +34,7 @@ class FeedController extends GetxController {
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  final dio.Dio _dio = dio.Dio();
+  //final dio.Dio _dio = dio.Dio();
 
   List<List<CachedVideoPlayerPlusController>> videoControllerList = <List<CachedVideoPlayerPlusController>>[].obs;
   late CachedVideoPlayerPlusController videoController;
@@ -190,7 +190,7 @@ class FeedController extends GetxController {
 
       videoPlayerController.addListener(() {
         if (videoPlayerController.value.isInitialized) {
-          duration.value = videoPlayerController.value.duration!.inMilliseconds;
+          duration.value = videoPlayerController.value.duration.inMilliseconds;
         }
       });
 

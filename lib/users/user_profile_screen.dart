@@ -26,7 +26,7 @@ class UserProfileScreen extends GetView<UserController> {
     Get.put(FeedController());
 
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: BaseAppBar(
         title: '#${getFeed.nickname}',
         centerTitle: false,

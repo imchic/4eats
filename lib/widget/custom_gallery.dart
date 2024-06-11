@@ -8,7 +8,6 @@ import 'package:photo_manager/photo_manager.dart';
 
 import '../screens/upload/upload_controller.dart';
 import '../utils/app_routes.dart';
-import '../utils/colors.dart';
 
 // CustomGallery widget
 class CustomGallery extends GetView<UploadController> {
