@@ -29,14 +29,15 @@ class _BaseTabBarState extends State<BaseTabBar> {
           color: Theme.of(context).colorScheme.primary,
         ),
       ),
+      indicatorPadding: EdgeInsets.symmetric(horizontal: 30.w),
       unselectedLabelColor: textUnselected  ,
       labelStyle: TextStyle(
-        fontSize: 14.sp,
-        fontWeight: FontWeight.w600,
+        fontSize: 12.sp,
+        fontWeight: FontWeight.w500,
       ),
       unselectedLabelStyle: TextStyle(
-        fontSize: 14.sp,
-        fontWeight: FontWeight.w600,
+        fontSize: 12.sp,
+        fontWeight: FontWeight.w400,
       ),
     );
   }

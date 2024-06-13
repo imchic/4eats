@@ -25,7 +25,7 @@ class BizTellBottomSheet extends GetWidget {
           bottom: MediaQuery.of(context).viewInsets.bottom + 20.h,
         ),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).scaffoldBackgroundColor,
           borderRadius: BorderRadius.only(
             topLeft: Radius.circular(20.r),
             topRight: Radius.circular(20.r),
@@ -37,7 +37,8 @@ class BizTellBottomSheet extends GetWidget {
             Text(
               '전화번호 입력',
               style: TextStyleUtils.titleTextStyle(
-                  fontSize: 18.sp
+                  fontSize: 18.sp,
+                  color: Get.isDarkMode ? Colors.white : Colors.black,
               ),
             ),
             SizedBox(height: 10.h),
@@ -45,7 +46,7 @@ class BizTellBottomSheet extends GetWidget {
               '번호 확인을 위해 일회용 인증번호를 발송해요 😁',
               style: TextStyleUtils.subTitleTextStyle(
                 fontSize: 10.sp,
-                color: gray600,
+                color: Get.isDarkMode ? gray400 : gray800,
               ),
             ),
             SizedBox(height: 10.h),
@@ -61,7 +62,7 @@ class BizTellBottomSheet extends GetWidget {
                 hintText: '전화번호를 입력해주세요',
                 hintStyle: TextStyle(
                   fontSize: 16.sp,
-                  color: Colors.grey,
+                  color: Get.isDarkMode ? gray400 : gray800,
                 ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10.r),

@@ -1,34 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:foreats/screens/signin/sign_controller.dart';
 import 'package:get/get.dart';
 import 'package:get/get_state_manager/get_state_manager.dart';
 import 'package:logger/logger.dart';
 import '../../utils/app_routes.dart';
 import '../../utils/colors.dart';
-import '../../utils/global_toast_controller.dart';
+import '../../utils/toast_controller.dart';
 import '../../utils/logger.dart';
 import '../../widget/base_appbar.dart';
 import '../login/login_controller.dart';
 import '../login/user_store.dart';
 
-class RegisterBirthScreen extends StatefulWidget {
+class RegisterBirthScreen extends GetView<SignController> {
   const RegisterBirthScreen({super.key});
-
-  @override
-  State<RegisterBirthScreen> createState() => _RegisterBirthScreen();
-}
-
-class _RegisterBirthScreen extends State<RegisterBirthScreen> {
-
-  late final TextEditingController _birthController = TextEditingController();
-
-  final RxBool _isBirthDuplicated = false.obs;
-  final RxString _calculateAgeString = ''.obs;
 
   @override
   Widget build(BuildContext context) {
 
-    Get.put(GlobalToastController());
+    Get.put(ToastController());
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.background,
@@ -72,7 +62,7 @@ class _RegisterBirthScreen extends State<RegisterBirthScreen> {
                             height: 10.h,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(10.r),
-                              color: Theme.of(context).colorScheme.secondary,
+                              color: Theme.of(Get.context!).colorScheme.secondary,
                             ),
                           ),
                         ],
@@ -108,7 +98,8 @@ class _RegisterBirthScreen extends State<RegisterBirthScreen> {
                           SizedBox(height: 20.h),
                           // 만나이 표출
                           Obx(() {
-                            _calculateAgeString.value = '${_calculateAge(_birthController.text)}';
+                            //_calculateAgeString.value = '${_calculateAge(_birthController.text)}';
+                            controller.calculateAgeString.value = controller.calculateAge(controller.birthController.text);
                             return RichText(
                               text: TextSpan(
                                 text: '만 ',
@@ -120,11 +111,12 @@ class _RegisterBirthScreen extends State<RegisterBirthScreen> {
                                 ),
                                 children: <TextSpan>[
                                   TextSpan(
-                                    text: '${_calculateAgeString.value}',
+                                    //text: '${_calculateAgeString.value}',
+                                    text: controller.calculateAgeString.value,
                                     style: TextStyle(
                                       fontSize: 16.sp,
                                       fontWeight: FontWeight.w600,
-                                      color: Theme.of(context).colorScheme.secondary,
+                                      color: Theme.of(Get.context!).colorScheme.secondary,
                                       height: 1.5,
                                     ),
                                   ),
@@ -144,10 +136,11 @@ class _RegisterBirthScreen extends State<RegisterBirthScreen> {
                           // textfield set height
                           Container(
                             child: TextField(
-                              controller: _birthController,
+                              controller: controller.birthController,
                               onChanged: (value) {
-                                _validateBirthday(value);
-                                _calculateAgeString.value = '만 ${_calculateAge(value)}세';
+                                // _validateBirthday(value);
+                                // _calculateAgeString.value = '만 ${_calculateAge(value)}세';
+                                controller.calculateAgeString.value = '만 ${controller.calculateAge(value)}세';
                               },
                               decoration: InputDecoration(
                                 hintText: '생년월일 입력 (예: 19900101)',
@@ -157,10 +150,7 @@ class _RegisterBirthScreen extends State<RegisterBirthScreen> {
                                 ),
                                 suffix: GestureDetector(
                                   onTap: () {
-                                    _birthController.clear();
-                                    setState(() {
-                                      _birthController.text = '';
-                                    });
+                                    controller.birthController.clear();
                                   },
                                   child: Container(
                                     margin: EdgeInsets.only(right: 10.w),
@@ -179,7 +169,6 @@ class _RegisterBirthScreen extends State<RegisterBirthScreen> {
                               maxLength: 8,
                             ),
                           ),
-                          //_buildErrorText(_validateId(_idController.text)),
                         ],
                       ),
                     ),
@@ -188,22 +177,7 @@ class _RegisterBirthScreen extends State<RegisterBirthScreen> {
               ),
               GestureDetector(
                 onTap: () async {
-                  if (_isBirthDuplicated.value) {
-                    // 생년월일 저장
-                    // LoginController.to.userModel.value.birthdate = _birthController.text;
-                    // 만나이 저장
-                    // LoginController.to.userModel.value.calculateBirthdate = _calculateAgeString.value;
-                    // _logger.d('생년월일: ${LoginController.to.userModel.toString()}');
-                    // Get.toNamed(AppRoutes.registerGender);
-
-                    UserStore.to.user.value.birthdate = _birthController.text;
-                    UserStore.to.user.value.calculateBirthdate = _calculateAgeString.value;
-                    AppLog.to.d('생년월일: ${UserStore.to.user.value.birthdate}');
-                    Get.toNamed(AppRoutes.registerGender);
-
-                  } else {
-                    GlobalToastController.to.showToast('생년월일을 입력해주세요.(숫자만 입력 가능)');
-                  }
+                  controller.validateBirth(controller.birthController.text);
                 },
                 child: Container(
                   width: 350.w,
@@ -212,7 +186,7 @@ class _RegisterBirthScreen extends State<RegisterBirthScreen> {
                       bottom: 34.h, top: 20.h, left: 20.w, right: 20.w),
                   padding: EdgeInsets.all(15.r),
                   decoration: ShapeDecoration(
-                    color: Theme.of(context).colorScheme.primary,
+                    color: Theme.of(Get.context!).colorScheme.primary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10.r),
                     ),
@@ -243,33 +217,5 @@ class _RegisterBirthScreen extends State<RegisterBirthScreen> {
     );
   }
 
-  // 숫자만 입력되도록 제한
-  _validateBirthday(String value) {
-    // 숫자만 입력되도록 제한
-    if (value.isNotEmpty) {
-      if (int.tryParse(value) == null) {
-        _isBirthDuplicated.value = false;
-      } else {
-        _isBirthDuplicated.value = true;
-      }
-    }
-  }
-
-  // 만나이 계산
-  int _calculateAge(String birth) {
-    if (birth.length != 8) {
-      return 0;
-    }
-    int year = int.parse(birth.substring(0, 4));
-    int month = int.parse(birth.substring(4, 6));
-    int day = int.parse(birth.substring(6, 8));
-    DateTime now = DateTime.now();
-    int age = now.year - year;
-    if (now.month < month || (now.month == month && now.day < day)) {
-      age--;
-    }
-    AppLog.to.d('만 나이: $age');
-    return age;
-  }
-
 }
+

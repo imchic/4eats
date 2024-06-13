@@ -1,47 +1,32 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:foreats/screens/signin/sign_controller.dart';
 
 import 'package:get/get.dart';
 import 'package:get/get_rx/get_rx.dart';
+import 'package:googleapis/admob/v1.dart';
 import 'package:logger/logger.dart';
 
 import '../../utils/app_routes.dart';
 import '../../utils/colors.dart';
-import '../../utils/global_toast_controller.dart';
+import '../../utils/toast_controller.dart';
 import '../../utils/logger.dart';
 import '../../widget/base_appbar.dart';
 import '../login/login_controller.dart';
 import '../login/user_store.dart';
 
-class RegisterIdScreen extends StatefulWidget {
+class RegisterIdScreen extends GetView<SignController> {
   const RegisterIdScreen({super.key});
 
   @override
-  State<RegisterIdScreen> createState() => _RegisterIdScreen();
-}
-
-class _RegisterIdScreen extends State<RegisterIdScreen> {
-
-  late final TextEditingController _idController = TextEditingController();
-  final _logger = Logger(
-    printer: PrettyPrinter(
-        methodCount: 2, // Number of method calls to be displayed
-        errorMethodCount: 8, // Number of method calls if stacktrace is provided
-        lineLength: 120, // Width of the output
-        colors: true, // Colorful log messages
-        printEmojis: true, // Print an emoji for each log message
-        printTime: false // Should each log print contain a timestamp
-    ),
-  );
-
-  final RxBool _isIdDuplicated = false.obs;
-
-  @override
   Widget build(BuildContext context) {
-    Get.put(GlobalToastController());
+    Get.put(ToastController());
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
+      backgroundColor: Theme
+          .of(context)
+          .colorScheme
+          .background,
       appBar: BaseAppBar(
         title: '회원가입',
         leading: true,
@@ -82,7 +67,10 @@ class _RegisterIdScreen extends State<RegisterIdScreen> {
                             height: 10.h,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(10.r),
-                              color: Theme.of(context).colorScheme.secondary,
+                              color: Theme
+                                  .of(Get.context!)
+                                  .colorScheme
+                                  .secondary,
                             ),
                           ),
                         ],
@@ -105,7 +93,8 @@ class _RegisterIdScreen extends State<RegisterIdScreen> {
                           ),
                           SizedBox(height: 2.5.h),
                           Text(
-                            '${AppRoutes.baseAppName}에서 사용할 고유 아이디를 입력해주세요. \n한번 설정한 아이디는 변경할 수 없어요!',
+                            '${AppRoutes
+                                .baseAppName}에서 사용할 고유 아이디를 입력해주세요. \n한번 설정한 아이디는 변경할 수 없어요!',
                             style: TextStyle(
                               fontSize: 11.sp,
                               fontWeight: FontWeight.w400,
@@ -129,7 +118,7 @@ class _RegisterIdScreen extends State<RegisterIdScreen> {
                               children: [
                                 Expanded(
                                   child: TextField(
-                                    controller: _idController,
+                                    controller: controller.idController,
                                     decoration: InputDecoration(
                                       prefixText: '@ ',
                                       prefixStyle: TextStyle(
@@ -145,10 +134,7 @@ class _RegisterIdScreen extends State<RegisterIdScreen> {
                                       ),
                                       suffix: GestureDetector(
                                         onTap: () {
-                                          _idController.clear();
-                                          setState(() {
-                                            _idController.text = '';
-                                          });
+                                          controller.idController.clear();
                                         },
                                         child: Container(
                                           margin: EdgeInsets.only(right: 10.w),
@@ -161,7 +147,9 @@ class _RegisterIdScreen extends State<RegisterIdScreen> {
                                       ),
                                     ),
                                     onChanged: (value) {
-                                      _validator(value);
+                                      //_validator(value);
+                                      //controller.validateId(value);
+                                      controller.id.value = controller.idController.text;
                                     },
                                     maxLength: 15,
                                   ),
@@ -177,32 +165,18 @@ class _RegisterIdScreen extends State<RegisterIdScreen> {
               ),
               GestureDetector(
                 onTap: () async {
-                  if (_isIdDuplicated.value) {
-                    // 중복 체크
-                    final snapshot = await FirebaseFirestore.instance
-                        .collection('users')
-                        .where('id', isEqualTo: _idController.text)
-                        .get();
-                    if (snapshot.docs.isNotEmpty) {
-                      GlobalToastController.to.showToast('이미 사용중인 아이디입니다.');
-                      return;
-                    }
-                    UserStore.to.user.value.id = _idController.text;
-                    AppLog.to.i('id: ${UserStore.to.user.value.id}');
-                    Get.toNamed(AppRoutes.registerBirth);
-
-                  } else {
-                    GlobalToastController.to.showToast('아이디는 영문 또는 영문 숫자 조합만 가능합니다.');
-                  }
+                  controller.validateId(controller.idController.text);
                 },
                 child: Container(
                   width: 350.w,
                   height: 50.h,
-                  margin: EdgeInsets.only(
-                      bottom: 34.h, top: 20.h, left: 20.w, right: 20.w),
+                  margin: EdgeInsets.only(bottom: 34.h, top: 20.h, left: 20.w, right: 20.w),
                   padding: EdgeInsets.all(15.r),
                   decoration: ShapeDecoration(
-                    color: Theme.of(context).colorScheme.primary,
+                    color: Theme
+                        .of(Get.context!)
+                        .colorScheme
+                        .primary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10.r),
                     ),
@@ -233,19 +207,15 @@ class _RegisterIdScreen extends State<RegisterIdScreen> {
     );
   }
 
-  _validator(String value) {
-
-
-    // 영문 숫자 조합 및 인스타그램 정규식
-    RegExp regExp = RegExp(r'^[a-zA-Z0-9_]*$');
-    if (regExp.hasMatch(value)) {
-      _isIdDuplicated.value = true;
-    } else {
-      _isIdDuplicated.value = false;
-      _logger.t('아이디 정규식 불일치: $value');
-    }
-
-
-  }
+  // _validator(String value) {
+  //   // 영문 숫자 조합 및 인스타그램 정규식
+  //   RegExp regExp = RegExp(r'^[a-zA-Z0-9_]*$');
+  //   if (regExp.hasMatch(value)) {
+  //     _isIdDuplicated.value = true;
+  //   } else {
+  //     _isIdDuplicated.value = false;
+  //     AppLog.to.e('아이디 정규식 불일치: $value');
+  //   }
+  // }
 
 }

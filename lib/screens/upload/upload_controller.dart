@@ -6,7 +6,7 @@ import 'package:cached_video_player_plus/cached_video_player_plus.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:foreats/utils/global_toast_controller.dart';
+import 'package:foreats/utils/toast_controller.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as googlemap;
 import 'package:image_picker/image_picker.dart';
@@ -400,7 +400,7 @@ class UploadController extends GetxController {
 
     } catch (e) {
       _logger.e('uploadVideo error: $e');
-      GlobalToastController.to.showToast('동영상 업로드에 실패했습니다.');
+      ToastController.to.showToast('동영상 업로드에 실패했습니다.');
       isUploadLoading.value = false;
       Get.back();
     }

@@ -9,6 +9,7 @@ import '../../utils/colors.dart';
 import '../../utils/dialog_util.dart';
 import '../../utils/text_style.dart';
 import '../../widget/base_appbar.dart';
+import '../../widget/base_tabbar.dart';
 import '../../widget/point_card.dart';
 import '../login/login_controller.dart';
 import '../login/user_store.dart';
@@ -21,10 +22,7 @@ class MyPageScreen extends GetView<MyPageController> {
   Widget build(BuildContext context) {
     Get.put(LoginController());
     return Scaffold(
-      backgroundColor: Theme
-          .of(context)
-          .colorScheme
-          .surface,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: BaseAppBar(
         title: '마이페이지',
       ),
@@ -35,7 +33,30 @@ class MyPageScreen extends GetView<MyPageController> {
           return Column(
             children: [
               _buildMyProfileInfo(context),
-              _buildMyFeedContainer(context),
+              BaseTabBar(
+                controller: controller.tabController,
+                tabItems: controller.tabs,
+              ),
+              Expanded(
+                child: TabBarView(
+                  controller: controller.tabController,
+                  children: [
+                    RefreshIndicator(
+                        onRefresh: () async {
+                          await controller.getMyFeeds();
+                        },
+                        child: _buildMyFeedContainer(context)
+                    ),
+                    RefreshIndicator(
+                        onRefresh: () async {
+                          await controller.getMyBookmarks();
+                        },
+                        child: _buildMyBookmarkContainer(context)
+                    ),
+                  ],
+                ),
+              ),
+              //_buildMyFeedContainer(context),
             ],
           );
         }
@@ -116,7 +137,12 @@ class MyPageScreen extends GetView<MyPageController> {
                             Text(
                               UserStore.to.user.value.nickname ?? '',
                               style: TextStyle(
-                                color: Theme
+                                color: Get.isDarkMode
+                                    ? Theme
+                                    .of(context)
+                                    .colorScheme
+                                    .surface
+                                    : Theme
                                     .of(context)
                                     .colorScheme
                                     .onSurface,
@@ -129,7 +155,9 @@ class MyPageScreen extends GetView<MyPageController> {
                             Text(
                               '@${UserStore.to.user.value.id ?? ''}',
                               style: TextStyle(
-                                color: gray500,
+                                color: Get.isDarkMode
+                                    ? gray500
+                                    : gray500,
                                 fontSize: 12.sp,
                                 fontWeight: FontWeight.w400,
                                 height: 0,
@@ -160,6 +188,9 @@ class MyPageScreen extends GetView<MyPageController> {
                         'assets/images/ic_settings.svg',
                         width: 20.w,
                         height: 20.h,
+                        color: Get.isDarkMode
+                            ? Colors.white
+                            : Colors.black,
                       ),
                     ],
                   ),
@@ -176,149 +207,229 @@ class MyPageScreen extends GetView<MyPageController> {
 
   /// 내가 올린 피드
   Widget _buildMyFeedContainer(BuildContext context) {
-    return Obx(() {
-        return Expanded(
-          child: FutureBuilder(future: controller.getMyFeeds(),
-              builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return DialogUtil().buildLoadingDialog();
-                } else {
-                  return Container(
-                    padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
-                    child: GridView.builder(
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 3,
-                        crossAxisSpacing: 10.w,
-                        mainAxisSpacing: 10.h,
-                        mainAxisExtent: 150.h,
-                        // childAspectRatio: 2,
-                      ),
-                      itemCount: snapshot.data.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        return Column(
-                          children: [
-                            // scrollview
-                            Expanded(
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(6.r),
-                                child: Stack(
-                                  children: [
-                                    CachedNetworkImage(
-                                      imageUrl: snapshot.data[index].thumbnailUrls[0] ?? '',
-                                      fit: BoxFit.cover,
-                                      placeholder: (context, url) => Container(color: gray200,),
-                                      errorWidget: (context, url, error) => Container(color: gray200, child: Icon(Icons.error, color: Colors.red,),),
+    return FutureBuilder(
+        future: controller.getMyFeeds(),
+        builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return DialogUtil().buildLoadingDialog();
+          } else {
+            return controller.myFeedList.isEmpty
+                ? Container(
+              padding: EdgeInsets.symmetric(
+                  horizontal: 20.w, vertical: 10.h),
+              child: Center(
+                child: Text(
+                  '아직 올린 피드가 없어요 😢',
+                  textAlign: TextAlign.center,
+                  style: TextStyleUtils.bodyTextStyle(
+                    fontSize: 11.sp,
+                    fontWeight: FontWeight.w600,
+                      color: Get.isDarkMode
+                          ? Colors.white
+                          : gray600
+                  ),
+                ),
+              ),
+            )
+                : Container(
+              padding: EdgeInsets.symmetric(
+                  horizontal: 20.w, vertical: 10.h),
+              child: GridView.builder(
+                gridDelegate:
+                SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3,
+                  crossAxisSpacing: 10.w,
+                  mainAxisSpacing: 10.h,
+                  mainAxisExtent: 150.h,
+                  // childAspectRatio: 2,
+                ),
+                itemCount: snapshot.data.length,
+                itemBuilder: (BuildContext context, int index) {
+                  return Column(
+                    children: [
+                      // scrollview
+                      Expanded(
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(6.r),
+                          child: Stack(
+                            children: [
+                              CachedNetworkImage(
+                                imageUrl: snapshot.data[index]
+                                    .thumbnailUrls[0] ??
+                                    '',
+                                fit: BoxFit.cover,
+                                placeholder: (context, url) =>
+                                    Container(
+                                      color: gray200,
                                     ),
-                                    // 좋아요
-                                    Positioned(
-                                      top: 5.h,
-                                      right: 5.w,
-                                      child: Container(
-                                        padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 2.h),
-                                        decoration: BoxDecoration(
-                                          color: Colors.black.withOpacity(0.5),
-                                          borderRadius: BorderRadius.circular(6.r),
-                                        ),
-                                        child: Row(
-                                          children: [
-                                            Icon(
-                                              Icons.favorite,
-                                              color: Colors.white,
-                                              size: 12.sp,
-                                            ),
-                                            SizedBox(width: 5.w),
-                                            Text(
-                                              snapshot.data[index].likeCount.toString(),
-                                              style: TextStyleUtils.bodyTextStyle(
-                                                fontSize: 8.sp,
-                                                fontWeight: FontWeight.w500,
-                                                color: Colors.white,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
+                                errorWidget: (context, url, error) =>
+                                    Container(
+                                      color: gray200,
+                                      child: Icon(
+                                        Icons.error,
+                                        color: Colors.red,
                                       ),
                                     ),
-                                  ],
+                              ),
+                              // 좋아요
+                              Positioned(
+                                top: 5.h,
+                                right: 5.w,
+                                child: Container(
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 5.w, vertical: 2.h),
+                                  decoration: BoxDecoration(
+                                    color:
+                                    Colors.black.withOpacity(0.5),
+                                    borderRadius:
+                                    BorderRadius.circular(6.r),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.favorite,
+                                        color: Colors.white,
+                                        size: 12.sp,
+                                      ),
+                                      SizedBox(width: 5.w),
+                                      Text(
+                                        snapshot.data[index].likeCount
+                                            .toString(),
+                                        style: TextStyleUtils
+                                            .bodyTextStyle(
+                                          fontSize: 8.sp,
+                                          fontWeight: FontWeight.w500,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
-                        );
-                      },
-                    ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
                   );
-                }
-              }),
-        );
-      });
+                },
+              ),
+            );
+          }
+        });
   }
 
-  /// 내가 올린 피드 아이템
-  // Widget _myFeedItem(index) {
-  //   return Column(
-  //     children: [
-  //       Stack(
-  //         children: [
-  //           // round corner
-  //           Container(
-  //             width: 100.w,
-  //             height: 150.h,
-  //             decoration: BoxDecoration(
-  //               borderRadius: BorderRadius.circular(6.r),
-  //               color: gray200,
-  //             ),
-  //             child: ClipRRect(
-  //               borderRadius: BorderRadius.circular(6.r),
-  //               child: CachedNetworkImage(
-  //                 imageUrl: FeedController.to.thumbnailList[index],
-  //                 fit: BoxFit.cover,
-  //                 placeholder: (context, url) =>
-  //                     Container(
-  //                       color: gray200,
-  //                     ),
-  //                 errorWidget: (context, url, error) =>
-  //                     Container(
-  //                       color: gray200,
-  //                       child: Icon(
-  //                         Icons.error,
-  //                         color: Colors.red,
-  //                       ),
-  //                     ),
-  //               ),
-  //             ),
-  //           ),
-  //           // 재생시간
-  //           Positioned(
-  //             top: 5.h,
-  //             right: 5.w,
-  //             child: Container(
-  //               padding: EdgeInsets.all(5),
-  //               child: Row(
-  //                 children: [
-  //                   Icon(
-  //                     Icons.favorite,
-  //                     color: Colors.red,
-  //                     size: 12.sp,
-  //                   ),
-  //                   SizedBox(width: 3.w),
-  //                   Text(
-  //                     FeedController.to.feedList[index].likeCount.toString(),
-  //                     style: TextStyle(
-  //                       color: Colors.white,
-  //                       fontSize: 10.sp,
-  //                       fontWeight: FontWeight.w600,
-  //                       height: 0,
-  //                     ),
-  //                   ),
-  //                 ],
-  //               ),
-  //             ),
-  //           ),
-  //         ],
-  //       ),
-  //     ],
-  //   );
-  // }
-
+  /// 북마크
+  Widget _buildMyBookmarkContainer(BuildContext context) {
+    return FutureBuilder(
+        future: controller.getMyBookmarks(),
+        builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return DialogUtil().buildLoadingDialog();
+          } else {
+            return controller.myFeedList.isEmpty
+                ? Container(
+              padding: EdgeInsets.symmetric(
+                  horizontal: 20.w, vertical: 10.h),
+              child: Center(
+                child: Text(
+                  '북마크 한 피드가 없어요 😢',
+                  textAlign: TextAlign.center,
+                  style: TextStyleUtils.bodyTextStyle(
+                    fontSize: 11.sp,
+                    fontWeight: FontWeight.w600,
+                    color: Get.isDarkMode
+                        ? Colors.white
+                        : gray600
+                  ),
+                ),
+              ),
+            )
+                : Container(
+              padding: EdgeInsets.symmetric(
+                  horizontal: 20.w, vertical: 10.h),
+              child: GridView.builder(
+                gridDelegate:
+                SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3,
+                  crossAxisSpacing: 10.w,
+                  mainAxisSpacing: 10.h,
+                  mainAxisExtent: 150.h,
+                  // childAspectRatio: 2,
+                ),
+                itemCount: snapshot.data.length,
+                itemBuilder: (BuildContext context, int index) {
+                  return Column(
+                    children: [
+                      // scrollview
+                      Expanded(
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(6.r),
+                          child: Stack(
+                            children: [
+                              CachedNetworkImage(
+                                imageUrl: snapshot.data[index]
+                                    .thumbnailUrls[0] ??
+                                    '',
+                                fit: BoxFit.cover,
+                                placeholder: (context, url) =>
+                                    Container(
+                                      color: gray200,
+                                    ),
+                                errorWidget: (context, url, error) =>
+                                    Container(
+                                      color: gray200,
+                                      child: Icon(
+                                        Icons.error,
+                                        color: Colors.red,
+                                      ),
+                                    ),
+                              ),
+                              // 좋아요
+                              Positioned(
+                                top: 5.h,
+                                right: 5.w,
+                                child: Container(
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 5.w, vertical: 2.h),
+                                  decoration: BoxDecoration(
+                                    color:
+                                    Colors.black.withOpacity(0.5),
+                                    borderRadius:
+                                    BorderRadius.circular(6.r),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.favorite,
+                                        color: Colors.white,
+                                        size: 12.sp,
+                                      ),
+                                      SizedBox(width: 5.w),
+                                      Text(
+                                        snapshot.data[index].likeCount
+                                            .toString(),
+                                        style: TextStyleUtils
+                                            .bodyTextStyle(
+                                          fontSize: 8.sp,
+                                          fontWeight: FontWeight.w500,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            );
+          }
+        });
+  }
 }

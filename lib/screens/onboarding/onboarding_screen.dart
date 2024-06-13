@@ -145,10 +145,6 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
           // background
           Center(
             child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.5),
-                borderRadius: BorderRadius.circular(100),
-              ),
               child: Lottie.asset(
                 backgroundImage,
                 width: 200.w,

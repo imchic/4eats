@@ -16,8 +16,7 @@ import '../../model/comment_model.dart';
 import '../../model/feed_model.dart';
 import '../../model/user_model.dart';
 import '../../utils/app_routes.dart';
-import '../../utils/global_toast_controller.dart';
-import 'package:dio/dio.dart' as dio;
+import '../../utils/toast_controller.dart';
 
 import '../../utils/logger.dart';
 import '../login/user_store.dart';
@@ -33,8 +32,6 @@ class FeedController extends GetxController {
   
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
-  //final dio.Dio _dio = dio.Dio();
 
   List<List<CachedVideoPlayerPlusController>> videoControllerList = <List<CachedVideoPlayerPlusController>>[].obs;
   late CachedVideoPlayerPlusController videoController;
@@ -686,13 +683,13 @@ class FeedController extends GetxController {
 
             // 이미 좋아요를 누른 경우
             if (value.docs[j].data()['likeUserIds'].contains(UserStore.to.user.value.id)) {
-              GlobalToastController.to.showToast('이미 좋아요를 누르셨습니다.');
+              ToastController.to.showToast('이미 좋아요를 누르셨습니다.');
               return;
             }
 
             // 자신이 올린 게시물 제외
             if (UserStore.to.user.value.id == value.docs[j].data()['userId']) {
-              GlobalToastController.to.showToast('자신이 작성한 게시물은 좋아요를 누를 수 없습니다.');
+              ToastController.to.showToast('자신이 작성한 게시물은 좋아요를 누를 수 없습니다.');
               return;
             }
 
@@ -769,19 +766,20 @@ class FeedController extends GetxController {
     try {
       await _firestore
           .collection('users')
-          .doc(UserStore.to.user.value.id)
-          .collection('bookmarks')
-          .where('feedId', isEqualTo: feedId)
+          .where('uid', isEqualTo: UserStore.to.user.value.uid)
           .get()
           .then((value) {
-        if (value.docs.isNotEmpty) {
-          FeedController.to.feedList[currentFeedIndex.value].isBookmark = true;
-          isFeedBookmark = true;
-        } else {
-          FeedController.to.feedList[currentFeedIndex.value].isBookmark = false;
-          isFeedBookmark = false;
+        for (var i = 0; i < value.docs.length; i++) {
+          value.docs[i].reference.collection('bookmarks').where('feedId', isEqualTo: feedId).get().then((value) {
+            if (value.docs.isNotEmpty) {
+              FeedController.to.feedList[currentFeedIndex.value].isBookmark = true;
+              isFeedBookmark = true;
+            } else {
+              FeedController.to.feedList[currentFeedIndex.value].isBookmark = false;
+              isFeedBookmark = false;
+            }
+          });
         }
-        // AppLog.to.d('isFeedBookmark: $isFeedBookmark');
       });
     } catch (e) {
       AppLog.to.e('fetchBookmarks error: $e');
@@ -797,32 +795,20 @@ class FeedController extends GetxController {
 
       // 자신이 올린 게시물 제외
       if (UserStore.to.user.value.id == feed.userid) {
-        GlobalToastController.to.showToast('자신이 작성한 게시물은 북마크를 누를 수 없습니다.');
+        ToastController.to.showToast('자신이 작성한 게시물은 북마크를 누를 수 없습니다.');
         return;
       }
 
-      // 유저 북마크 추가
       await _firestore
           .collection('users')
-          .doc(UserStore.to.user.value.id)
-          .collection('bookmarks')
-          .doc(feedId)
-          .set({
-        'feedId': feedId,
-        'createdAt': Timestamp.now(),
-      });
-
-      await _firestore
-          .collection('feeds').get().then((value) {
+          .where('uid', isEqualTo: UserStore.to.user.value.uid)
+          .get()
+          .then((value) {
         for (var i = 0; i < value.docs.length; i++) {
-          if (feed.seq == value.docs[i].data()['seq']) {
-            value.docs[i].reference.update({
-              'bookmarkCount': FieldValue.increment(1),
-            });
-            _feedList[target].bookmarkCount =
-                value.docs[i].data()['bookmarkCount'] + 1;
-            AppLog.to.d('add bookmarkCount: ${_feedList[target].bookmarkCount}');
-          }
+          value.docs[i].reference.collection('bookmarks').doc(feedId).set({
+            'feedId': feedId,
+            'createdAt': Timestamp.now(),
+          });
         }
       });
 
@@ -830,7 +816,8 @@ class FeedController extends GetxController {
       await sendFcm(feedId, comment, '북마크');
 
       fetchBookmarks(feedId);
-      GlobalToastController.to.showToast('북마크에 추가되었습니다.');
+      ToastController.to.showToast('북마크에 추가되었습니다.');
+
     } catch (e) {
       AppLog.to.e('addBookmark error: $e');
     }
@@ -839,11 +826,22 @@ class FeedController extends GetxController {
   /// 피드 북마크 삭제
   Future<void> removeBookmark(String feedId) async {
     try {
+
+      // await _firestore
+      //     .collection('users')
+      //     .doc(UserStore.to.user.value.id)
+      //     .collection('bookmarks')
+      //     .where('feedId', isEqualTo: feedId)
+      //     .get()
+      //     .then((value) {
+      //   for (var i = 0; i < value.docs.length; i++) {
+      //     value.docs[i].reference.delete();
+      //   }
+      // });
+
       await _firestore
           .collection('users')
-          .doc(UserStore.to.user.value.id)
-          .collection('bookmarks')
-          .where('feedId', isEqualTo: feedId)
+          .where('uid', isEqualTo: UserStore.to.user.value.uid)
           .get()
           .then((value) {
         for (var i = 0; i < value.docs.length; i++) {
@@ -860,16 +858,14 @@ class FeedController extends GetxController {
             value.docs[i].reference.update({
               'bookmarkCount': FieldValue.increment(-1),
             });
-            _feedList[target].bookmarkCount =
-                value.docs[i].data()['bookmarkCount'] - 1;
-            AppLog.to
-                .d('remove bookmarkCount: ${_feedList[target].bookmarkCount}');
+            _feedList[target].bookmarkCount = value.docs[i].data()['bookmarkCount'] - 1;
+            AppLog.to.d('remove bookmarkCount: ${_feedList[target].bookmarkCount}');
           }
         }
       });
 
       fetchBookmarks(feedId);
-      GlobalToastController.to.showToast('북마크에서 삭제되었습니다.');
+      ToastController.to.showToast('북마크에서 삭제되었습니다.');
     } catch (e) {
       AppLog.to.e('deleteBookmark error: $e');
     }
@@ -911,7 +907,7 @@ class FeedController extends GetxController {
 
       // 자신이 올린 게시물 제외
       if (UserStore.to.user.value.id == feed.userid) {
-        GlobalToastController.to.showToast('자신이 작성한 게시물은 좋아요를 누를 수 없습니다.');
+        ToastController.to.showToast('자신이 작성한 게시물은 좋아요를 누를 수 없습니다.');
         return;
       }
 
@@ -942,7 +938,7 @@ class FeedController extends GetxController {
       await sendFcm(feedId, comment, '좋아요');
 
       fetchLikes(feedId);
-      GlobalToastController.to.showToast('좋아요를 눌렀습니다.');
+      ToastController.to.showToast('좋아요를 눌렀습니다.');
     } catch (e) {
       AppLog.to.e('addLike error: $e');
     }
@@ -980,7 +976,7 @@ class FeedController extends GetxController {
       });
 
       fetchLikes(feedId);
-      GlobalToastController.to.showToast('좋아요를 취소했습니다.');
+      ToastController.to.showToast('좋아요를 취소했습니다.');
     } catch (e) {
       AppLog.to.e('removeLike error: $e');
     }
@@ -1046,7 +1042,7 @@ class FeedController extends GetxController {
         }
       } else {
         AppLog.to.e('카카오톡 미설치: 웹 공유 기능 사용 권장');
-        GlobalToastController.to.showToast('카카오톡이 설치되어 있지 않아 웹으로 공유합니다.');
+        ToastController.to.showToast('카카오톡이 설치되어 있지 않아 웹으로 공유합니다.');
       }
 
 

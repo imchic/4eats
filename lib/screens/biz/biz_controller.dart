@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:foreats/utils/global_toast_controller.dart';
+import 'package:foreats/utils/toast_controller.dart';
 import 'package:foreats/utils/logger.dart';
 import 'package:get/get.dart';
 
@@ -313,16 +313,16 @@ class BizController extends GetxController {
         // }
         try {
           if (value.user != null) {
-            GlobalToastController.to.showToast('인증되었습니다.');
+            ToastController.to.showToast('인증되었습니다.');
             isVerify.value = false;
             Get.back();
           } else {
-            GlobalToastController.to.showToast('인증번호가 일치하지 않습니다.');
+            ToastController.to.showToast('인증번호가 일치하지 않습니다.');
             isVerify.value = true;
           }
         } catch (e) {
           if (e is FirebaseAuthException) {
-            GlobalToastController.to.showToast('인증번호가 일치하지 않습니다.');
+            ToastController.to.showToast('인증번호가 일치하지 않습니다.');
             isVerify.value = true;
           } else {
             _logger.e(e.toString());

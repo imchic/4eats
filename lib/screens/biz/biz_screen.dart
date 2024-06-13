@@ -1,15 +1,12 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:foreats/widget/point_card.dart';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
 
 import '../../model/biz_model.dart';
-import '../../utils/app_routes.dart';
 import '../../utils/colors.dart';
-import '../../utils/text_style.dart';
 import '../../widget/base_appbar.dart';
 import '../login/user_store.dart';
 import 'biz_controller.dart';
@@ -22,7 +19,7 @@ class BizScreen extends GetView<BizController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Theme.of(context).colorScheme.background,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: BaseAppBar(
           title: '포인트몰',
           notification: true,
@@ -38,7 +35,9 @@ class BizScreen extends GetView<BizController> {
                           '로그인이 필요한 서비스입니다',
                           style: TextStyle(
                             fontSize: 14.sp,
-                            color: gray600,
+                            color: Get.isDarkMode
+                                ? Theme.of(context).colorScheme.onSurface
+                                : Theme.of(context).colorScheme.primary,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
@@ -198,14 +197,18 @@ class BizScreen extends GetView<BizController> {
                 padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
                 decoration: BoxDecoration(
                   color: controller.isGoodTypeSelectIndex.value == index
-                      ? Theme.of(context).colorScheme.background
-                      : gray50,
+                      ? Get.isDarkMode
+                          ? Theme.of(context).colorScheme.primary
+                          : Theme.of(context).colorScheme.secondary
+                      : Get.isDarkMode
+                          ? Theme.of(context).colorScheme.surface
+                          : gray500,
                   borderRadius: BorderRadius.circular(20.r),
                   shape: BoxShape.rectangle,
                   border: Border.all(
                     color: controller.isGoodTypeSelectIndex.value == index
                         ? Theme.of(context).colorScheme.secondary
-                        : gray300,
+                        : Theme.of(context).scaffoldBackgroundColor,
                     width: 1.w,
                   ),
                 ),
@@ -215,8 +218,12 @@ class BizScreen extends GetView<BizController> {
                     fontSize: 11.sp,
                     fontWeight: FontWeight.w400,
                     color: controller.isGoodTypeSelectIndex.value == index
-                        ? Theme.of(context).colorScheme.secondary
-                        : gray700,
+                        ? Get.isDarkMode
+                            ? Theme.of(context).colorScheme.onPrimary
+                            : Theme.of(context).colorScheme.onSecondary
+                        : Get.isDarkMode
+                            ? Theme.of(context).colorScheme.onSurface
+                            : Theme.of(context).colorScheme.onPrimary,
                   ),
                 ),
               ),
@@ -242,8 +249,7 @@ class BizScreen extends GetView<BizController> {
           itemBuilder: (context, index) {
             return controller.isAll.value
                 ? _buildBizListApiItem(context, controller.bizList[index])
-                : _buildBizListApiItem(
-                    context, controller.bizSelectList[index]);
+                : _buildBizListApiItem(context, controller.bizSelectList[index]);
           },
         ),
       ),
@@ -290,33 +296,13 @@ class BizScreen extends GetView<BizController> {
                   ),
                 ),
               ),
-              /*Positioned(
-                top: 5.h,
-                left: 5.w,
-                child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 2.h),
-                  child: CachedNetworkImage(
-                    imageUrl: bizModel.brandIconImg!,
-                    width: 16.w,
-                    height: 16.h,
-                    errorWidget: (context, url, error) => Icon(
-                      Icons.all_inclusive,
-                      color: gray500,
-                      size: 20,
-                    ),
-                    placeholder: (context, url) => CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(gray300),
-                    ),
-                  ),
-                ),
-              ),*/
             ],
           ),
         ),
         SizedBox(height: 5.h),
         Text(bizModel.brandName ?? '',
             style: TextStyle(
-                fontSize: 10.sp, fontWeight: FontWeight.w500, color: gray600)),
+                fontSize: 10.sp, fontWeight: FontWeight.w500, color: Get.isDarkMode ? Colors.white : gray600)),
         SizedBox(height: 2.5.h),
         Container(
           alignment: Alignment.center,
@@ -324,7 +310,8 @@ class BizScreen extends GetView<BizController> {
               style: TextStyle(
                   fontSize: 11.sp,
                   fontWeight: FontWeight.w600,
-                  color: Theme.of(context).colorScheme.onBackground),
+                  color: Get.isDarkMode ? gray200 : gray800
+              ),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center),

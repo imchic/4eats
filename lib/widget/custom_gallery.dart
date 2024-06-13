@@ -26,37 +26,42 @@ class CustomGallery extends GetView<UploadController> {
             );
           } else {
             return Obx(() {
-              return GridView.builder(
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  childAspectRatio: 1,
-                  crossAxisSpacing: 1.w,
-                  mainAxisSpacing: 1.h,
-                  mainAxisExtent: 180.h,
+              return Container(
+                width: 1.sw,
+                height: 1.sh,
+                color: Theme.of(context).scaffoldBackgroundColor,
+                child: GridView.builder(
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    childAspectRatio: 1,
+                    crossAxisSpacing: 1.w,
+                    mainAxisSpacing: 1.h,
+                    mainAxisExtent: 180.h,
+                  ),
+                  itemCount: controller.assets.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    final AssetEntity asset = controller.assets[index];
+                    return InkWell(
+                      onTap: () {
+                        if (asset.id == 'camera') {
+                          controller.pickVideoFromCamera();
+                        } else {
+                          asset.file.then((value) {
+                            controller.uploadFile.value = value ?? File('');
+                            Get.toNamed(AppRoutes.uploadPreview);
+                          });
+                        }
+                      },
+                      child: Stack(
+                        children: <Widget>[
+                          _galleryItems(asset),
+                          _checkbox(context, asset),
+                          _playTime(asset),
+                        ],
+                      ),
+                    );
+                  },
                 ),
-                itemCount: controller.assets.length,
-                itemBuilder: (BuildContext context, int index) {
-                  final AssetEntity asset = controller.assets[index];
-                  return InkWell(
-                    onTap: () {
-                      if (asset.id == 'camera') {
-                        controller.pickVideoFromCamera();
-                      } else {
-                        asset.file.then((value) {
-                          controller.uploadFile.value = value ?? File('');
-                          Get.toNamed(AppRoutes.uploadPreview);
-                        });
-                      }
-                    },
-                    child: Stack(
-                      children: <Widget>[
-                        _galleryItems(asset),
-                        _checkbox(context, asset),
-                        _playTime(asset),
-                      ],
-                    ),
-                  );
-                },
               );
             });
           }
@@ -70,8 +75,7 @@ class CustomGallery extends GetView<UploadController> {
     return Center(
       child: asset.id == 'camera'
           ? Container(
-              margin:
-                  EdgeInsets.only(left: 4.w, right: 4.w, top: 1.h, bottom: 1.h),
+              margin: EdgeInsets.only(left: 4.w, right: 4.w, top: 1.h, bottom: 1.h),
               padding: EdgeInsets.all(10.w),
               width: 256.w,
               height: 256.h,
@@ -127,27 +131,23 @@ class CustomGallery extends GetView<UploadController> {
               right: 8.w,
               child: InkWell(
                 onTap: () async {
-                  if (controller.selectedList
-                      .contains(controller.assets.indexOf(asset))) {
-                    controller.selectedList
-                        .remove(controller.assets.indexOf(asset));
+                  if (controller.selectedList.contains(controller.assets.indexOf(asset))) {
+                    controller.selectedList.remove(controller.assets.indexOf(asset));
                   } else {
-                    controller.selectedList
-                        .add(controller.assets.indexOf(asset));
+                    controller.selectedList.add(controller.assets.indexOf(asset));
                   }
-
                   await controller.setSelectVideoFiles();
                 },
                 child: Container(
                   width: 24.w,
                   height: 24.h,
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.75),
+                    color: Theme.of(context).scaffoldBackgroundColor,
                     shape: BoxShape.circle,
                   ),
                   child: // 멀티 선택
                       controller.selectedList
-                              .contains(controller.assets.indexOf(asset))
+                          .contains(controller.assets.indexOf(asset))
                           ? Icon(
                               Icons.check,
                               size: 14.w,

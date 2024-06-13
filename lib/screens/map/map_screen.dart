@@ -207,7 +207,7 @@ class MapScreen extends GetView<MapController> {
       children: [
         Container(
           width: Get.width,
-          color: Colors.white,
+          color: Theme.of(context).scaffoldBackgroundColor,
           child: Container(
             padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
             margin: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
@@ -221,7 +221,7 @@ class MapScreen extends GetView<MapController> {
                       TextSpan(
                         text: '검색결과 ',
                         style: TextStyle(
-                          color: Colors.black,
+                          color: Get.isDarkMode ? Colors.white : Colors.black,
                           fontSize: 12.sp,
                           fontWeight: FontWeight.w600,
                         ),
@@ -229,7 +229,7 @@ class MapScreen extends GetView<MapController> {
                       TextSpan(
                         text: '${controller.storeList.length}개',
                         style: TextStyle(
-                          color: CupertinoColors.activeBlue,
+                          color: Get.isDarkMode ? Theme.of(context).colorScheme.tertiary : CupertinoColors.activeBlue,
                           fontSize: 12.sp,
                           fontWeight: FontWeight.w600,
                         ),
@@ -241,20 +241,13 @@ class MapScreen extends GetView<MapController> {
                 InkWell(
                   onTap: () {
                     Get.defaultDialog(
+                      contentPadding: EdgeInsetsDirectional.symmetric(horizontal: 10.w, vertical: 5.h),
                       title: '필터',
+                      titlePadding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
                       content: Column(
                         children: [
                           ListTile(
-                            title: Row(
-                              children: [
-                                Icon(
-                                  CupertinoIcons.location,
-                                  size: 15.sp,
-                                ),
-                                SizedBox(width: 5.w),
-                                Text('가까운 거리'),
-                              ],
-                            ),
+                            title: Text('가까운 거리'),
                             onTap: () {
                               controller.storeList.sort((a, b) {
                                 return double.parse(a.distance ?? '0.0')
@@ -263,17 +256,9 @@ class MapScreen extends GetView<MapController> {
                               Get.back();
                             },
                           ),
+                          Divider(),
                           ListTile(
-                            title: Row(
-                              children: [
-                                Icon(
-                                  CupertinoIcons.location_slash,
-                                  size: 15.sp,
-                                ),
-                                SizedBox(width: 5.w),
-                                Text('먼 거리'),
-                              ],
-                            ),
+                            title: Text('먼 거리'),
                             onTap: () {
                               controller.storeList.sort((a, b) {
                                 return double.parse(b.distance ?? '0.0')
@@ -289,30 +274,30 @@ class MapScreen extends GetView<MapController> {
                   child: Container(
                     padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.secondary,
                       borderRadius: BorderRadius.circular(10.r),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.15),
-                          spreadRadius: 1,
-                          blurRadius: 7.r,
-                          offset: Offset(0, 3),
-                        ),
-                      ],
+                      // boxShadow: [
+                      //   BoxShadow(
+                      //     color: Colors.grey.withOpacity(0.15),
+                      //     spreadRadius: 1,
+                      //     blurRadius: 7.r,
+                      //     offset: Offset(0, 3),
+                      //   ),
+                      // ],
                     ),
                     child: Row(
                       children: [
                         Text(
                           '필터',
                           style: TextStyle(
-                            color: Colors.black,
+                            color: Colors.white,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
                         SizedBox(width: 5.w),
                         Icon(
                           CupertinoIcons.slider_horizontal_3,
-                          color: Colors.black,
+                          color: Colors.white,
                           size: 15.sp,
                         ),
                       ],
@@ -328,7 +313,7 @@ class MapScreen extends GetView<MapController> {
           width: Get.width,
           height: Get.height * 0.38,
           padding: EdgeInsets.symmetric(horizontal: 10.w),
-          color: Colors.white,
+          color: Theme.of(context).scaffoldBackgroundColor,
           child: controller.isSearchLoading.value == false ?
           ListView.builder(
             scrollDirection: Axis.horizontal,
@@ -346,9 +331,9 @@ class MapScreen extends GetView<MapController> {
                     margin: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
                     padding: EdgeInsets.all(10.w),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.75),
+                      color: Theme.of(context).scaffoldBackgroundColor,
                       border: index == controller.selectIndex.value ? Border.all(
-                        color: Theme.of(context).colorScheme.tertiary,
+                        color: Get.isDarkMode ? gray500 : Theme.of(context).colorScheme.tertiary,
                         width: 2.w,
                       ) : null,
                       // color: index == controller.selectIndex.value ? Theme.of(context).colorScheme.tertiary.withOpacity(0.1) : Colors.white,
@@ -422,7 +407,7 @@ class MapScreen extends GetView<MapController> {
                                         child: Text(
                                           controller.storeList[index].name ?? '',
                                           style: TextStyle(
-                                            color: Colors.black,
+                                            color: Get.isDarkMode ? Colors.white : Colors.black,
                                             fontSize: 11.sp,
                                             fontWeight: FontWeight.w600,
                                           ),
@@ -435,7 +420,7 @@ class MapScreen extends GetView<MapController> {
                                         child: Text(
                                           controller.storeList[index].status ?? '',
                                           style: TextStyle(
-                                            color: CupertinoColors.activeBlue,
+                                            color: Get.isDarkMode ? Theme.of(context).colorScheme.tertiary : CupertinoColors.activeBlue,
                                             fontSize: 10.sp,
                                             fontWeight: FontWeight.w400,
                                           ),
@@ -448,7 +433,7 @@ class MapScreen extends GetView<MapController> {
                                 Text(
                                   controller.storeList[index].category ?? '',
                                   style: TextStyle(
-                                    color: Theme.of(context).colorScheme.primary,
+                                    color: Get.isDarkMode ? gray400 : gray800,
                                     fontSize: 10.sp,
                                     fontWeight: FontWeight.w400,
                                   ),
@@ -532,7 +517,7 @@ class MapScreen extends GetView<MapController> {
                                 TextSpan(
                                   text: '현재위치에서 ',
                                   style: TextStyle(
-                                    color: gray700,
+                                    color: Get.isDarkMode ? Colors.white : Colors.black,
                                     fontSize: 10.sp,
                                     fontWeight: FontWeight.w400,
                                   ),
@@ -542,7 +527,7 @@ class MapScreen extends GetView<MapController> {
                                       double.parse(controller.storeList[index].distance ?? '0.0')
                                   ),
                                   style: TextStyle(
-                                    color: CupertinoColors.activeBlue,
+                                    color: Get.isDarkMode ? Theme.of(context).colorScheme.tertiary : CupertinoColors.activeBlue,
                                     fontSize: 10.sp,
                                     fontWeight: FontWeight.w600,
                                   ),
