@@ -7,7 +7,7 @@ import 'package:get/get_state_manager/get_state_manager.dart';
 
 import '../screens/login/login_controller.dart';
 import '../utils/colors.dart';
-import '../utils/global_toast_controller.dart';
+import '../utils/toast_controller.dart';
 
 class LoginBottomSheet extends GetWidget {
   const LoginBottomSheet({super.key});
@@ -23,7 +23,7 @@ class LoginBottomSheet extends GetWidget {
           bottom: MediaQuery.of(context).viewInsets.bottom + 20.h,
         ),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Get.isDarkMode ? Theme.of(Get.context!).scaffoldBackgroundColor : Colors.white,
           borderRadius: BorderRadius.only(
             topLeft: Radius.circular(20.r),
             topRight: Radius.circular(20.r),
@@ -32,7 +32,7 @@ class LoginBottomSheet extends GetWidget {
         child: Column(
           children: [
             Image.asset(
-              'assets/images/ic_foreat_new_logo.png',
+              'assets/images/ic_foreat_logo.png',
               width: 100.w,
               height: 60.h,
             ),
@@ -79,12 +79,15 @@ class LoginBottomSheet extends GetWidget {
                       width: 20.w,
                       height: 20.h,
                     ),
-                    SizedBox(height: 10.h),
-                    Text(
-                      '구글로 시작하기',
-                      style: TextStyleUtils.bodyTextStyle(
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.w500,
+                    Container(
+                      margin: EdgeInsets.only(left: 10.w),
+                      child: Text(
+                        '구글로 시작하기',
+                        style: TextStyleUtils.bodyTextStyle(
+                          color: Get.isDarkMode ? Colors.white : Colors.black,
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
                   ],
@@ -133,7 +136,7 @@ class LoginBottomSheet extends GetWidget {
             InkWell(
               onTap: () {
                 //LoginController.to.signInWithApple();
-                GlobalToastController.to.showToast('준비중입니다.');
+                ToastController.to.showToast('준비중입니다.');
               },
               child: Container(
                 padding: EdgeInsets.symmetric(vertical: 10.h),

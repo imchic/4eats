@@ -9,7 +9,7 @@ import '../../home/home_controller.dart';
 import '../../utils/app_routes.dart';
 import '../../utils/colors.dart';
 import '../../utils/dialog_util.dart';
-import '../../utils/global_toast_controller.dart';
+import '../../utils/toast_controller.dart';
 import '../../utils/logger.dart';
 import '../../utils/text_style.dart';
 import '../../widget/description_text.dart';
@@ -750,7 +750,7 @@ class FeedScreen extends GetView<FeedController> {
                                         await FeedController.to.addComment(FeedController.to.feedList[feedIndex].seq ?? '', FeedController.to.commentController.text,);
                                       }
                                     } else {
-                                      GlobalToastController.to.showToast(
+                                      ToastController.to.showToast(
                                         '댓글을 입력해주세요',
                                       );
                                     }

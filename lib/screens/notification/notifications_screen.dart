@@ -20,7 +20,7 @@ class NotificationsScreen extends GetView<NotificationsController> {
     Get.put(NotificationsController());
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: const BaseAppBar(
         title: '알림',
         leading: true,
@@ -48,7 +48,7 @@ class NotificationsScreen extends GetView<NotificationsController> {
                     '알림이 없어요 😢',
                     style: TextStyleUtils.bodyTextStyle(
                       fontSize: 10.sp,
-                      color: gray800
+                      color: Get.isDarkMode ? Colors.white : gray800,
                     ),
                   ),
                 )

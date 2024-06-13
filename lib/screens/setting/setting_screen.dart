@@ -1,14 +1,13 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/svg.dart';
-import 'package:foreats/screens/setting/setting_controller.dart';
 import 'package:get/get.dart';
 
 import '../../utils/colors.dart';
 import '../../widget/base_appbar.dart';
 import '../login/login_controller.dart';
 import '../login/user_store.dart';
+import 'setting_controller.dart';
 
 class SettingScreen extends GetView<SettingController> {
   const SettingScreen({super.key});
@@ -16,7 +15,7 @@ class SettingScreen extends GetView<SettingController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: BaseAppBar(
         title: '환경설정',
         leading: true,

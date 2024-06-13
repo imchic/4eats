@@ -9,7 +9,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:logger/logger.dart';
 
 import '../../utils/colors.dart';
-import '../../utils/global_toast_controller.dart';
+import '../../utils/toast_controller.dart';
 import '../../widget/base_appbar.dart';
 import '../map/map_controller.dart';
 
@@ -20,7 +20,7 @@ class UploadRegisterScreen extends GetView<UploadController> {
   @override
   Widget build(BuildContext context) {
 
-    Get.put(GlobalToastController());
+    Get.put(ToastController());
     Get.put(UploadController());
     Get.put(MapController());
     Get.put(AppLog());

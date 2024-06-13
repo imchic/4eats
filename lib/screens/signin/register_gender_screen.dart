@@ -1,36 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/svg.dart';
-import 'package:foreats/utils/logger.dart';
+import 'package:foreats/screens/signin/sign_controller.dart';
 import 'package:get/get.dart';
-import 'package:googleapis/admob/v1.dart';
-import 'package:logger/logger.dart';
-import '../../home/home_controller.dart';
-import '../../utils/app_routes.dart';
 import '../../utils/colors.dart';
-import '../../utils/global_toast_controller.dart';
+import '../../utils/logger.dart';
+import '../../utils/toast_controller.dart';
 import '../../widget/base_appbar.dart';
 import '../login/login_controller.dart';
 import '../login/user_store.dart';
 
-class RegisterGenderScreen extends StatefulWidget {
-  const RegisterGenderScreen({super.key});
-
-  @override
-  State<RegisterGenderScreen> createState() => _RegisterGenderScreen();
-}
-
-class _RegisterGenderScreen extends State<RegisterGenderScreen> {
-
-  final RxString _genderSelected = ''.obs;
-
+class RegisterGenderScreen extends GetView<SignController> {
   @override
   Widget build(BuildContext context) {
-
-    Get.put(GlobalToastController());
+    Get.put(ToastController());
 
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: BaseAppBar(
         title: '회원가입',
         leading: true,
@@ -52,7 +37,6 @@ class _RegisterGenderScreen extends State<RegisterGenderScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-
                     // 진행바
                     Container(
                       width: 350.w,
@@ -71,13 +55,12 @@ class _RegisterGenderScreen extends State<RegisterGenderScreen> {
                             height: 10.h,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(10.r),
-                              color: Theme.of(context).colorScheme.secondary,
+                              color: Theme.of(Get.context!).colorScheme.secondary,
                             ),
                           ),
                         ],
                       ),
                     ),
-
 
                     Container(
                       width: 350.w,
@@ -108,10 +91,11 @@ class _RegisterGenderScreen extends State<RegisterGenderScreen> {
                           SizedBox(height: 20.h),
 
                           // 성별 선택
-                          Obx(() =>
-                            Container(
+                          Obx(
+                                () => Container(
                               width: Get.width,
-                              padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 10.h),
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 4.w, vertical: 10.h),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -121,18 +105,22 @@ class _RegisterGenderScreen extends State<RegisterGenderScreen> {
                                     onTap: () {
                                       // 남성 선택
                                       AppLog.to.d('남성 선택');
-                                      _genderSelected.value = '남성';
+                                      //controller.genderSelected.value = '남성';
+                                      controller.genderSelected.value = '남성';
                                     },
                                     child: SizedBox(
                                       width: 150.w,
                                       child: Card(
                                         elevation: 0,
                                         shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(10.r),
+                                          borderRadius:
+                                          BorderRadius.circular(10.r),
                                         ),
                                         child: Column(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          crossAxisAlignment: CrossAxisAlignment.center,
+                                          mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                          crossAxisAlignment:
+                                          CrossAxisAlignment.center,
                                           children: [
                                             Container(
                                               padding: EdgeInsets.all(4.r),
@@ -147,13 +135,36 @@ class _RegisterGenderScreen extends State<RegisterGenderScreen> {
                                               padding: EdgeInsets.all(4.r),
                                               // border color
                                               decoration: ShapeDecoration(
-                                                color: _genderSelected.value == '남성' ? Theme.of(context).colorScheme.primary : Colors.white,
+                                                // color: controller.genderSelected.value ==
+                                                //     '남성'
+                                                //     ? Theme.of(context)
+                                                //     .colorScheme
+                                                //     .primary
+                                                //     : Colors.white,
+                                                color: controller.genderSelected.value ==
+                                                    '남성'
+                                                    ? Theme.of(Get.context!)
+                                                    .colorScheme
+                                                    .primary
+                                                    : Colors.white,
                                                 shape: RoundedRectangleBorder(
-                                                  borderRadius: BorderRadius.circular(10.r),
+                                                  borderRadius:
+                                                  BorderRadius.circular(
+                                                      10.r),
                                                   side: BorderSide(
-                                                    color: _genderSelected.value == '남성'
+                                                    color:
+                                                    // controller.genderSelected.value ==
+                                                    //     '남성'
+                                                    //     ? Colors.white
+                                                    //     : Theme.of(context)
+                                                    //     .colorScheme
+                                                    //     .primary,
+                                                    controller.genderSelected.value ==
+                                                        '남성'
                                                         ? Colors.white
-                                                        : Theme.of(context).colorScheme.primary,
+                                                        : Theme.of(Get.context!)
+                                                        .colorScheme
+                                                        .primary,
                                                     width: 1,
                                                   ),
                                                 ),
@@ -162,7 +173,18 @@ class _RegisterGenderScreen extends State<RegisterGenderScreen> {
                                                 '남성',
                                                 textAlign: TextAlign.center,
                                                 style: TextStyle(
-                                                  color: _genderSelected.value == '남성' ? Colors.white : gray500,
+                                                  color:
+                                                  // controller.genderSelected.value ==
+                                                  //     '남성'
+                                                  //     ? Colors.white
+                                                  //     : gray500,
+                                                  // fontSize: 12.sp,
+                                                  // fontWeight: FontWeight.w700,
+                                                  // height: 0,
+                                                  controller.genderSelected.value ==
+                                                      '남성'
+                                                      ? Colors.white
+                                                      : gray500,
                                                   fontSize: 12.sp,
                                                   fontWeight: FontWeight.w700,
                                                   height: 0,
@@ -182,18 +204,22 @@ class _RegisterGenderScreen extends State<RegisterGenderScreen> {
                                     onTap: () {
                                       // 여성 선택
                                       AppLog.to.d('여성 선택');
-                                      _genderSelected.value = '여성';
+                                      //controller.genderSelected.value = '여성';
+                                      controller.genderSelected.value = '여성';
                                     },
                                     child: SizedBox(
                                       width: 150.w,
                                       child: Card(
                                         elevation: 0,
                                         shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(10.r),
+                                          borderRadius:
+                                          BorderRadius.circular(10.r),
                                         ),
                                         child: Column(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          crossAxisAlignment: CrossAxisAlignment.center,
+                                          mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                          crossAxisAlignment:
+                                          CrossAxisAlignment.center,
                                           children: [
                                             Container(
                                               padding: EdgeInsets.all(4.r),
@@ -207,13 +233,25 @@ class _RegisterGenderScreen extends State<RegisterGenderScreen> {
                                               width: 40.w,
                                               padding: EdgeInsets.all(4.r),
                                               decoration: ShapeDecoration(
-                                                color: _genderSelected.value == '여성' ? Theme.of(context).colorScheme.primary : Colors.white,
+                                                color:
+                                                controller.genderSelected.value ==
+                                                    '여성'
+                                                    ? Theme.of(Get.context!)
+                                                    .colorScheme
+                                                    .primary
+                                                    : Colors.white,
                                                 shape: RoundedRectangleBorder(
-                                                  borderRadius: BorderRadius.circular(10.r),
+                                                  borderRadius:
+                                                  BorderRadius.circular(
+                                                      10.r),
                                                   side: BorderSide(
-                                                    color: _genderSelected.value == '여성'
+                                                    color:
+                                                    controller.genderSelected.value ==
+                                                        '여성'
                                                         ? Colors.white
-                                                        : Theme.of(context).colorScheme.primary,
+                                                        : Theme.of(Get.context!)
+                                                        .colorScheme
+                                                        .primary,
                                                     width: 1,
                                                   ),
                                                 ),
@@ -222,7 +260,11 @@ class _RegisterGenderScreen extends State<RegisterGenderScreen> {
                                                 '여성',
                                                 textAlign: TextAlign.center,
                                                 style: TextStyle(
-                                                  color: _genderSelected.value == '여성' ? Colors.white : gray500,
+                                                  color:
+                                                  controller.genderSelected.value ==
+                                                      '여성'
+                                                      ? Colors.white
+                                                      : gray500,
                                                   fontSize: 12.sp,
                                                   fontWeight: FontWeight.w700,
                                                   height: 0,
@@ -234,7 +276,6 @@ class _RegisterGenderScreen extends State<RegisterGenderScreen> {
                                       ),
                                     ),
                                   ),
-
                                 ],
                               ),
                             ),
@@ -247,23 +288,21 @@ class _RegisterGenderScreen extends State<RegisterGenderScreen> {
               ),
               GestureDetector(
                 onTap: () async {
-                  if (_genderSelected.value.isEmpty) {
-                    GlobalToastController.to.showToast('성별을 선택해주세요.');
+                  if (controller.genderSelected.value.isEmpty) {
+                    ToastController.to.showToast('성별을 선택해주세요.');
                     return;
-
                   } else {
-
                     var genderValue = '';
 
-                    if (_genderSelected.value == '남성') {
+                    if (controller.genderSelected.value == '남성') {
                       genderValue = 'M';
                     } else {
                       genderValue = 'F';
                     }
 
-                    UserStore.to.user.value.gender = genderValue;
-                    AppLog.to.d('성별: ${UserStore.to.user.value.toString()}');
-                    LoginController.to.signIn(UserStore.to.user.value);
+                    LoginController.to.userModel.value.gender = genderValue;
+                    LoginController.to
+                        .signIn(LoginController.to.userModel.value);
                   }
                 },
                 child: Container(
@@ -273,7 +312,7 @@ class _RegisterGenderScreen extends State<RegisterGenderScreen> {
                       bottom: 34.h, top: 20.h, left: 20.w, right: 20.w),
                   padding: EdgeInsets.all(15.r),
                   decoration: ShapeDecoration(
-                    color: Theme.of(context).colorScheme.primary,
+                    color: Theme.of(Get.context!).colorScheme.primary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10.r),
                     ),
@@ -303,5 +342,4 @@ class _RegisterGenderScreen extends State<RegisterGenderScreen> {
       ],
     );
   }
-
 }

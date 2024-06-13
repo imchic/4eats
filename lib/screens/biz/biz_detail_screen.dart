@@ -15,7 +15,7 @@ class BizDetailScreen extends GetView<BizController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: BaseAppBar(
         title: '상세보기',
         leading: true,
@@ -55,7 +55,7 @@ class BizDetailScreen extends GetView<BizController> {
                               shape: BoxShape.rectangle,
                               boxShadow: [
                                 BoxShadow(
-                                  color: gray300,
+                                  color: Get.isDarkMode ? Colors.black : gray300,
                                   offset: Offset(0, 2),
                                   blurRadius: 2,
                                 ),
@@ -64,8 +64,7 @@ class BizDetailScreen extends GetView<BizController> {
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(10.r),
                               child: CachedNetworkImage(
-                                imageUrl:
-                                    controller.bizDetail.value.goodsImgS ?? '',
+                                imageUrl: controller.bizDetail.value.goodsImgS ?? '',
                                 fit: BoxFit.cover,
                               ),
                             ),
@@ -78,33 +77,19 @@ class BizDetailScreen extends GetView<BizController> {
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(10.r),
                                 child: Container(
-                                  width: 0.1.sw,
-                                  height: 0.1.sw,
-                                  decoration: BoxDecoration(
-                                    color: Theme.of(context).colorScheme.background,
-                                    borderRadius: BorderRadius.circular(10.r),
-                                    shape: BoxShape.rectangle,
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: gray300,
-                                        offset: Offset(0, 2),
-                                        blurRadius: 2,
-                                      ),
-                                    ],
-                                  ),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(10.r),
-                                    child: CachedNetworkImage(
-                                      imageUrl: controller.bizDetail.value.brandIconImg ?? '',
-                                      fit: BoxFit.cover,
-                                    ),
+                                  width: 20.w,
+                                  height: 20.h,
+                                  child: CachedNetworkImage(
+                                    imageUrl: controller.bizDetail.value.brandIconImg ?? '',
+                                    fit: BoxFit.cover,
                                   ),
                                 ),
                               ),
+                              SizedBox(width: 10.w),
                               Text('${controller.bizDetail.value.brandName}',
                                   style: TextStyle(
                                       fontSize: 12.sp,
-                                      color: gray600,
+                                      color: Get.isDarkMode ? Colors.white : gray800,
                                       fontWeight: FontWeight.bold)),
                             ],
                           ),
@@ -113,7 +98,7 @@ class BizDetailScreen extends GetView<BizController> {
                           Text('${controller.bizDetail.value.goodsName}',
                               style: TextStyle(
                                   fontSize: 13.sp,
-                                  color: gray800,
+                                  color: Get.isDarkMode ? Colors.white : gray800,
                                   fontWeight: FontWeight.w600)),
 
                           SizedBox(height: 30.h),
@@ -126,7 +111,7 @@ class BizDetailScreen extends GetView<BizController> {
                                 // 교환처
                                 Divider(
                                   height: 1,
-                                  color: gray300,
+                                  color: Get.isDarkMode ? Colors.white : gray300,
                                 ),
                                 SizedBox(height: 10.h),
                                 Row(
@@ -137,14 +122,14 @@ class BizDetailScreen extends GetView<BizController> {
                                       '교환처',
                                       style: TextStyle(
                                         fontSize: 12.sp,
-                                        color: gray600,
+                                        color: Get.isDarkMode ? Colors.white : gray600,
                                       ),
                                     ),
                                     Text(
                                       '${controller.bizDetail.value.affiliate}',
                                       style: TextStyle(
                                         fontSize: 12.sp,
-                                        color: gray800,
+                                        color: Get.isDarkMode ? Colors.white : gray800,
                                       ),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
@@ -165,7 +150,7 @@ class BizDetailScreen extends GetView<BizController> {
                                       '유효기간',
                                       style: TextStyle(
                                         fontSize: 12.sp,
-                                        color: gray600,
+                                        color: Get.isDarkMode ? Colors.white : gray600,
                                       ),
                                     ),
                                     Text(
@@ -173,7 +158,7 @@ class BizDetailScreen extends GetView<BizController> {
                                       '${convertDate(controller.bizDetail.value.validPrdDay ?? '')}',
                                       style: TextStyle(
                                         fontSize: 12.sp,
-                                        color: gray800,
+                                        color: Get.isDarkMode ? Colors.white : gray800,
                                       ),
                                     ),
                                   ],
@@ -193,7 +178,7 @@ class BizDetailScreen extends GetView<BizController> {
                                       '유의사항',
                                       style: TextStyle(
                                         fontSize: 12.sp,
-                                        color: gray600,
+                                        color: Get.isDarkMode ? Colors.white : gray600,
                                       ),
                                     ),
                                     SizedBox(height: 10.h),
@@ -205,7 +190,7 @@ class BizDetailScreen extends GetView<BizController> {
                                           '${controller.bizDetail.value.content}',
                                           style: TextStyle(
                                             fontSize: 10.sp,
-                                            color: gray800,
+                                            color: Get.isDarkMode ? Colors.white : gray800,
                                             height: 1.5,
                                           ),
                                         ),

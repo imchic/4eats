@@ -8,7 +8,7 @@ import '../screens/feed/feed_controller.dart';
 import '../screens/upload/upload_controller.dart';
 import '../utils/app_routes.dart';
 import '../utils/colors.dart';
-import '../utils/global_toast_controller.dart';
+import '../utils/toast_controller.dart';
 
 class BaseAppBar extends GetWidget implements PreferredSizeWidget {
   // title
@@ -35,7 +35,7 @@ class BaseAppBar extends GetWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       shadowColor: Colors.transparent,
       title: Container(
         child: Row(
@@ -51,7 +51,8 @@ class BaseAppBar extends GetWidget implements PreferredSizeWidget {
                 textAlign: TextAlign.center,
                 title,
                 style: TextStyle(
-                  color: gray800,
+                  color:
+                      Get.isDarkMode ? Colors.white : Colors.black,
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w700,
                 ),
@@ -73,7 +74,10 @@ class BaseAppBar extends GetWidget implements PreferredSizeWidget {
                               return snapshot.data == 0
                                   ? SvgPicture.asset(
                                       'assets/images/ic_bell.svg',
-                                      color: gray800,
+                                      colorFilter: ColorFilter.mode(
+                                        Get.isDarkMode ? Colors.white : Colors.black,
+                                        BlendMode.srcIn,
+                                      ),
                                       width: 20.w,
                                     )
                                   : Stack(
@@ -82,7 +86,10 @@ class BaseAppBar extends GetWidget implements PreferredSizeWidget {
                                           margin: EdgeInsets.only(top: 6.w),
                                           child: SvgPicture.asset(
                                             'assets/images/ic_bell.svg',
-                                            color: gray800,
+                                            colorFilter: ColorFilter.mode(
+                                              Get.isDarkMode ? Colors.white : Colors.black,
+                                              BlendMode.srcIn,
+                                            ),
                                             width: 20.w,
                                           ),
                                         ),
@@ -122,7 +129,7 @@ class BaseAppBar extends GetWidget implements PreferredSizeWidget {
           ? Container(
               padding: EdgeInsets.only(left: 10.w),
               child: IconButton(
-                icon: Icon(Icons.arrow_back_ios, color: gray800, size: 14.sp),
+                icon: Icon(Icons.arrow_back_ios, color: Get.isDarkMode ? Colors.white : Colors.black, size: 14.sp),
                 onPressed: () {
                   print('leading');
                   if (callback != null) {
@@ -145,7 +152,7 @@ class BaseAppBar extends GetWidget implements PreferredSizeWidget {
                   Get.toNamed(AppRoutes.uploadRegister,
                       preventDuplicates: false);
                 } else {
-                  GlobalToastController.to.showToast('동영상을 선택해주세요.');
+                  ToastController.to.showToast('동영상을 선택해주세요.');
                 }
               },
             ),

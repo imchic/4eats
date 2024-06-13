@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:foreats/model/store_model.dart';
-import 'package:foreats/utils/global_toast_controller.dart';
+import 'package:foreats/utils/toast_controller.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -383,7 +383,7 @@ class MapController extends GetxController {
 
       if(storeList.isEmpty) {
         AppLog.to.d('검색 결과가 없습니다.');
-        GlobalToastController.to.showToast('검색 결과가 없습니다');
+        ToastController.to.showToast('검색 결과가 없습니다');
         isSearchLoading.value = false;
         return storeList;
       }

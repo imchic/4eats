@@ -51,7 +51,7 @@ class HomeScreen extends GetView<HomeController> {
               currentIndex: HomeController.to.currentIndex,
               onTap: (value) => {HomeController.to.moveToPage(value)},
               type: BottomNavigationBarType.fixed,
-              backgroundColor: theme.colorScheme.background,
+              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
               selectedItemColor: theme.colorScheme.primary,
               unselectedItemColor: theme.colorScheme.onBackground.withOpacity(0.5),
               selectedLabelStyle: TextStyle(

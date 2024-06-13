@@ -21,7 +21,7 @@ class StoreScreen extends GetView<StoreController> {
     final args = Get.arguments;
 
     return Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: BaseAppBar(
           title: '#${args['storeName']}',
           centerTitle: false,

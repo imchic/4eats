@@ -13,7 +13,7 @@ import '../screens/map/location_service.dart';
 import '../screens/map/map_controller.dart';
 import '../screens/mypage/mypage_controller.dart';
 import '../screens/upload/upload_controller.dart';
-import '../utils/global_toast_controller.dart';
+import '../utils/toast_controller.dart';
 import 'home_controller.dart';
 
 class HomeBinding extends Bindings {
@@ -31,7 +31,7 @@ class HomeBinding extends Bindings {
     Get.lazyPut<MyPageController>(() => MyPageController());
     Get.lazyPut<MapController>(() => MapController());
     Get.lazyPut<LocationService>(() => LocationService());
-    Get.lazyPut<GlobalToastController>(() => GlobalToastController());
+    Get.lazyPut<ToastController>(() => ToastController());
     Get.lazyPut<BizController>(() => BizController());
     Get.lazyPut<NotificationsController>(() => NotificationsController());
   }

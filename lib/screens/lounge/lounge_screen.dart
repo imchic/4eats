@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:avatar_glow/avatar_glow.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -20,7 +21,7 @@ class LoungeScreen extends GetView<LoungeController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: BaseAppBar(
         title: '라운지',
         notification: true,
@@ -58,16 +59,6 @@ class LoungeScreen extends GetView<LoungeController> {
                   }
                 },
               ),
-              // FutureBuilder(
-              //   future: controller.fetchLoungeFeedList('성수동'),
-              //   builder: (context, snapshot) {
-              //     if (snapshot.connectionState == ConnectionState.waiting) {
-              //       return DialogUtil().buildLoadingDialog();
-              //     } else {
-              //       return _hotPlaceContainer(context, '요즘 떠오르는 성수동 핫플레이스', '성수동에서 인기있는 가게들이에요 ⚡️');
-              //     }
-              //   },
-              // ),
             ],
           ),
         ),
@@ -85,7 +76,11 @@ class LoungeScreen extends GetView<LoungeController> {
           Row(
             children: [
               Text('오늘의 추천은 어떠세요? 😎',
-                  style: TextStyleUtils.loungeTitleTextStyle()),
+                  style: TextStyleUtils.loungeTitleTextStyle(
+                    color: Get.isDarkMode ? Colors.white : Colors.black,
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w700,
+                  )),
               Spacer(),
               // 더보기
               InkWell(
@@ -93,44 +88,33 @@ class LoungeScreen extends GetView<LoungeController> {
                   Get.toNamed(AppRoutes.loungeFeed);
                 },
                 child: Text('더보기',
-                    style: TextStyleUtils.bodyTextStyle(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.w500, fontSize: 10.sp)),
+                    style: TextStyleUtils.bodyTextStyle(
+                        color: Theme
+                            .of(context)
+                            .colorScheme
+                            .primary,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 9.sp)),
               ),
             ],
           ),
           SizedBox(height: 5.h),
           Text('포잇에서 추천하는 가게들이에요',
-              style: TextStyleUtils.bodyTextStyle(color: gray600)),
+              style: TextStyleUtils.bodyTextStyle(
+                color: Get.isDarkMode ? gray400 : gray600,
+                fontSize: 10.sp,
+              )),
           SizedBox(height: 10.h),
           controller.loungeFeedList.isNotEmpty
               ? _todayFeedList()
               : Text('추천하는 가게가 없어요 😢',
-                  style: TextStyleUtils.bodyTextStyle(color: gray600)),
+              style: TextStyleUtils.bodyTextStyle(
+                color: Get.isDarkMode ? Colors.white : gray600,
+              )),
         ],
       ),
     );
   }
-
-  /// 지역 핫플
-  /*Widget _hotPlaceContainer(BuildContext context, String title, String subTitle) {
-    return Container(
-      padding: EdgeInsets.only(left: 20.w, right: 20.w),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(title,
-              style: TextStyleUtils.loungeTitleTextStyle()),
-          SizedBox(height: 5.h),
-          Text(subTitle,
-              style: TextStyleUtils.bodyTextStyle(color: gray600)),
-          SizedBox(height: 10.h),
-          // controller.loungeFeedList.isNotEmpty
-          //     ? _todayFeedList()
-          //     : Text('추천하는 가게가 없어요 😢',
-          //     style: TextStyleUtils.bodyTextStyle(color: gray600)),
-        ],
-      ),
-    );
-  }*/
 
   /// 인기 서포터즈
   Widget _supporters(BuildContext context) {
@@ -143,15 +127,18 @@ class LoungeScreen extends GetView<LoungeController> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                '이달의 포잇터분들이에요 👀',
-                style: TextStyleUtils.loungeTitleTextStyle(),
-              ),
+              Text('이달의 포잇터분들이에요 👀',
+                  style: TextStyleUtils.loungeTitleTextStyle(
+                    color: Get.isDarkMode ? Colors.white : Colors.black,
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w700,
+                  )),
               SizedBox(height: 5.h),
               Text(
                 '포잇에서 왕성하게 활동중이신 분들이에요',
                 style: TextStyleUtils.bodyTextStyle(
-                  color: gray600,
+                  color: Get.isDarkMode ? gray400 : gray600,
+                  fontSize: 10.sp,
                 ),
               ),
             ],
@@ -209,91 +196,65 @@ class LoungeScreen extends GetView<LoungeController> {
 
   /// 오늘의 추천 리스트 아이템
   Widget _todayFeedItem(List<FeedModel> feedList, int index) {
-    return Container(
-      child: Column(
-        children: [
-          InkWell(
-            onTap: () {
-              var model = FeedModel.fromJson(feedList[index].toJson());
-              Get.toNamed(AppRoutes.feedDetail, arguments: {
-                'detailFeed': model,
-              });
-            },
-            child: Stack(
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(6.r),
-                  child: CachedNetworkImage(
-                    imageUrl: feedList[index].thumbnailUrls![0],
-                    fit: BoxFit.cover,
-                    placeholder: (context, url) => Center(
-                        child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(gray300),
-                    )),
-                    errorWidget: (context, url, error) =>
-                        const Icon(Icons.error),
-                  ),
+    return Column(
+      children: [
+        InkWell(
+          onTap: () {
+            var model = FeedModel.fromJson(feedList[index].toJson());
+            Get.toNamed(AppRoutes.feedDetail, arguments: {
+              'detailFeed': model,
+            });
+          },
+          child: Stack(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(6.r),
+                child: CachedNetworkImage(
+                  imageUrl: feedList[index].thumbnailUrls![0],
+                  fit: BoxFit.cover,
+                  placeholder: (context, url) => Center(
+                      child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(gray300),
+                  )),
+                  errorWidget: (context, url, error) =>
+                      const Icon(Icons.error),
                 ),
-                // 좋아요
-                Positioned(
-                  top: 5.h,
-                  right: 5.w,
-                  child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 2.h),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.5),
-                      borderRadius: BorderRadius.circular(6.r),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.favorite,
+              ),
+              // 좋아요
+              Positioned(
+                top: 5.h,
+                right: 5.w,
+                child: Container(
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 5.w, vertical: 2.h),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.5),
+                    borderRadius: BorderRadius.circular(6.r),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.favorite,
+                        color: Colors.white,
+                        size: 12.sp,
+                      ),
+                      SizedBox(width: 5.w),
+                      Text(
+                        feedList[index].likeCount.toString(),
+                        style: TextStyleUtils.bodyTextStyle(
+                          fontSize: 8.sp,
+                          fontWeight: FontWeight.w500,
                           color: Colors.white,
-                          size: 12.sp,
                         ),
-                        SizedBox(width: 5.w),
-                        Text(
-                          feedList[index].likeCount.toString(),
-                          style: TextStyleUtils.bodyTextStyle(
-                            fontSize: 8.sp,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
-                // Positioned(
-                //   bottom: 5.h,
-                //   right: 2.w,
-                //   child: Container(
-                //     padding:
-                //         EdgeInsets.symmetric(horizontal: 5.w, vertical: 2.h),
-                //     decoration: BoxDecoration(
-                //       color: Colors.black.withOpacity(0.5),
-                //       borderRadius: BorderRadius.circular(6.r),
-                //     ),
-                //     child: Column(
-                //       crossAxisAlignment: CrossAxisAlignment.start,
-                //       children: [
-                //         Text(
-                //           feedList[index].storeName ?? '',
-                //           style: TextStyleUtils.bodyTextStyle(
-                //             fontSize: 8.sp,
-                //             fontWeight: FontWeight.w500,
-                //             color: Colors.white,
-                //           ),
-                //         ),
-                //       ],
-                //     ),
-                //   ),
-                // ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -305,38 +266,41 @@ class LoungeScreen extends GetView<LoungeController> {
           onTap: () {
             // 유저 포스팅 화면
             Get.toNamed(AppRoutes.userProfile, arguments: {
-              // 'nickname': nickname,
-              // 'profileImage': imageUrl ?? '',
               'feedModel': model,
             });
           },
-          child: CachedNetworkImage(
-            imageUrl: model.profileImage ?? '',
-            imageBuilder: (context, imageProvider) => Container(
-              width: 50.w,
-              height: 50.h,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                image: DecorationImage(
-                  image: imageProvider,
-                  fit: BoxFit.cover,
+          child: AvatarGlow(
+            glowRadiusFactor: 0.1,
+            glowColor: Get.isDarkMode ? Colors.white : Colors.black,
+            glowCount: 1,
+            child: CachedNetworkImage(
+              imageUrl: model.profileImage ?? '',
+              imageBuilder: (context, imageProvider) => Container(
+                width: 50.w,
+                height: 50.h,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  image: DecorationImage(
+                    image: imageProvider,
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ),
-            ),
-            placeholder: (context, url) => Center(
-                child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(gray300),
-            )),
-            errorWidget: (context, url, error) => Container(
-              width: 44.w,
-              height: 44.h,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.grey[200],
-              ),
-              child: Icon(
-                Icons.error,
-                color: Colors.red,
+              placeholder: (context, url) => Center(
+                  child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(gray300),
+              )),
+              errorWidget: (context, url, error) => Container(
+                width: 44.w,
+                height: 44.h,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.grey[200],
+                ),
+                child: Icon(
+                  Icons.error,
+                  color: Colors.red,
+                ),
               ),
             ),
           ),
@@ -347,7 +311,9 @@ class LoungeScreen extends GetView<LoungeController> {
             Text(
               model.nickname ?? '',
               style: TextStyleUtils.bodyTextStyle(
-                  fontSize: 8.sp, fontWeight: FontWeight.w500),
+                  color: Get.isDarkMode ? Colors.white : Colors.black,
+                  fontSize: 8.sp,
+                  fontWeight: FontWeight.w500),
             ),
           ],
         ),

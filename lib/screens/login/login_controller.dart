@@ -1,32 +1,21 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:foreats/screens/login/user_store.dart';
 import 'package:foreats/utils/dialog_util.dart';
 import 'package:get/get.dart';
 import 'package:googleapis/admob/v1.dart';
 import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart' as kakao;
-import 'package:logger/logger.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:lottie/lottie.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../home/home_controller.dart';
 import '../../model/user_model.dart';
 import '../../utils/app_routes.dart';
-import '../../utils/colors.dart';
-import '../../utils/global_alert_dialog.dart';
 import '../../utils/logger.dart';
 
 class LoginController extends GetxController {
-  
   static LoginController get to => Get.find();
 
-  final RxString _clickType = ''.obs;
   final RxString _accessToken = ''.obs;
   final RxString _email = ''.obs;
   final RxString _id = ''.obs;
@@ -44,8 +33,6 @@ class LoginController extends GetxController {
   final _firebase = FirebaseAuth.instance;
   Rx<UserModel> userModel = UserModel().obs;
 
-  get user => userModel.value;
-
   @override
   Future<void> onInit() async {
     super.onInit();
@@ -56,7 +43,8 @@ class LoginController extends GetxController {
   Future<void> signInWithGoogle() async {
     try {
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-      final GoogleSignInAuthentication googleAuth = await googleUser!.authentication;
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser!.authentication;
       final OAuthCredential credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
@@ -81,7 +69,7 @@ class LoginController extends GetxController {
       // if(defaultTargetPlatform == TargetPlatform.iOS) {
       //   fcmToken = await FirebaseMessaging.instance.getAPNSToken();
       // } else if(defaultTargetPlatform == TargetPlatform.android) {
-        fcmToken = await FirebaseMessaging.instance.getToken();
+      fcmToken = await FirebaseMessaging.instance.getToken();
       // }
 
       var currentUser = _firebase.currentUser;
@@ -107,6 +95,8 @@ class LoginController extends GetxController {
           .doc(currentUser?.uid)
           .get();
 
+      AppLog.to.i('userSnapshot.exists: ${userSnapshot.data()}');
+
       if (userSnapshot.exists) {
         AppLog.to.i('userSnapshot: ${userSnapshot.data()}');
         userModel.value = UserModel.fromJson(userSnapshot.data()!);
@@ -114,7 +104,6 @@ class LoginController extends GetxController {
       } else {
         Get.toNamed(AppRoutes.registerNickname, arguments: userModel.value);
       }
-
     } catch (e) {
       AppLog.to.e('signInWithGoogle error: $e');
     }
@@ -129,7 +118,7 @@ class LoginController extends GetxController {
 
       kakao.OAuthToken token;
 
-      if(isKakaoTalkInstalled) {
+      if (isKakaoTalkInstalled) {
         token = await kakao.UserApi.instance.loginWithKakaoTalk();
       } else {
         token = await kakao.UserApi.instance.loginWithKakaoAccount();
@@ -137,9 +126,7 @@ class LoginController extends GetxController {
 
       var provider = OAuthProvider('oidc.eat');
       var credential = provider.credential(
-          idToken: token.idToken,
-          accessToken: token.accessToken
-      );
+          idToken: token.idToken, accessToken: token.accessToken);
 
       await _firebase.signInWithCredential(credential);
 
@@ -150,6 +137,7 @@ class LoginController extends GetxController {
       }
 
       var currentUser = _firebase.currentUser;
+
       userModel.value = UserModel(
         uid: currentUser!.uid,
         displayName: currentUser.displayName,
@@ -177,15 +165,14 @@ class LoginController extends GetxController {
         // 기존 로그인
         signIn(userModel.value);
       } else {
+        userModel.value = UserModel.fromJson(userSnapshot.data()!);
         Get.toNamed(AppRoutes.registerNickname, arguments: userModel.value);
       }
-
     } catch (e) {
       AppLog.to.e('kakao login error $e');
 
       // account already exists
       if (e.toString().contains('account-exists-with-different-credential')) {
-
         // me
         final kakao.User kakaoUser = await kakao.UserApi.instance.me();
         // email
@@ -199,7 +186,6 @@ class LoginController extends GetxController {
           },
         );
       }
-
     }
   }
 
@@ -256,15 +242,19 @@ class LoginController extends GetxController {
   Future<void> signIn(UserModel value) async {
     try {
 
+      AppLog.to.i('signIn: ${value.toString()}');
+
       // 파이어베이스 유저정보 저장
-      await FirebaseFirestore.instance.collection('users').doc(value.uid).set(value.toJson());
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(value.uid)
+          .set(value.toJson());
 
       // 로그인 상태 변경
       UserStore.to.setLoginStatus(true);
 
       // 로그인 성공
       Get.offAllNamed(AppRoutes.home);
-
 
     } catch (e) {
       AppLog.to.e('signIn error: $e');
@@ -274,7 +264,6 @@ class LoginController extends GetxController {
   /// 로그아웃
   Future<void> logout() async {
     try {
-
       // 로그아웃
       await _firebase.signOut();
 
@@ -284,19 +273,14 @@ class LoginController extends GetxController {
       // 로그아웃 성공
       Get.offAllNamed(AppRoutes.home);
       HomeController.to.moveToPage(0);
-
     } catch (e) {
       AppLog.to.e('signOut error: $e');
     }
   }
 
   Future<void> temp() async {
-    try {
-
-    } catch (e) {
+    try {} catch (e) {
       AppLog.to.e('signOut error: $e');
     }
   }
-
-
 }
