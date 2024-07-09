@@ -47,10 +47,10 @@ app.*.map.json
 .env.prod
 
 # Firebase
-android/app/google-services.json
-ios/Runner/GoogleService-Info.plist
-ios/firebase_app_id_file.json
-lib/firebase_options.dart
-
-pubspec.yaml
-pubspec.lock
+#android/app/google-services.json
+#ios/Runner/GoogleService-Info.plist
+#ios/firebase_app_id_file.json
+#lib/firebase_options.dart
+#
+#pubspec.yaml
+#pubspec.lock

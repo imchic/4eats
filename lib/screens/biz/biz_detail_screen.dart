@@ -204,7 +204,7 @@ class BizDetailScreen extends GetView<BizController> {
                         ],
                       ),
                     ),
-                    GestureDetector(
+                    /*GestureDetector(
                       onTap: () async {
 
                         // 파이어베이스 전화번호 연결
@@ -213,6 +213,41 @@ class BizDetailScreen extends GetView<BizController> {
                         );
                         //controller.verifyPhoneNumber('+821081312826');
 
+                      },
+                      child: Container(
+                        width: 350.w,
+                        height: Get.height * 0.06,
+                        margin: const EdgeInsets.all(40),
+                        decoration: ShapeDecoration(
+                          color: Theme.of(context).colorScheme.primary,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10.r),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Text(
+                              '확인',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.w600,
+                                height: 0,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )*/
+                    GestureDetector(
+                      onTap: () async {
+                        Get.bottomSheet(
+                            BizTellBottomSheet()
+                        );
                       },
                       child: Container(
                         width: 350.w,

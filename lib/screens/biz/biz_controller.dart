@@ -1,5 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:foreats/utils/toast_controller.dart';
 import 'package:foreats/utils/logger.dart';
 import 'package:get/get.dart';
@@ -266,6 +268,13 @@ class BizController extends GetxController {
 
       var phoneNumber = '+82${tellNum.substring(1)}';
 
+      Get.dialog(
+        Center(
+          child: CircularProgressIndicator(),
+        ),
+        barrierDismissible: false,
+      );
+
       _auth.verifyPhoneNumber(
         phoneNumber: phoneNumber,
         verificationCompleted: (PhoneAuthCredential credential) async {
@@ -286,6 +295,7 @@ class BizController extends GetxController {
       );
 
       isSent.value = true;
+      Get.back();
 
     } catch (e) {
       _logger.e(e.toString());
