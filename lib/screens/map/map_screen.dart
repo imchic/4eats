@@ -1,13 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:custom_info_window/custom_info_window.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:foreats/utils/logger.dart';
 import 'package:get/get.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:logger/logger.dart';
 import 'package:widget_marker_google_map/widget_marker_google_map.dart';
 
@@ -38,15 +35,12 @@ class MapScreen extends GetView<MapController> {
         double.parse(lonlat.last),
       );
 
-      Future.delayed(Duration(milliseconds: 500), () {
-        controller.moveToCurrentLocation(
-            LatLng(
-              double.parse(lonlat.first),
-              double.parse(lonlat.last),
-            )
-        );
+      Future.delayed(const Duration(milliseconds: 500), () {
+        controller.moveToCurrentLocation(LatLng(
+          double.parse(lonlat.first),
+          double.parse(lonlat.last),
+        ));
       });
-
     }
 
     FeedController.to.allPause();
@@ -99,54 +93,61 @@ class MapScreen extends GetView<MapController> {
             zoom: 15,
           ),
           //widgetMarkers: controller.widgetMarkers.isNotEmpty ? controller.widgetMarkers : [],
-          widgetMarkers: controller.storeList.isNotEmpty ? controller.storeList.map((store) {
-            return
-              WidgetMarker(
-                markerId: store.name ?? '0',
-                position: LatLng(
-                  double.parse(store.y ?? '0.0'),
-                  double.parse(store.x ?? '0.0'),
-                ),
-                onTap: () {
-                  controller.onMarkerTapped(store);
-                },
-                widget: Container(
-                  width: 120.w,
-                  height: Get.height * 0.05,
-                  alignment: Alignment.center,
-                  padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
-                  decoration: BoxDecoration(
-                    color: store.isContain == true ? Colors.pink.withOpacity(0.75) : Theme.of(context).colorScheme.secondary.withOpacity(0.75),
-                    borderRadius: BorderRadius.circular(10.r),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.25),
-                        spreadRadius: 1,
-                        blurRadius: 7.r,
-                        offset: Offset(0, 3),
+          widgetMarkers: controller.storeList.isNotEmpty
+              ? controller.storeList.map((store) {
+                  return WidgetMarker(
+                    markerId: store.name ?? '0',
+                    position: LatLng(
+                      double.parse(store.y ?? '0.0'),
+                      double.parse(store.x ?? '0.0'),
+                    ),
+                    onTap: () {
+                      controller.onMarkerTapped(store);
+                    },
+                    widget: Container(
+                      width: 120.w,
+                      height: Get.height * 0.05,
+                      alignment: Alignment.center,
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
+                      decoration: BoxDecoration(
+                        color: store.isContain == true
+                            ? Colors.pink.withOpacity(0.75)
+                            : Theme.of(context)
+                                .colorScheme
+                                .secondary
+                                .withOpacity(0.75),
+                        borderRadius: BorderRadius.circular(10.r),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.25),
+                            spreadRadius: 1,
+                            blurRadius: 7.r,
+                            offset: const Offset(0, 3),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      SvgPicture.asset(
-                        'assets/images/ic_coins.svg',
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          SvgPicture.asset(
+                            'assets/images/ic_coins.svg',
+                          ),
+                          SizedBox(width: 5.w),
+                          Text('${store.totalPoint} 포인트' ?? '0 포인트',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14.sp,
+                                  fontWeight: FontWeight.bold),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1),
+                        ],
                       ),
-                      SizedBox(width: 5.w),
-                      Text('${store.totalPoint} 포인트' ?? '0 포인트',
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.bold),
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1),
-                    ],
-                  ),
-                ),
-              );
-          }).toList() : [],
+                    ),
+                  );
+                }).toList()
+              : [],
           // onCameraMove: controller.onCameraMove,
           // onCameraMoveStarted: controller.onCameraMoveStarted,
           // onCameraIdle: controller.onCameraIdle,
@@ -173,7 +174,7 @@ class MapScreen extends GetView<MapController> {
         rtl: false,
         onSubmitted: (String value) async {
           controller.searchPlace.value = value;
-          await controller.fetchSearchPlace(value, page: 1);
+          //await controller.fetchSearchPlace(value, page: 1);
         },
         onChanged: (String value) {
           //controller.searchController.text = value;
@@ -229,7 +230,9 @@ class MapScreen extends GetView<MapController> {
                       TextSpan(
                         text: '${controller.storeList.length}개',
                         style: TextStyle(
-                          color: Get.isDarkMode ? Theme.of(context).colorScheme.tertiary : CupertinoColors.activeBlue,
+                          color: Get.isDarkMode
+                              ? Theme.of(context).colorScheme.tertiary
+                              : CupertinoColors.activeBlue,
                           fontSize: 12.sp,
                           fontWeight: FontWeight.w600,
                         ),
@@ -241,28 +244,32 @@ class MapScreen extends GetView<MapController> {
                 InkWell(
                   onTap: () {
                     Get.defaultDialog(
-                      contentPadding: EdgeInsetsDirectional.symmetric(horizontal: 10.w, vertical: 5.h),
+                      contentPadding: EdgeInsetsDirectional.symmetric(
+                          horizontal: 10.w, vertical: 5.h),
                       title: '필터',
-                      titlePadding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
+                      titlePadding: EdgeInsets.symmetric(
+                          horizontal: 10.w, vertical: 10.h),
                       content: Column(
                         children: [
                           ListTile(
-                            title: Text('가까운 거리'),
+                            title: const Text('가까운 거리'),
                             onTap: () {
                               controller.storeList.sort((a, b) {
                                 return double.parse(a.distance ?? '0.0')
-                                    .compareTo(double.parse(b.distance ?? '0.0'));
+                                    .compareTo(
+                                        double.parse(b.distance ?? '0.0'));
                               });
                               Get.back();
                             },
                           ),
-                          Divider(),
+                          const Divider(),
                           ListTile(
-                            title: Text('먼 거리'),
+                            title: const Text('먼 거리'),
                             onTap: () {
                               controller.storeList.sort((a, b) {
                                 return double.parse(b.distance ?? '0.0')
-                                    .compareTo(double.parse(a.distance ?? '0.0'));
+                                    .compareTo(
+                                        double.parse(a.distance ?? '0.0'));
                               });
                               Get.back();
                             },
@@ -272,7 +279,8 @@ class MapScreen extends GetView<MapController> {
                     );
                   },
                   child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
                     decoration: BoxDecoration(
                       color: Theme.of(context).colorScheme.secondary,
                       borderRadius: BorderRadius.circular(10.r),
@@ -287,7 +295,7 @@ class MapScreen extends GetView<MapController> {
                     ),
                     child: Row(
                       children: [
-                        Text(
+                        const Text(
                           '필터',
                           style: TextStyle(
                             color: Colors.white,
@@ -310,242 +318,304 @@ class MapScreen extends GetView<MapController> {
         ),
         // 가게 리스트 아이템
         Container(
-          width: Get.width,
-          height: Get.height * 0.38,
-          padding: EdgeInsets.symmetric(horizontal: 10.w),
-          color: Theme.of(context).scaffoldBackgroundColor,
-          child: controller.isSearchLoading.value == false ?
-          ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: controller.storeList.length,
-            controller: controller.scrollController,
-            itemBuilder: (context, index) {
-              return InkWell(
-                onTap: () {
-                  controller.selectIndex.value = index;
-                  controller.onMarkerTapped(controller.storeList[index]);
-                },
-                child: Obx(() =>
-                  Container(
-                    width: Get.width * 0.7,
-                    margin: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
-                    padding: EdgeInsets.all(10.w),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).scaffoldBackgroundColor,
-                      border: index == controller.selectIndex.value ? Border.all(
-                        color: Get.isDarkMode ? gray500 : Theme.of(context).colorScheme.tertiary,
-                        width: 2.w,
-                      ) : null,
-                      // color: index == controller.selectIndex.value ? Theme.of(context).colorScheme.tertiary.withOpacity(0.1) : Colors.white,
-                      borderRadius: BorderRadius.circular(10.r),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.25),
-                          spreadRadius: 1,
-                          blurRadius: 7.r,
-                          offset: Offset(0, 3),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Container(
-                              width: Get.width * 0.65,
-                              height: Get.height * 0.12,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(10.r),
-                              ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(10.r),
-                                child: CachedNetworkImage(
-                                  imageUrl: controller.storeList[index].thumbnail ?? '',
-                                  placeholder: (context, url) => Container(
-                                      width: 40.w,
-                                      height: 40.h,
-                                      child: Center(
-                                        child: CircularProgressIndicator(
-                                          valueColor: AlwaysStoppedAnimation<Color>(
-                                            gray200,
-                                          ),
-                                        ),
-                                      )),
-                                  errorWidget: (context, url, error) =>
-                                      Container(
-                                        width: 40.w,
-                                        height: 40.h,
-                                        child: Center(
-                                          child: Icon(
-                                            CupertinoIcons.xmark_circle_fill,
-                                            color: gray400,
-                                            size: 40.sp,
-                                          ),
-                                        ),
-                                      ),
-                                  fit: BoxFit.cover,
+            width: Get.width,
+            height: Get.height * 0.38,
+            padding: EdgeInsets.symmetric(horizontal: 10.w),
+            color: Theme.of(context).scaffoldBackgroundColor,
+            child: controller.isSearchLoading.value == false
+                ? ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: controller.storeList.length,
+                    controller: controller.scrollController,
+                    itemBuilder: (context, index) {
+                      return InkWell(
+                        onTap: () {
+                          controller.selectIndex.value = index;
+                          controller
+                              .onMarkerTapped(controller.storeList[index]);
+                        },
+                        child: Obx(
+                          () => Container(
+                            width: Get.width * 0.7,
+                            margin: EdgeInsets.symmetric(
+                                horizontal: 10.w, vertical: 10.h),
+                            padding: EdgeInsets.all(10.w),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).scaffoldBackgroundColor,
+                              border: index == controller.selectIndex.value
+                                  ? Border.all(
+                                      color: Get.isDarkMode
+                                          ? gray500
+                                          : Theme.of(context)
+                                              .colorScheme
+                                              .tertiary,
+                                      width: 2.w,
+                                    )
+                                  : null,
+                              // color: index == controller.selectIndex.value ? Theme.of(context).colorScheme.tertiary.withOpacity(0.1) : Colors.white,
+                              borderRadius: BorderRadius.circular(10.r),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.25),
+                                  spreadRadius: 1,
+                                  blurRadius: 7.r,
+                                  offset: const Offset(0, 3),
                                 ),
-                              ),
+                              ],
                             ),
-                            SizedBox(height: 10.h),
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                SizedBox(
-                                  width: Get.width * 0.6,
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    crossAxisAlignment: CrossAxisAlignment.center,
-                                    children: [
-                                      Container(
-                                        width: Get.width * 0.4,
-                                        child: Text(
-                                          controller.storeList[index].name ?? '',
-                                          style: TextStyle(
-                                            color: Get.isDarkMode ? Colors.white : Colors.black,
-                                            fontSize: 11.sp,
-                                            fontWeight: FontWeight.w600,
+                                Column(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Container(
+                                      width: Get.width * 0.65,
+                                      height: Get.height * 0.12,
+                                      decoration: BoxDecoration(
+                                        borderRadius:
+                                            BorderRadius.circular(10.r),
+                                      ),
+                                      child: ClipRRect(
+                                        borderRadius:
+                                            BorderRadius.circular(10.r),
+                                        child: CachedNetworkImage(
+                                          imageUrl: controller
+                                                  .storeList[index].thumbnail ??
+                                              '',
+                                          placeholder: (context, url) =>
+                                              SizedBox(
+                                                  width: 40.w,
+                                                  height: 40.h,
+                                                  child: const Center(
+                                                    child:
+                                                        CircularProgressIndicator(
+                                                      valueColor:
+                                                          AlwaysStoppedAnimation<
+                                                              Color>(
+                                                        gray200,
+                                                      ),
+                                                    ),
+                                                  )),
+                                          errorWidget: (context, url, error) =>
+                                              SizedBox(
+                                            width: 40.w,
+                                            height: 40.h,
+                                            child: Center(
+                                              child: Icon(
+                                                CupertinoIcons
+                                                    .xmark_circle_fill,
+                                                color: gray400,
+                                                size: 40.sp,
+                                              ),
+                                            ),
                                           ),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
+                                          fit: BoxFit.cover,
                                         ),
                                       ),
-                                      // status
-                                      Container(
-                                        child: Text(
-                                          controller.storeList[index].status ?? '',
+                                    ),
+                                    SizedBox(height: 10.h),
+                                    Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        SizedBox(
+                                          width: Get.width * 0.6,
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.center,
+                                            children: [
+                                              SizedBox(
+                                                width: Get.width * 0.4,
+                                                child: Text(
+                                                  controller.storeList[index]
+                                                          .name ??
+                                                      '',
+                                                  style: TextStyle(
+                                                    color: Get.isDarkMode
+                                                        ? Colors.white
+                                                        : Colors.black,
+                                                    fontSize: 11.sp,
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
+                                                  maxLines: 1,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                ),
+                                              ),
+                                              // status
+                                              Container(
+                                                child: Text(
+                                                  controller.storeList[index]
+                                                          .status ??
+                                                      '',
+                                                  style: TextStyle(
+                                                    color: Get.isDarkMode
+                                                        ? Theme.of(context)
+                                                            .colorScheme
+                                                            .tertiary
+                                                        : CupertinoColors
+                                                            .activeBlue,
+                                                    fontSize: 10.sp,
+                                                    fontWeight: FontWeight.w400,
+                                                  ),
+                                                ),
+                                              )
+                                            ],
+                                          ),
+                                        ),
+                                        SizedBox(height: 5.h),
+                                        Text(
+                                          controller
+                                                  .storeList[index].category ??
+                                              '',
                                           style: TextStyle(
-                                            color: Get.isDarkMode ? Theme.of(context).colorScheme.tertiary : CupertinoColors.activeBlue,
+                                            color: Get.isDarkMode
+                                                ? gray400
+                                                : gray800,
                                             fontSize: 10.sp,
                                             fontWeight: FontWeight.w400,
                                           ),
                                         ),
-                                      )
-                                    ],
-                                  ),
+                                        SizedBox(height: 10.h),
+                                        SizedBox(
+                                          width: Get.width * 0.6,
+                                          height: 10.h,
+                                          child: Text(
+                                            controller.storeList[index]
+                                                    .roadAddress ??
+                                                '',
+                                            style: TextStyle(
+                                              color: gray500,
+                                              fontSize: 10.sp,
+                                              fontWeight: FontWeight.w400,
+                                            ),
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                        SizedBox(height: 5.h),
+                                        SizedBox(
+                                          width: Get.width * 0.6,
+                                          height: 10.h,
+                                          child: Text(
+                                            controller
+                                                    .storeList[index].address ??
+                                                '',
+                                            style: TextStyle(
+                                              color: gray500,
+                                              fontSize: 10.sp,
+                                              fontWeight: FontWeight.w400,
+                                            ),
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                        Text(
+                                          controller.storeList[index].tel ?? '',
+                                          style: TextStyle(
+                                            color: Colors.black,
+                                            fontSize: 10.sp,
+                                            fontWeight: FontWeight.w400,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
                                 ),
-                                SizedBox(height: 5.h),
-                                Text(
-                                  controller.storeList[index].category ?? '',
-                                  style: TextStyle(
-                                    color: Get.isDarkMode ? gray400 : gray800,
-                                    fontSize: 10.sp,
-                                    fontWeight: FontWeight.w400,
-                                  ),
-                                ),
-                                SizedBox(height: 10.h),
+                                // 메뉴
                                 Container(
                                   width: Get.width * 0.6,
-                                  height: 10.h,
-                                  child: Text(
-                                    controller.storeList[index].roadAddress ?? '',
-                                    style: TextStyle(
-                                      color: gray500,
-                                      fontSize: 10.sp,
-                                      fontWeight: FontWeight.w400,
+                                  margin: EdgeInsets.only(left: 10.w),
+                                  child: SingleChildScrollView(
+                                    scrollDirection: Axis.horizontal,
+                                    child: Row(
+                                      children: controller
+                                              .storeList[index].menuInfo
+                                              ?.map((e) {
+                                            return Container(
+                                              margin:
+                                                  EdgeInsets.only(right: 5.w),
+                                              padding: EdgeInsets.symmetric(
+                                                  horizontal: 5.w,
+                                                  vertical: 2.h),
+                                              decoration: BoxDecoration(
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .secondary,
+                                                borderRadius:
+                                                    BorderRadius.circular(5.r),
+                                              ),
+                                              child: Text(
+                                                e,
+                                                style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 11.sp,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                            );
+                                          }).toList() ??
+                                          [],
                                     ),
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
-                                SizedBox(height: 5.h),
+                                // 거리
                                 Container(
-                                  width: Get.width * 0.6,
-                                  height: 10.h,
-                                  child: Text(
-                                    controller.storeList[index].address ?? '',
-                                    style: TextStyle(
-                                      color: gray500,
-                                      fontSize: 10.sp,
-                                      fontWeight: FontWeight.w400,
+                                  margin: EdgeInsets.only(
+                                      top: 10.h,
+                                      bottom: 5.h,
+                                      right: 10.w,
+                                      left: 10.w),
+                                  child: RichText(
+                                    text: TextSpan(
+                                      children: [
+                                        TextSpan(
+                                          text: '현재위치에서 ',
+                                          style: TextStyle(
+                                            color: Get.isDarkMode
+                                                ? Colors.white
+                                                : Colors.black,
+                                            fontSize: 10.sp,
+                                            fontWeight: FontWeight.w400,
+                                          ),
+                                        ),
+                                        TextSpan(
+                                          text: controller.convertKmToMeter(
+                                              double.parse(controller
+                                                      .storeList[index]
+                                                      .distance ??
+                                                  '0.0')),
+                                          style: TextStyle(
+                                            color: Get.isDarkMode
+                                                ? Theme.of(context)
+                                                    .colorScheme
+                                                    .tertiary
+                                                : CupertinoColors.activeBlue,
+                                            fontSize: 10.sp,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                                Text(
-                                  controller.storeList[index].tel ?? '',
-                                  style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 10.sp,
-                                    fontWeight: FontWeight.w400,
                                   ),
                                 ),
                               ],
                             ),
-                          ],
-                        ),
-                        // 메뉴
-                        Container(
-                          width: Get.width * 0.6,
-                          margin: EdgeInsets.only(left: 10.w),
-                          child: SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: Row(
-                              children: controller.storeList[index].menuInfo?.map((e) {
-                                return Container(
-                                  margin: EdgeInsets.only(right: 5.w),
-                                  padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 2.h),
-                                  decoration: BoxDecoration(
-                                    color: Theme.of(context).colorScheme.secondary,
-                                    borderRadius: BorderRadius.circular(5.r),
-                                  ),
-                                  child: Text(
-                                    e,
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 11.sp,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                );
-                              })?.toList() ?? [],
-                            ),
                           ),
                         ),
-                        // 거리
-                        Container(
-                          margin: EdgeInsets.only(top: 10.h, bottom: 5.h, right: 10.w, left: 10.w),
-                          child: RichText(
-                            text: TextSpan(
-                              children: [
-                                TextSpan(
-                                  text: '현재위치에서 ',
-                                  style: TextStyle(
-                                    color: Get.isDarkMode ? Colors.white : Colors.black,
-                                    fontSize: 10.sp,
-                                    fontWeight: FontWeight.w400,
-                                  ),
-                                ),
-                                TextSpan(
-                                  text: controller.convertKmToMeter(
-                                      double.parse(controller.storeList[index].distance ?? '0.0')
-                                  ),
-                                  style: TextStyle(
-                                    color: Get.isDarkMode ? Theme.of(context).colorScheme.tertiary : CupertinoColors.activeBlue,
-                                    fontSize: 10.sp,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              );
-            },
-          ) : Center(
-            child: CircularProgressIndicator(),
-          )
-        ),
+                      );
+                    },
+                  )
+                : const Center(
+                    child: CircularProgressIndicator(),
+                  )),
       ],
     );
   }

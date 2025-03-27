@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>572765239328-4u3nbmd7v5e61d4vp1gj5gbdq5d8qff2.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.572765239328-4u3nbmd7v5e61d4vp1gj5gbdq5d8qff2</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>572765239328-idj3pvrj4simsc9irntucji09lgksgg6.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyBfzcZxbyfp7Ro-w6vmfGosoGmMHoBuhuI</string>
+	<key>GCM_SENDER_ID</key>
+	<string>572765239328</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>kr.debrix.foreatide</string>
+	<key>PROJECT_ID</key>
+	<string>brix-ide</string>
+	<key>STORAGE_BUCKET</key>
+	<string>brix-ide.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:572765239328:ios:8216e07705f2c101a76445</string>
+</dict>
+</plist>

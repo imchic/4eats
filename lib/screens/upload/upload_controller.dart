@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:cached_video_player_plus/cached_video_player_plus.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -111,7 +110,6 @@ class UploadController extends GetxController {
 
     MapController.to.storeList.clear();
     MapController.to.searchAddress.value = '';
-
   }
 
   /// 동영상 압축
@@ -150,14 +148,18 @@ class UploadController extends GetxController {
 
           final List<AssetEntity> entities =
               await albums.first.getAssetListPaged(page: 0, size: total.value);
-          entities.insert(0,
-              AssetEntity(id: 'camera', typeInt: 1, width: 128, height: 250));
+          entities.insert(
+              0,
+              const AssetEntity(
+                  id: 'camera', typeInt: 1, width: 128, height: 250));
           assets.assignAll(entities);
         } else {
           _logger.w('No assets');
           List<AssetEntity> entities = [];
-          entities.insert(0,
-              AssetEntity(id: 'camera', typeInt: 1, width: 128, height: 250));
+          entities.insert(
+              0,
+              const AssetEntity(
+                  id: 'camera', typeInt: 1, width: 128, height: 250));
           assets.assignAll(entities);
         }
       } else if (ps.hasAccess) {
@@ -260,7 +262,7 @@ class UploadController extends GetxController {
   uploadVideo() async {
     try {
       Get.dialog(
-        Center(
+        const Center(
           child: CircularProgressIndicator(),
         ),
         barrierDismissible: false,
@@ -271,26 +273,35 @@ class UploadController extends GetxController {
       var thumbnailDownloadUrls = <String>[];
 
       for (int i = 0; i < uploadFiles.length; i++) {
-        final MediaInfo? compressVideoFile = await compressVideo(uploadFiles[i]);
-        _logger.i('uploadVideo > compressVideoFile: ${compressVideoFile?.filesize}');
+        final MediaInfo? compressVideoFile =
+            await compressVideo(uploadFiles[i]);
+        _logger.i(
+            'uploadVideo > compressVideoFile: ${compressVideoFile?.filesize}');
 
         // 동영상 업로드
         final String fileName = uploadFiles[i].path.split('/').last;
         _logger.i('uploadVideo > fileName: $fileName');
 
-        final Reference ref = FirebaseStorage.instance.ref().child('videos/$fileName');
+        final Reference ref =
+            FirebaseStorage.instance.ref().child('videos/$fileName');
         final UploadTask uploadTask = ref.putFile(compressVideoFile!.file!);
-        final TaskSnapshot taskSnapshot = await uploadTask.whenComplete(() => _logger.i('uploadVideo > complete'));
+        final TaskSnapshot taskSnapshot = await uploadTask
+            .whenComplete(() => _logger.i('uploadVideo > complete'));
         final String downloadUrl = await taskSnapshot.ref.getDownloadURL();
 
         // 썸네일 업로드
         final String thumbnail = await thumbnailDownload(downloadUrl);
         final String thumbnailFileName = '${fileName.split('.').first}.webp';
-        final Reference thumbnailRef = FirebaseStorage.instance.ref().child('thumbnails/$thumbnailFileName');
-        final UploadTask thumbnailUploadTask = thumbnailRef.putFile(File(thumbnail));
+        final Reference thumbnailRef = FirebaseStorage.instance
+            .ref()
+            .child('thumbnails/$thumbnailFileName');
+        final UploadTask thumbnailUploadTask =
+            thumbnailRef.putFile(File(thumbnail));
 
         _logger.i('uploadVideo > downloadUrl: $downloadUrl');
-        final String thumbnailDownloadUrl = await thumbnailUploadTask.whenComplete(() => _logger.i('uploadVideo > thumbnail complete')).then((value) => value.ref.getDownloadURL());
+        final String thumbnailDownloadUrl = await thumbnailUploadTask
+            .whenComplete(() => _logger.i('uploadVideo > thumbnail complete'))
+            .then((value) => value.ref.getDownloadURL());
 
         _logger.i('uploadVideo > thumbnailDownloadUrl: $thumbnailDownloadUrl');
 
@@ -308,7 +319,8 @@ class UploadController extends GetxController {
         storeType: MapController.to.storeCategory.value,
         storeMenuInfo: MapController.to.storeMenuInfo.value,
         storeContext: MapController.to.storeContext.value,
-        storeLngLat: '${MapController.to.currentLocation.value.latitude}, ${MapController.to.currentLocation.value.longitude}',
+        storeLngLat:
+            '${MapController.to.currentLocation.value.latitude}, ${MapController.to.currentLocation.value.longitude}',
         videoUrls: videoUrls,
         thumbnailUrls: thumbnailDownloadUrls,
         description: storeDescription,
@@ -330,7 +342,10 @@ class UploadController extends GetxController {
       // 가게 정보 등록
       // 중복된 가게가 있을 경우
 
-      QuerySnapshot<Map<String, dynamic>> querySnapshot = await _firestore.collection('stores').where('storeName', isEqualTo: storeNameController.text).get();
+      QuerySnapshot<Map<String, dynamic>> querySnapshot = await _firestore
+          .collection('stores')
+          .where('storeName', isEqualTo: storeNameController.text)
+          .get();
 
       if (querySnapshot.docs.isNotEmpty) {
         _logger.i('storeName: ${querySnapshot.docs[0]['storeName']}');
@@ -346,7 +361,10 @@ class UploadController extends GetxController {
 
         _logger.i('기존가게: ${storeNameController.text}');
 
-        await _firestore.collection('stores').doc(storeNameController.text).update({
+        await _firestore
+            .collection('stores')
+            .doc(storeNameController.text)
+            .update({
           'storeName': storeNameController.text,
           'storeAddress': MapController.to.searchAddress.value,
           'storeType': MapController.to.storeCategory.value,
@@ -370,7 +388,10 @@ class UploadController extends GetxController {
         });
       } else {
         _logger.i('신규가게: ${storeNameController.text}');
-        await _firestore.collection('stores').doc(storeNameController.text).set({
+        await _firestore
+            .collection('stores')
+            .doc(storeNameController.text)
+            .set({
           'storeName': storeNameController.text,
           'storeAddress': MapController.to.searchAddress.value,
           'storeType': MapController.to.storeCategory.value,
@@ -392,12 +413,10 @@ class UploadController extends GetxController {
           'bookmarkCount': 0,
           'point': 0,
         });
-
       }
 
       isUploadLoading.value = false;
       Get.offAllNamed(AppRoutes.uploadDone);
-
     } catch (e) {
       _logger.e('uploadVideo error: $e');
       ToastController.to.showToast('동영상 업로드에 실패했습니다.');
@@ -408,8 +427,7 @@ class UploadController extends GetxController {
 
   /// 해시태그 추가
   addHashtag(String hashtag) {
-
-    if(selectedHashtagStringList.contains(hashtag)) {
+    if (selectedHashtagStringList.contains(hashtag)) {
       selectedHashtagStringList.remove(hashtag);
     } else {
       selectedHashtagStringList.add(hashtag);
@@ -417,7 +435,6 @@ class UploadController extends GetxController {
 
     _logger.d('selectedHashtagString: $selectedHashtagStringList');
   }
-
 
   /// 업로드 화면 내에서 선택된 동영상 리스트 내 선택삭제
   removeCustomGallerySelectedList(int index) {
@@ -458,7 +475,7 @@ class UploadController extends GetxController {
       MapController.to.storeList.clear();
       if (_debounce?.isActive ?? false) _debounce!.cancel();
       _debounce = Timer(const Duration(milliseconds: 800), () async {
-        await MapController.to.fetchSearchPlace(value, page: 1);
+        //await MapController.to.fetchSearchPlace(value, page: 1);
       });
     } catch (e) {
       _logger.e('onPlaceSearchChanged error: $e');

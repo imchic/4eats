@@ -4,9 +4,8 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:foreats/screens/login/user_store.dart';
 import 'package:foreats/utils/dialog_util.dart';
 import 'package:get/get.dart';
-import 'package:googleapis/admob/v1.dart';
-import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart' as kakao;
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart' as kakao;
 
 import '../../home/home_controller.dart';
 import '../../model/user_model.dart';
@@ -65,11 +64,11 @@ class LoginController extends GetxController {
       //final iosToken = await FirebaseMessaging.instance.getAPNSToken();
 
       // 플랫폼 별 토큰 가져오기
-      String? fcmToken = '';
+      // String? fcmToken = '';
       // if(defaultTargetPlatform == TargetPlatform.iOS) {
       //   fcmToken = await FirebaseMessaging.instance.getAPNSToken();
       // } else if(defaultTargetPlatform == TargetPlatform.android) {
-      fcmToken = await FirebaseMessaging.instance.getToken();
+      //fcmToken = await FirebaseMessaging.instance.getToken();
       // }
 
       var currentUser = _firebase.currentUser;
@@ -81,7 +80,7 @@ class LoginController extends GetxController {
         point: '0',
         accessToken: googleAuth.accessToken,
         refreshToken: googleAuth.idToken,
-        fcmToken: fcmToken,
+        //fcmToken: fcmToken,
         profileImage: user?.photoURL,
         loginType: 'google',
         createdAt: Timestamp.now().toDate(),
@@ -241,7 +240,6 @@ class LoginController extends GetxController {
   /// 회원가입 정보 저장
   Future<void> signIn(UserModel value) async {
     try {
-
       AppLog.to.i('signIn: ${value.toString()}');
 
       // 파이어베이스 유저정보 저장
@@ -255,7 +253,6 @@ class LoginController extends GetxController {
 
       // 로그인 성공
       Get.offAllNamed(AppRoutes.home);
-
     } catch (e) {
       AppLog.to.e('signIn error: $e');
     }

@@ -959,7 +959,7 @@ PODS:
     - BoringSSL-GRPC/Interface (= 0.0.32)
   - BoringSSL-GRPC/Interface (0.0.32)
   - Cache (6.0.0)
-  - cloud_firestore (4.17.3):
+  - cloud_firestore (4.17.5):
     - Firebase/Firestore (= 10.25.0)
     - firebase_core
     - Flutter
@@ -981,18 +981,18 @@ PODS:
   - Firebase/Storage (10.25.0):
     - Firebase/CoreOnly
     - FirebaseStorage (~> 10.25.0)
-  - firebase_auth (4.19.5):
+  - firebase_auth (4.20.0):
     - Firebase/Auth (= 10.25.0)
     - firebase_core
     - Flutter
-  - firebase_core (2.31.0):
+  - firebase_core (2.32.0):
     - Firebase/CoreOnly (= 10.25.0)
     - Flutter
-  - firebase_messaging (14.9.2):
+  - firebase_messaging (14.9.4):
     - Firebase/Messaging (= 10.25.0)
     - firebase_core
     - Flutter
-  - firebase_storage (11.7.5):
+  - firebase_storage (11.7.7):
     - Firebase/Storage (= 10.25.0)
     - firebase_core
     - Flutter
@@ -1058,16 +1058,20 @@ PODS:
   - Flutter (1.0.0)
   - flutter_local_notifications (0.0.1):
     - Flutter
-  - flutter_native_splash (0.0.1):
+  - flutter_native_splash (2.4.3):
     - Flutter
   - GCDWebServer (3.5.4):
     - GCDWebServer/Core (= 3.5.4)
   - GCDWebServer/Core (3.5.4)
   - geolocator_apple (1.2.0):
     - Flutter
+    - FlutterMacOS
+  - Google-Maps-iOS-Utils (5.0.0):
+    - GoogleMaps (~> 8.0)
   - google_maps_flutter_ios (0.0.1):
     - Flutter
-    - GoogleMaps (< 9.0, >= 8.4)
+    - Google-Maps-iOS-Utils (< 7.0, >= 5.0)
+    - GoogleMaps (< 10.0, >= 8.4)
   - google_sign_in_ios (0.0.1):
     - AppAuth (>= 1.7.4)
     - Flutter
@@ -1203,7 +1207,7 @@ PODS:
     - PINCache (>= 3.0.1-beta.3)
   - image_picker_ios (0.0.1):
     - Flutter
-  - kakao_flutter_sdk_common (1.9.0):
+  - kakao_flutter_sdk_common (1.9.5):
     - Flutter
   - leveldb-library (1.22.5)
   - libphonenumber_plugin (0.0.1):
@@ -1263,7 +1267,7 @@ PODS:
   - shared_preferences_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
-  - sqflite (0.0.3):
+  - sqflite_darwin (0.0.4):
     - Flutter
     - FlutterMacOS
   - video_compress (0.3.0):
@@ -1278,6 +1282,7 @@ PODS:
     - Flutter
   - webview_flutter_wkwebview (0.0.1):
     - Flutter
+    - FlutterMacOS
 
 DEPENDENCIES:
   - cloud_firestore (from `.symlinks/plugins/cloud_firestore/ios`)
@@ -1290,7 +1295,7 @@ DEPENDENCIES:
   - Flutter (from `Flutter`)
   - flutter_local_notifications (from `.symlinks/plugins/flutter_local_notifications/ios`)
   - flutter_native_splash (from `.symlinks/plugins/flutter_native_splash/ios`)
-  - geolocator_apple (from `.symlinks/plugins/geolocator_apple/ios`)
+  - geolocator_apple (from `.symlinks/plugins/geolocator_apple/darwin`)
   - google_maps_flutter_ios (from `.symlinks/plugins/google_maps_flutter_ios/ios`)
   - google_sign_in_ios (from `.symlinks/plugins/google_sign_in_ios/darwin`)
   - image_picker_ios (from `.symlinks/plugins/image_picker_ios/ios`)
@@ -1303,12 +1308,12 @@ DEPENDENCIES:
   - photo_manager (from `.symlinks/plugins/photo_manager/ios`)
   - river_player (from `.symlinks/plugins/river_player/ios`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
-  - sqflite (from `.symlinks/plugins/sqflite/darwin`)
+  - sqflite_darwin (from `.symlinks/plugins/sqflite_darwin/darwin`)
   - video_compress (from `.symlinks/plugins/video_compress/ios`)
   - video_player_avfoundation (from `.symlinks/plugins/video_player_avfoundation/darwin`)
   - video_thumbnail (from `.symlinks/plugins/video_thumbnail/ios`)
   - wakelock_plus (from `.symlinks/plugins/wakelock_plus/ios`)
-  - webview_flutter_wkwebview (from `.symlinks/plugins/webview_flutter_wkwebview/ios`)
+  - webview_flutter_wkwebview (from `.symlinks/plugins/webview_flutter_wkwebview/darwin`)
 
 SPEC REPOS:
   trunk:
@@ -1330,6 +1335,7 @@ SPEC REPOS:
     - FirebaseSharedSwift
     - FirebaseStorage
     - GCDWebServer
+    - Google-Maps-iOS-Utils
     - GoogleDataTransport
     - GoogleMaps
     - GoogleSignIn
@@ -1370,7 +1376,7 @@ EXTERNAL SOURCES:
   flutter_native_splash:
     :path: ".symlinks/plugins/flutter_native_splash/ios"
   geolocator_apple:
-    :path: ".symlinks/plugins/geolocator_apple/ios"
+    :path: ".symlinks/plugins/geolocator_apple/darwin"
   google_maps_flutter_ios:
     :path: ".symlinks/plugins/google_maps_flutter_ios/ios"
   google_sign_in_ios:
@@ -1395,8 +1401,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/river_player/ios"
   shared_preferences_foundation:
     :path: ".symlinks/plugins/shared_preferences_foundation/darwin"
-  sqflite:
-    :path: ".symlinks/plugins/sqflite/darwin"
+  sqflite_darwin:
+    :path: ".symlinks/plugins/sqflite_darwin/darwin"
   video_compress:
     :path: ".symlinks/plugins/video_compress/ios"
   video_player_avfoundation:
@@ -1406,21 +1412,21 @@ EXTERNAL SOURCES:
   wakelock_plus:
     :path: ".symlinks/plugins/wakelock_plus/ios"
   webview_flutter_wkwebview:
-    :path: ".symlinks/plugins/webview_flutter_wkwebview/ios"
+    :path: ".symlinks/plugins/webview_flutter_wkwebview/darwin"
 
 SPEC CHECKSUMS:
   abseil: d121da9ef7e2ff4cab7666e76c5a3e0915ae08c3
   AppAuth: 501c04eda8a8d11f179dbe8637b7a91bb7e5d2fa
   BoringSSL-GRPC: 1e2348957acdbcad360b80a264a90799984b2ba6
   Cache: 4ca7e00363fca5455f26534e5607634c820ffc2d
-  cloud_firestore: 792f773e5e8c080ffcbadd49f9fb397927f29af6
+  cloud_firestore: 003d53b6b8b392600b7769acf9421cc4f23e5911
   device_info_plus: 97af1d7e84681a90d0693e63169a5d50e0839a0d
-  file_selector_ios: 146db144df431a266b1c44e7647b78b25c95c52f
+  file_selector_ios: f0670c1064a8c8450e38145d8043160105d0b97c
   Firebase: 0312a2352584f782ea56f66d91606891d4607f06
-  firebase_auth: 76ea642e91a9e914b3af751a416046ce1a965cf4
-  firebase_core: 0b39f4f424e02eecabb2356ddf331fa07b772af8
-  firebase_messaging: 8999827b6efc9c3ab4b1f9dc246deaa7f13dbf88
-  firebase_storage: e8b44d3f47e35f60dde2a119da11dc6e8962bef3
+  firebase_auth: 5719ddc9f654b813405899480e84971bd8e61235
+  firebase_core: a626d00494efa398e7c54f25f1454a64c8abf197
+  firebase_messaging: 06391e8f35dc65a00c56580266285263d2861f10
+  firebase_storage: 5c0f552d6b27d621429d7fd16ebab4be94a3c954
   FirebaseAppCheckInterop: 5da5ce93e8797a215e3f677fb0654b74e736c8b8
   FirebaseAuth: c0f93dcc570c9da2bffb576969d793e95c344fbb
   FirebaseAuthInterop: 2753ef68cb3cd5aefebe0f58082671cede78350f
@@ -1435,11 +1441,12 @@ SPEC CHECKSUMS:
   FirebaseStorage: 44f4e25073f6fa0d4d8c09f5bec299ee9e4eb985
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
   flutter_local_notifications: 4cde75091f6327eb8517fa068a0a5950212d2086
-  flutter_native_splash: edf599c81f74d093a4daf8e17bd7a018854bc778
+  flutter_native_splash: f71420956eb811e6d310720fee915f1d42852e7a
   GCDWebServer: 2c156a56c8226e2d5c0c3f208a3621ccffbe3ce4
-  geolocator_apple: 6cbaf322953988e009e5ecb481f07efece75c450
-  google_maps_flutter_ios: c454f18e0e22df6ac0e9f2a4df340858f5a3680c
-  google_sign_in_ios: 07375bfbf2620bc93a602c0e27160d6afc6ead38
+  geolocator_apple: 66b711889fd333205763b83c9dcf0a57a28c7afd
+  Google-Maps-iOS-Utils: 66d6de12be1ce6d3742a54661e7a79cb317a9321
+  google_maps_flutter_ios: e31555a04d1986ab130f2b9f24b6cdc861acc6d3
+  google_sign_in_ios: 4111e87aa5e24a4404f00ea13479f35e571969cc
   GoogleDataTransport: 6c09b596d841063d76d4288cc2d2f42cc36e1e2a
   GoogleMaps: 8939898920281c649150e0af74aa291c60f2e77d
   GoogleSignIn: d4281ab6cf21542b1cfaff85c191f230b399d2db
@@ -1450,14 +1457,14 @@ SPEC CHECKSUMS:
   GTMSessionFetcher: 8000756fc1c19d2e5697b90311f7832d2e33f6cd
   HLSCachingReverseProxyServer: 59935e1e0244ad7f3375d75b5ef46e8eb26ab181
   image_picker_ios: c560581cceedb403a6ff17f2f816d7fea1421fc1
-  kakao_flutter_sdk_common: 6cc350382c723c0ec6faf44e7c68a22b1c48737b
+  kakao_flutter_sdk_common: 985c7085c29a2bd949972cadac8238845dc354db
   leveldb-library: e8eadf9008a61f9e1dde3978c086d2b6d9b9dc28
   libphonenumber_plugin: 48bf4078546377eedaab4aa54978cd0f6fa23072
   libwebp: 1786c9f4ff8a279e4dac1e8f385004d5fc253009
   location: d5cf8598915965547c3f36761ae9cc4f4e87d22e
   nanopb: 438bc412db1928dac798aa6fd75726007be04262
   native_exif: 837ad189661d7b353660ae7f19f9f6932418f195
-  package_info_plus: 58f0028419748fad15bf008b270aaa8e54380b1c
+  package_info_plus: c0502532a26c7662a62a356cebe2692ec5fe4ec4
   path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
   PhoneNumberKit: 3d9a20cfe8ee68f35c2a3ae9474093133f72a8a1
   photo_manager: ff695c7a1dd5bc379974953a2b5c0a293f7c4c8a
@@ -1467,13 +1474,13 @@ SPEC CHECKSUMS:
   RecaptchaInterop: 7d1a4a01a6b2cb1610a47ef3f85f0c411434cb21
   river_player: ba880eae2d34deaff38fdf53a96b63edc654c9bf
   shared_preferences_foundation: fcdcbc04712aee1108ac7fda236f363274528f78
-  sqflite: 673a0e54cc04b7d6dba8d24fb8095b31c3a99eec
+  sqflite_darwin: 5a7236e3b501866c1c9befc6771dfd73ffb8702d
   video_compress: fce97e4fb1dfd88175aa07d2ffc8a2f297f87fbe
   video_player_avfoundation: 7c6c11d8470e1675df7397027218274b6d2360b3
   video_thumbnail: c4e2a3c539e247d4de13cd545344fd2d26ffafd1
-  wakelock_plus: 78ec7c5b202cab7761af8e2b2b3d0671be6c4ae1
-  webview_flutter_wkwebview: be0f0d33777f1bfd0c9fdcb594786704dbf65f36
+  wakelock_plus: 373cfe59b235a6dd5837d0fb88791d2f13a90d56
+  webview_flutter_wkwebview: a4af96a051138e28e29f60101d094683b9f82188
 
-PODFILE CHECKSUM: 1959d098c91d8a792531a723c4a9d7e9f6a01e38
+PODFILE CHECKSUM: f7340667b2f128e2a6875725172c17964fbd4351
 
-COCOAPODS: 1.15.2
+COCOAPODS: 1.16.2
